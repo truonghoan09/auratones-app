@@ -1,0 +1,41 @@
+// src/styles/dashboard.scss
+
+@import 'variables';
+@import 'mixins';
+
+.dashboard-container {
+  @include flex-center;
+  flex-direction: column;
+  height: 100vh;
+  // Sử dụng biến CSS
+  padding: var(--spacing-md);
+  background-color: var(--background-color); 
+  
+  & > div {
+    background-color: var(--card-background);
+    padding: var(--spacing-xl);
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--box-shadow);
+    width: 100%;
+    max-width: 600px;
+    text-align: center;
+    color: var(--text-color);
+  }
+
+  h1 {
+    color: var(--primary-color);
+    margin-bottom: var(--spacing-md);
+  }
+
+  p {
+    color: var(--secondary-color);
+    font-size: 1.1em;
+    margin-bottom: var(--spacing-md);
+  }
+
+  button {
+    @include button-styles();
+    background-color: var(--accent-color);
+    color: var(--card-background);
+  }
+}

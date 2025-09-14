@@ -5,7 +5,11 @@ import { signOut, onAuthStateChanged, type User } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 
-const Dashboard = () => {
+interface DashboardProps {
+    onLogout: () => void;
+}
+
+const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
   const navigate = useNavigate();
   const [userDisplayName, setUserDisplayName] = useState('');
 

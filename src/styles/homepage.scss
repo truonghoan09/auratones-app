@@ -1,0 +1,36 @@
+// src/styles/homepage.scss
+.homepage-container {
+  // Sử dụng biến CSS từ _variables.scss
+  background-color: var(--background-color);
+  color: var(--text-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: var(--spacing-md);
+}
+
+.homepage-card {
+  // Sử dụng biến CSS từ _variables.scss
+  background-color: var(--card-background);
+  box-shadow: var(--box-shadow);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-xl);
+  padding-top: 0;
+  min-height: 80vh;
+  width: 90%;
+  text-align: center;
+}
+
+h1 {
+  color: var(--text-color);
+  font-size: 2rem;
+  margin-bottom: var(--spacing-sm);
+}
+
+.button-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+}

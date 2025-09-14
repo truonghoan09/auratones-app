@@ -12,7 +12,8 @@ import {
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, getDocs, collection, query, where } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
-import UserSetup from './UserSetup'; // Import lại UserSetup
+import UserSetup from './UserSetup';
+import '../styles/auth.scss';
 
 // Hàm kiểm tra username đã tồn tại chưa
 const isUsernameTaken = async (username: string): Promise<boolean> => {
@@ -22,49 +23,74 @@ const isUsernameTaken = async (username: string): Promise<boolean> => {
   return !querySnapshot.empty;
 };
 
-const Auth = ({ showToast }: { showToast: (msg: string, type: 'success' | 'error' | 'info') => void }) => {
+interface AuthProps {
+    showToast: (message: string, type: 'success' | 'error' | 'info') => void;
+    isModal: boolean;
+    onClose: () => void;
+    onLoginSuccess: () => void; // Thêm prop này
+}
+
+const Auth = ({ showToast, isModal, onClose, onLoginSuccess }: AuthProps) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [user, setUser] = useState<User | null>(null);
   const [isLoginView, setIsLoginView] = useState(true);
-  const [showUserNotFoundModal, setShowUserNotFoundModal] = useState(false);
+  const [showUserSetupModal, setShowUserSetupModal] = useState(false);
   const navigate = useNavigate();
 
-  // Theo dõi trạng thái đăng nhập
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      if (currentUser) {
-        navigate('/dashboard');
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose?.();
       }
-    });
-    return () => unsubscribe();
-  }, [navigate]);
+    };
 
-  // Xử lý đăng nhập bằng username
- const handleUsernameLogin = async () => {
+    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
+            if (currentUser) {
+                onLoginSuccess(); // Chỉ gọi hàm này khi đăng nhập
+            }
+        });
+
+    if (isModal) {
+      document.addEventListener('keydown', handleKeyDown);
+    }
+
+    return () => {
+      if (isModal) {
+        document.removeEventListener('keydown', handleKeyDown);
+      }
+      unsubscribeAuth();
+    };
+  }, [navigate, isModal, onClose]);
+
+  const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget && onClose) {
+      onClose();
+    }
+  };
+
+  const handleUsernameLogin = async () => {
     if (!username || !password) {
       showToast('Vui lòng nhập đầy đủ tên người dùng và mật khẩu.', 'error');
       return;
     }
-
-    // Bước 1: Kiểm tra username có tồn tại trong Firestore không
     const usersRef = collection(db, 'users');
     const q = query(usersRef, where('username', '==', username));
     const querySnapshot = await getDocs(q);
 
     if (querySnapshot.empty) {
-      // Nếu không tồn tại, hiển thị modal hỏi đăng ký
-      setShowUserNotFoundModal(true);
+      setShowUserSetupModal(true);
     } else {
-      // Nếu username tồn tại, lấy email giả để đăng nhập
       const fakeEmail = `${username}@auratones.com`;
       try {
         await signInWithEmailAndPassword(auth, fakeEmail, password);
         showToast('Đăng nhập thành công!', 'success');
-        navigate('/dashboard');
+        if (isModal) {
+          onClose?.();
+        } else {
+          onLoginSuccess()
+        }
       } catch (error: any) {
-        // Xử lý cả hai lỗi: sai mật khẩu hoặc thông tin không hợp lệ
         if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
           showToast('Mật khẩu không đúng. Vui lòng thử lại.', 'error');
         } else {
@@ -74,7 +100,6 @@ const Auth = ({ showToast }: { showToast: (msg: string, type: 'success' | 'error
     }
   };
 
-  // Xử lý đăng ký bằng username
   const handleUsernameRegister = async () => {
     if (!username || !password) {
       showToast('Vui lòng nhập đầy đủ tên người dùng và mật khẩu.', 'error');
@@ -92,13 +117,16 @@ const Auth = ({ showToast }: { showToast: (msg: string, type: 'success' | 'error
         email: null,
       });
       showToast('Đăng ký thành công!', 'success');
-      navigate('/dashboard');
+      if (isModal) {
+        onClose?.();
+      } else {
+        onLoginSuccess(); 
+      }
     } catch (registerError: any) {
       showToast(`Lỗi đăng ký: ${registerError.message}`, 'error');
     }
   };
 
-  // Xử lý đăng nhập bằng Google
   const handleGoogleAuth = async () => {
     const provider = new GoogleAuthProvider();
     try {
@@ -112,7 +140,12 @@ const Auth = ({ showToast }: { showToast: (msg: string, type: 'success' | 'error
         });
       }
       showToast('Đăng nhập bằng Google thành công!', 'success');
-      navigate('/dashboard');
+      onLoginSuccess(); 
+      if (isModal) {
+        onClose?.();
+      } else {
+        navigate('/dashboard');
+      }
     } catch (error: any) {
       showToast(`Lỗi đăng nhập Google!`, 'error');
     }
@@ -129,57 +162,70 @@ const Auth = ({ showToast }: { showToast: (msg: string, type: 'success' | 'error
   };
 
   const handleUserNotFoundConfirm = () => {
-    setShowUserNotFoundModal(false);
+    setShowUserSetupModal(false);
     setIsLoginView(false);
   };
 
   const handleUserNotFoundCancel = () => {
-    setShowUserNotFoundModal(false);
+    setShowUserSetupModal(false);
     setUsername('');
     setPassword('');
   };
 
   return (
-    <div style={{ padding: '20px', border: '1px solid #ccc', borderRadius: '8px', maxWidth: '400px', margin: '50px auto', textAlign: 'center' }}>
-      {user ? (
-        <div>
-          <h2>Xin chào, {user.email || 'Người dùng'}!</h2>
-          <button onClick={handleLogout}>Đăng xuất</button>
-        </div>
-      ) : (
-        <>
-          {isLoginView ? (
-            <div>
-              <h2>Đăng nhập</h2>
-              <input type="text" placeholder="Tên người dùng" value={username} onChange={(e) => setUsername(e.target.value)} />
-              <input type="password" placeholder="Mật khẩu" value={password} onChange={(e) => setPassword(e.target.value)} />
-              <button onClick={handleUsernameLogin}>Đăng nhập</button>
-              <button onClick={() => setIsLoginView(false)}>Chuyển sang đăng ký</button>
-              <p>hoặc</p>
-              <button onClick={handleGoogleAuth}>Đăng nhập bằng Google</button>
-            </div>
-          ) : (
-            <div>
-              <h2>Đăng ký</h2>
-              <input type="text" placeholder="Tên người dùng" value={username} onChange={(e) => setUsername(e.target.value)} />
-              <input type="password" placeholder="Mật khẩu" value={password} onChange={(e) => setPassword(e.target.value)} />
-              <button onClick={handleUsernameRegister}>Đăng ký</button>
-              <button onClick={() => setIsLoginView(true)}>Chuyển sang đăng nhập</button>
-              <p>hoặc</p>
-              <button onClick={handleGoogleAuth}>Đăng nhập bằng Google</button>
-            </div>
-          )}
-          {showUserNotFoundModal && (
-            <UserSetup
-              username={username}
-              onConfirm={handleUserNotFoundConfirm}
-              onCancel={handleUserNotFoundCancel}
-            />
-          )}
-        </>
+    <div className="auth-modal-overlay" onClick={handleOverlayClick}>
+      {isModal && onClose && (
+        <span className="close-btn" onClick={onClose}>&times;</span>
+      )}
+      <div className="auth-form" onClick={(e) => e.stopPropagation()}>
+        {isLoginView ? (
+          <>
+            <h2>Đăng nhập</h2>
+            <input type="text" placeholder="Tên người dùng" value={username} onChange={(e) => setUsername(e.target.value)} />
+            <input type="password" placeholder="Mật khẩu" value={password} onChange={(e) => setPassword(e.target.value)} />
+            <button onClick={handleUsernameLogin}>Đăng nhập</button>
+            <button onClick={() => setIsLoginView(false)}>Chuyển sang đăng ký</button>
+            <p>hoặc</p>
+            <button onClick={handleGoogleAuth}>
+              <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="20" height="20" viewBox="0 0 48 48">
+                <path fill="#fbc02d" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12	s5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24s8.955,20,20,20	s20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"></path>
+                <path fill="#e53935" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039	l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"></path>
+                <path fill="#4caf50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36	c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"></path>
+                <path fill="#1565c0" d="M43.611,20.083L43.595,20L42,20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571	c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"></path>
+              </svg>
+              <span>Google</span>
+            </button>
+          </>
+        ) : (
+          <>
+            <h2>Đăng ký</h2>
+            <input type="text" placeholder="Tên người dùng" value={username} onChange={(e) => setUsername(e.target.value)} />
+            <input type="password" placeholder="Mật khẩu" value={password} onChange={(e) => setPassword(e.target.value)} />
+            <button onClick={handleUsernameRegister}>Đăng ký</button>
+            <button onClick={() => setIsLoginView(true)}>Chuyển sang đăng nhập</button>
+            <p>hoặc</p>
+            <button onClick={handleGoogleAuth}>
+              <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="20" height="20" viewBox="0 0 48 48">
+                <path fill="#fbc02d" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12	s5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24s8.955,20,20,20	s20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"></path>
+                <path fill="#e53935" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039	l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"></path>
+                <path fill="#4caf50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36	c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"></path>
+                <path fill="#1565c0" d="M43.611,20.083L43.595,20L42,20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571	c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"></path>
+              </svg>
+              <span>Google</span>
+            </button>
+          </>
+        )}
+      </div>
+      {showUserSetupModal && (
+        <UserSetup
+          username={username}
+          onConfirm={handleUserNotFoundConfirm}
+          onCancel={handleUserNotFoundCancel}
+        />
       )}
     </div>
   );
 };
 
 export default Auth;
+
