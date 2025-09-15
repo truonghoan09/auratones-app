@@ -44,6 +44,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
   const handleLogout = async () => {
     try {
       await signOut(auth);
+      onLogout();
     } catch (error) {
       console.error("Lỗi đăng xuất:", error);
     }
