@@ -9,6 +9,8 @@ import './styles/main.scss';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import HomePage from './pages/HomePage';
 import { useNavigate } from 'react-router-dom';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { auth } from './firebase-config';
 
 const AppContent = () => {
   const { theme } = useTheme();
@@ -35,10 +37,15 @@ const AppContent = () => {
         showToast('Đăng nhập thành công!', 'success');
     };
 
-  const handleLogout = () => {
-        setIsLoggedIn(false);
-        showToast('Đã đăng xuất', 'info');
-    };
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      showToast('Đã đăng xuất', 'info');
+    } catch (error) {
+      console.error("Lỗi đăng xuất:", error);
+      showToast('Đăng xuất thất bại', 'error');
+    }
+  };
 
   useEffect(() => {
         if (isLoggedIn) {
