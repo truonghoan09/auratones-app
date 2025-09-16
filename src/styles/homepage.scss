@@ -1,13 +1,21 @@
 // src/styles/homepage.scss
 .homepage-container {
-  // Sử dụng biến CSS từ _variables.scss
+  // Loại bỏ căn giữa theo chiều dọc
   background-color: var(--background-color);
   color: var(--text-color);
+  min-height: 100vh;
+  padding: 0; // Đặt lại padding về 0 để header chiếm hết chiều ngang
+  display: flex;
+  flex-direction: column; // Sắp xếp các phần tử con theo chiều dọc
+  transition: background-color 0.3s ease;
+}
+
+.homepage-content {
+  flex-grow: 1; // Cho phép phần nội dung chính chiếm hết không gian còn lại
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
-  padding: var(--spacing-md);
+  padding: var(--spacing-xl); // Thêm padding cho nội dung
 }
 
 .homepage-card {
@@ -17,6 +25,7 @@
   border-radius: var(--border-radius-md);
   padding: var(--spacing-xl);
   padding-top: 0;
+  margin-top: 2rem;
   min-height: 80vh;
   width: 90%;
   text-align: center;

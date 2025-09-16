@@ -1,7 +1,7 @@
 // src/components/Auth.tsx
 import { useState, useEffect } from 'react';
 import { auth, db } from '../firebase-config';
-import type { User } from 'firebase/auth';
+// import type { User } from 'firebase/auth';
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -33,7 +33,7 @@ interface AuthProps {
 const Auth = ({ showToast, isModal, onClose, onLoginSuccess }: AuthProps) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [user, setUser] = useState<User | null>(null);
+  // const [user, setUser] = useState<User | null>(null);
   const [isLoginView, setIsLoginView] = useState(true);
   const [showUserSetupModal, setShowUserSetupModal] = useState(false);
   const navigate = useNavigate();
@@ -144,7 +144,7 @@ const Auth = ({ showToast, isModal, onClose, onLoginSuccess }: AuthProps) => {
       if (isModal) {
         onClose?.();
       } else {
-        navigate('/dashboard');
+        onLoginSuccess();
       }
     } catch (error: any) {
       showToast(`Lỗi đăng nhập Google!`, 'error');

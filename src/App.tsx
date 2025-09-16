@@ -11,6 +11,7 @@ import HomePage from './pages/HomePage';
 import { useNavigate } from 'react-router-dom';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from './firebase-config';
+import AppRoutes from './AppRoutes';
 
 const AppContent = () => {
   const { theme } = useTheme();
@@ -18,17 +19,9 @@ const AppContent = () => {
   const [isClosing, setIsClosing] = useState(false);
   const { message, type, showToast, hideToast } = useToast();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const navigate = useNavigate();
 
   const handleCloseModal = () => {
     setIsClosing(true);
-  };
-
-  const onAnimationEnd = () => {
-    if (isClosing) {
-      setShowLoginModal(false);
-      setIsClosing(false);
-    }
   };
 
   const handleLoginSuccess = () => {
@@ -41,6 +34,7 @@ const AppContent = () => {
     try {
       await signOut(auth);
       showToast('Đã đăng xuất', 'info');
+      window.location.reload(); 
     } catch (error) {
       console.error("Lỗi đăng xuất:", error);
       showToast('Đăng xuất thất bại', 'error');
@@ -48,24 +42,33 @@ const AppContent = () => {
   };
 
   useEffect(() => {
-        if (isLoggedIn) {
-            navigate('/dashboard');
-        } else {
-            navigate('/');
-        }
-    }, [isLoggedIn, navigate]);
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setIsLoggedIn(!!user); // Cập nhật trạng thái đăng nhập
+    });
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (isClosing) {
+      const timer = setTimeout(() => {
+        setShowLoginModal(false);
+        setIsClosing(false);
+      }, 300); // 300ms, khớp với thời gian transition của CSS
+      return () => clearTimeout(timer);
+    }
+  }, [isClosing]);
 
   return (
     <div className={`app-container ${theme}`}>
-      <Routes>
-        <Route path="/" element={<HomePage onLoginClick={() => setShowLoginModal(true)} />} />
-        <Route path="/dashboard" element={isLoggedIn ? <Dashboard onLogout={handleLogout} /> : <HomePage onLoginClick={() => setShowLoginModal(true)} />} />
-      </Routes>
+      <AppRoutes
+        isLoggedIn={isLoggedIn}
+        onLoginClick={() => setShowLoginModal(true)}
+        onLogout={handleLogout}
+      />
       
       {showLoginModal && (
         <div 
           className={`auth-modal-overlay ${isClosing ? 'fade-out' : ''}`} 
-          onAnimationEnd={onAnimationEnd}
         >
           <Auth 
             showToast={showToast} 
