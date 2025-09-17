@@ -1,0 +1,23 @@
+/* src/components/Toast.scss */
+.toast {
+  padding: 10px 20px;
+  border-radius: 8px;
+  color: white;
+  margin-bottom: 10px;
+  position: fixed;
+  bottom: 20px; /* Vị trí dưới cùng bên phải */
+  right: 20px;
+  z-index: 9999;
+}
+
+.toast.success {
+  background-color: #4CAF50;
+}
+
+.toast.error {
+  background-color: #f44336;
+}
+
+.toast.info {
+  background-color: #2196F3;
+}

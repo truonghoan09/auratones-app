@@ -7,9 +7,10 @@ interface AppRoutesProps {
   isLoggedIn: boolean;
   onLoginClick: () => void;
   onLogout: () => void;
+  userAvatar: string | null;
 }
 
-const AppRoutes: React.FC<AppRoutesProps> = ({ isLoggedIn, onLoginClick, onLogout }) => {
+const AppRoutes: React.FC<AppRoutesProps> = ({ isLoggedIn, onLoginClick, onLogout, userAvatar }) => {
   return (
     <Routes>
       <Route
@@ -19,6 +20,7 @@ const AppRoutes: React.FC<AppRoutesProps> = ({ isLoggedIn, onLoginClick, onLogou
             isLoggedIn={isLoggedIn}
             onLoginClick={onLoginClick}
             onLogout={onLogout}
+            userAvatar={userAvatar}
           />
         }
       />

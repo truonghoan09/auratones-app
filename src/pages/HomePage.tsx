@@ -1,74 +1,63 @@
 // src/pages/HomePage.tsx
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import '../styles/main.scss'; // Đảm bảo import file CSS gốc
-import '../styles/homepage.scss';
-import ThemeSwitcher from '../components/ThemeSwitcher';
 import Header from '../components/Header';
+import '../styles/homepage.scss';
 
-// Định nghĩa các props mà HomePage sẽ nhận
 interface HomePageProps {
   isLoggedIn: boolean;
   onLoginClick: () => void;
   onLogout: () => void;
+  userAvatar: string | null;
 }
 
-const HomePage: React.FC<HomePageProps> = ({ isLoggedIn, onLoginClick, onLogout }) => {
-  const navigate = useNavigate();
-
+const HomePage: React.FC<HomePageProps> = ({ isLoggedIn, onLoginClick, onLogout, userAvatar }) => {
   return (
-    <div className="homepage-container">
-      <Header 
-        isLoggedIn={isLoggedIn} 
-        onLoginClick={onLoginClick} 
-        onLogout={onLogout} 
+    <>
+      <Header
+        isLoggedIn={isLoggedIn}
+        onLoginClick={onLoginClick}
+        onLogout={onLogout}
+        userAvatar={userAvatar}
       />
-      <div className='homepage-content'>
-        <div className="homepage-card">
-          {/* Câu lệnh điều kiện để render nội dung */}
+      <main className="homepage-main">
+        <section className="hero-section">
+          <h1>Chào mừng đến với Auratones</h1>
+          <p>Nền tảng học nhạc cụ tốt nhất dành cho bạn.</p>
           {isLoggedIn ? (
-            // Nội dung cho người dùng đã đăng nhập
-            <>
-              <h1>Chào mừng bạn trở lại!</h1>
-              <p>Đây là nội dung tùy chỉnh dành riêng cho bạn.</p>
-              <div className="button-group">
-                <button 
-                  className="btn-primary" 
-                  onClick={onLogout}
-                >
-                  Đăng xuất
-                </button>
-                <button 
-                  className="btn-secondary" 
-                  onClick={() => navigate('/settings')} // Ví dụ: chuyển đến trang cài đặt
-                >
-                  Cài đặt
-                </button>
-                <ThemeSwitcher />
-              </div>
-            </>
+            <div className="logged-in-message">
+              <p>Bạn đã đăng nhập thành công. Hãy bắt đầu hành trình âm nhạc của mình!</p>
+              {/* Thêm các nút hoặc link dành cho người dùng đã đăng nhập */}
+              <a href="/dashboard" className="cta-button primary">Đi đến Dashboard</a>
+            </div>
           ) : (
-            // Nội dung công khai cho người chưa đăng nhập
-            <>
-              <h1>Chào mừng đến với trang chủ!</h1>
-              <p>Đây là nội dung công khai, bạn có thể xem mà không cần đăng nhập.</p>
-              <div className="button-group">
-                <button className="btn-primary" onClick={onLoginClick}>
-                  Đăng nhập / Đăng ký
-                </button>
-                <button 
-                  className="btn-secondary" 
-                  onClick={() => navigate('/about')}
-                >
-                  Tìm hiểu thêm
-                </button>
-                <ThemeSwitcher />
-              </div>
-            </>
+            <div className="guest-cta">
+              <p>Đăng ký ngay để truy cập kho tài liệu và các khóa học độc quyền.</p>
+              <button className="cta-button primary" onClick={onLoginClick}>
+                Đăng ký ngay!
+              </button>
+            </div>
           )}
-        </div>
-      </div>
-    </div>
+        </section>
+        {/* Thêm các phần nội dung khác của trang chủ */}
+        <section className="features-section">
+          <h2>Các tính năng nổi bật</h2>
+          <div className="features-grid">
+            <div className="feature-item">
+              <h3>Kho hợp âm khổng lồ</h3>
+              <p>Tìm kiếm và luyện tập hàng ngàn hợp âm cho mọi loại nhạc cụ.</p>
+            </div>
+            <div className="feature-item">
+              <h3>Thư viện bài hát</h3>
+              <p>Hàng trăm bài hát được phân tích hợp âm, giúp bạn dễ dàng luyện tập.</p>
+            </div>
+            <div className="feature-item">
+              <h3>Khóa học chuyên sâu</h3>
+              <p>Học từ các chuyên gia với lộ trình rõ ràng, từ cơ bản đến nâng cao.</p>
+            </div>
+          </div>
+        </section>
+      </main>
+    </>
   );
 };
 

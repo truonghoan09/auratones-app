@@ -12,61 +12,38 @@ import { useNavigate } from 'react-router-dom';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from './firebase-config';
 import AppRoutes from './AppRoutes';
+import { useAuth } from './hooks/useAuth';
+import { useModal } from './hooks/useModal';
+import { useUserProfile } from './hooks/useUserProfile';
 
 const AppContent = () => {
+
   const { theme } = useTheme();
-  const [showLoginModal, setShowLoginModal] = useState(false);
-  const [isClosing, setIsClosing] = useState(false);
   const { message, type, showToast, hideToast } = useToast();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { showModal, isClosing, handleOpenModal, handleCloseModal } = useModal();
+  const { 
+    isLoginView, 
+    setIsLoginView, 
+    showUserSetupModal, 
+    setShowUserSetupModal, 
+    handleUsernameLogin, 
+    handleUsernameRegister, 
+    handleGoogleAuth, 
+    handleLogout 
+  } = useAuth(showToast, handleCloseModal);
 
-  const handleCloseModal = () => {
-    setIsClosing(true);
-  };
-
-  const handleLoginSuccess = () => {
-        setIsLoggedIn(true);
-        setShowLoginModal(false);
-        showToast('Đăng nhập thành công!', 'success');
-    };
-
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      showToast('Đã đăng xuất', 'info');
-      window.location.reload(); 
-    } catch (error) {
-      console.error("Lỗi đăng xuất:", error);
-      showToast('Đăng xuất thất bại', 'error');
-    }
-  };
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setIsLoggedIn(!!user); // Cập nhật trạng thái đăng nhập
-    });
-    return () => unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    if (isClosing) {
-      const timer = setTimeout(() => {
-        setShowLoginModal(false);
-        setIsClosing(false);
-      }, 300); // 300ms, khớp với thời gian transition của CSS
-      return () => clearTimeout(timer);
-    }
-  }, [isClosing]);
+  const { isLoggedIn, userAvatar } = useUserProfile();
 
   return (
     <div className={`app-container ${theme}`}>
       <AppRoutes
         isLoggedIn={isLoggedIn}
-        onLoginClick={() => setShowLoginModal(true)}
+        onLoginClick={handleOpenModal}
         onLogout={handleLogout}
+        userAvatar={userAvatar}
       />
       
-      {showLoginModal && (
+      {showModal && (
         <div 
           className={`auth-modal-overlay ${isClosing ? 'fade-out' : ''}`} 
         >
@@ -74,9 +51,15 @@ const AppContent = () => {
             showToast={showToast} 
             isModal={true} 
             onClose={handleCloseModal} 
-            onLoginSuccess={handleLoginSuccess}
+            isLoginView={isLoginView}
+            setIsLoginView={setIsLoginView}
+            showUserSetupModal={showUserSetupModal}
+            setShowUserSetupModal={setShowUserSetupModal}
+            handleUsernameLogin={handleUsernameLogin}
+            handleUsernameRegister={handleUsernameRegister}
+            handleGoogleAuth={handleGoogleAuth}
           />
-        </div>
+        </div>  
       )}
 
       {message && <Toast message={message} type={type} onClose={hideToast} />}
