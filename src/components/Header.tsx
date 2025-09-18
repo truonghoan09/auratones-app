@@ -53,7 +53,7 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, onLoginClick, onLogout, use
           <div className="user-profile" ref={userProfileRef}>
             <ThemeSwitcher />
             <button className="user-avatar" onClick={handleToggleMenu}>
-              {userAvatar ? (
+              {userAvatar  ? (
                 <img src={userAvatar} alt="User Avatar" />
               ) : (
                 <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" className="bi bi-person-circle" viewBox="0 0 16 16">

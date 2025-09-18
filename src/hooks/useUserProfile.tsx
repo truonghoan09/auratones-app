@@ -7,6 +7,7 @@ import { doc, getDoc, setDoc } from 'firebase/firestore';
 export const useUserProfile = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userAvatar, setUserAvatar] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -32,6 +33,7 @@ export const useUserProfile = () => {
         setIsLoggedIn(false);
         setUserAvatar(null);
       }
+      setIsLoading(false);
     });
 
     return () => unsubscribe();
@@ -40,5 +42,6 @@ export const useUserProfile = () => {
   return {
     isLoggedIn,
     userAvatar,
+    isLoading,
   };
 };

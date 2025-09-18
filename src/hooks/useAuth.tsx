@@ -108,6 +108,7 @@ export const useAuth = (showToast: (message: string, type: 'success' | 'error' |
         await setDoc(userDocRef, { photoURL: result.user.photoURL }, { merge: true });
       }
       showToast('Đăng nhập bằng Google thành công!', 'success');
+      
     } catch (error: any) {
       showToast(`Lỗi đăng nhập Google!`, 'error');
     }

@@ -15,6 +15,7 @@ import AppRoutes from './AppRoutes';
 import { useAuth } from './hooks/useAuth';
 import { useModal } from './hooks/useModal';
 import { useUserProfile } from './hooks/useUserProfile';
+import LoadingModal from './components/LoadingModal';
 
 const AppContent = () => {
 
@@ -32,17 +33,23 @@ const AppContent = () => {
     handleLogout 
   } = useAuth(showToast, handleCloseModal);
 
-  const { isLoggedIn, userAvatar } = useUserProfile();
+  const { isLoggedIn, userAvatar, isLoading } = useUserProfile();
 
   return (
     <div className={`app-container ${theme}`}>
-      <AppRoutes
+      { isLoading ? (
+        <LoadingModal isOpen={true}/>
+      ) : (
+        <AppRoutes
         isLoggedIn={isLoggedIn}
         onLoginClick={handleOpenModal}
         onLogout={handleLogout}
         userAvatar={userAvatar}
       />
+      )}
       
+
+
       {showModal && (
         <div 
           className={`auth-modal-overlay ${isClosing ? 'fade-out' : ''}`} 
