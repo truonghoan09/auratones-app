@@ -1,0 +1,46 @@
+// src/styles/homepage.scss
+.homepage-container {
+  // Loại bỏ căn giữa theo chiều dọc
+  background-color: var(--background-color);
+  color: var(--text-color);
+  min-height: 100vh;
+  padding: 0; // Đặt lại padding về 0 để header chiếm hết chiều ngang
+  display: flex;
+  flex-direction: column; // Sắp xếp các phần tử con theo chiều dọc
+  transition: background-color 0.3s ease;
+}
+
+.homepage-content {
+  flex-grow: 1; // Cho phép phần nội dung chính chiếm hết không gian còn lại
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: var(--spacing-xl); // Thêm padding cho nội dung
+  color: var(--text-color);
+}
+
+.homepage-card {
+  // Sử dụng biến CSS từ _variables.scss
+  background-color: var(--card-background);
+  box-shadow: var(--box-shadow);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-xl);
+  padding-top: 0;
+  margin-top: 2rem;
+  min-height: 80vh;
+  width: 90%;
+  text-align: center;
+}
+
+h1 {
+  color: var(--text-color);
+  font-size: 2rem;
+  margin-bottom: var(--spacing-sm);
+}
+
+.button-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+}

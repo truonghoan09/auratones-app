@@ -1,0 +1,105 @@
+/* src/styles/header.scss */
+.main-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: var(--card-background);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  transition: background-color 0.3s ease;
+
+  .header-left, .header-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .header-logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--primary-color);
+    text-decoration: none;
+    margin-right: 20px;
+  }
+
+  .header-nav {
+    display: flex;
+    gap: 15px;
+    .nav-link {
+      text-decoration: none;
+      color: var(--text-color);
+      font-weight: 500;
+      transition: color 0.3s ease;
+      &:hover {
+        color: var(--primary-color);
+      }
+    }
+  }
+
+  .auth-buttons .btn-primary {
+    margin-left: 1rem;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 5px;
+    font-weight: 600;
+    cursor: pointer;
+    background-color: var(--primary-color);
+    color: #fff;
+    &:hover {
+      background-color: var(--accent-color);
+    }
+  }
+
+  .user-profile {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+
+    .user-avatar {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+      }
+    }
+
+    .dropdown-menu {
+      position: absolute;
+      top: calc(100% + 10px);
+      right: 0;
+      z-index: 1001;
+    //   transform: translateX(calc(-100% - 1rem));
+      transition: transform 0.3s ease-out;
+      background-color: var(--card-background);
+      border-radius: 5px;
+      box-shadow: 0 0px 8px var(--text-color);
+      display: flex;
+      flex-direction: column;
+      min-width: 150px;
+      overflow: hidden;
+
+      .dropdown-item {
+        padding: 10px 15px;
+        text-decoration: none;
+        color: var(--text-color);
+        background-color: transparent;
+        border: none;
+        width: 100%;
+        text-align: left;
+        cursor: pointer;
+        &:hover {
+          background-color: var(--bg-color);
+        }
+      }
+    }
+  }
+}

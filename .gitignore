@@ -1,0 +1,17 @@
+# Dependency directories
+/auratones-frontend/node_modules/
+/auratones-backend/node_modules/
+
+# Environment variables
+.env
+.env.local
+
+# Firebase service account
+auratones-backend/auratones-123456-firebase-adminsdk-fbsvc-a308c1b97e.json
+
+# Build and temporary files
+/auratones-frontend/dist/
+/auratones-frontend/.vite/
+
+# VS Code directory
+.vscode/
