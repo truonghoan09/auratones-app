@@ -7,16 +7,18 @@ import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import AppRoutes from './AppRoutes';
 import { useAuth } from './hooks/useAuth';
 import { useModal } from './hooks/useModal';
-import { useUserProfile } from './hooks/useUserProfile';
 import LoadingModal from './components/LoadingModal';
 import Auth from './components/Auth';
+import { AuthProvider, useAuthContext } from './contexts/AuthContext';
+import { useUserProfile } from './hooks/useUserProfile';
 
 const AppContent = () => {
+    useUserProfile();
     const { theme } = useTheme();
     const { message, type, showToast, hideToast } = useToast();
     const { showModal, isClosing, handleOpenModal, handleCloseModal } = useModal();
     const { handleLogout } = useAuth(showToast);
-    const { isLoggedIn, userAvatar, isLoading } = useUserProfile();
+    const { isLoading } = useAuthContext();
 
     return (
         <div className={`app-container ${theme}`}>
@@ -24,10 +26,8 @@ const AppContent = () => {
                 <LoadingModal isOpen={true} />
             ) : (
                 <AppRoutes
-                    isLoggedIn={isLoggedIn}
                     onLoginClick={handleOpenModal}
                     onLogout={handleLogout}
-                    userAvatar={userAvatar}
                 />
             )}
 
@@ -52,7 +52,9 @@ function App() {
     return (
         <Router>
             <ThemeProvider>
-                <AppContent />
+                <AuthProvider>
+                    <AppContent />
+                </AuthProvider>
             </ThemeProvider>
         </Router>
     );

@@ -1,18 +1,23 @@
 // src/hooks/useUserProfile.tsx
-import { useState, useEffect } from 'react';
+import { useEffect, useRef } from 'react';
+import { useAuthContext } from '../contexts/AuthContext';
 
 export const useUserProfile = () => {
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [userAvatar, setUserAvatar] = useState<string | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
+    const { setIsAuthenticated, setIsLoading, setUserAvatar } = useAuthContext();
+    const isInitialCheckDone = useRef(false); 
 
     useEffect(() => {
+        if (isInitialCheckDone.current) {
+            return;
+        }
         const checkAuthStatus = async () => {
+            setIsLoading(true);
+            
             const token = localStorage.getItem('authToken');
             if (token) {
                 try {
                     // Gọi API backend để lấy thông tin user
-                    const response = await fetch('http://localhost:3001/api/auth/profile', {
+                    const response = await fetch('http://localhost:3001/api/auth/me', {
                         method: 'GET',
                         headers: {
                             'Content-Type': 'application/json',
@@ -22,36 +27,29 @@ export const useUserProfile = () => {
 
                     if (response.ok) {
                         const userData = await response.json();
-                        setIsLoggedIn(true);
+                        setIsAuthenticated(true);
                         setUserAvatar(userData.photoURL || null);
                     } else {
                         // Token không hợp lệ, xóa token và đăng xuất
                         localStorage.removeItem('authToken');
-                        setIsLoggedIn(false);
+                        setIsAuthenticated(false);
                         setUserAvatar(null);
                     }
                 } catch (error) {
                     // Lỗi mạng hoặc lỗi khác, xóa token và đăng xuất
                     localStorage.removeItem('authToken');
-                    setIsLoggedIn(false);
+                    setIsAuthenticated(false);
                     setUserAvatar(null);
                 }
             } else {
-                setIsLoggedIn(false);
+                setIsAuthenticated(false);
                 setUserAvatar(null);
             }
             setIsLoading(false);
         };
 
         checkAuthStatus();
-    }, []);
+        isInitialCheckDone.current = true;
+    }, [setIsAuthenticated, setIsLoading, setUserAvatar]);
 
-    // Loại bỏ useEffect thứ hai vì nó không cần thiết,
-    // Giá trị userAvatar sẽ được cập nhật đúng sau khi fetch thành công
-
-    return {
-        isLoggedIn,
-        userAvatar,
-        isLoading,
-    };
 };

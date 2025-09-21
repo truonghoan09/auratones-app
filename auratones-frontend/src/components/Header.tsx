@@ -3,16 +3,16 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import ThemeSwitcher from './ThemeSwitcher';
 import '../styles/header.scss';
+import { useAuthContext } from '../contexts/AuthContext';
 
 interface HeaderProps {
-  isLoggedIn: boolean;
   onLoginClick: () => void;
   onLogout: () => void;
-  userAvatar: string | null;
 }
 
-const Header: React.FC<HeaderProps> = ({ isLoggedIn, onLoginClick, onLogout, userAvatar }) => {
+const Header: React.FC<HeaderProps> = ({ onLoginClick, onLogout }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { isAuthenticated, userAvatar } = useAuthContext();
   const userProfileRef = useRef<HTMLDivElement>(null);
 
   const handleToggleMenu = () => {
@@ -49,7 +49,7 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, onLoginClick, onLogout, use
       </div>
 
       <div className="header-right">
-        {isLoggedIn ? (
+        {isAuthenticated ? (
           <div className="user-profile" ref={userProfileRef}>
             <ThemeSwitcher />
             <button className="user-avatar" onClick={handleToggleMenu}>

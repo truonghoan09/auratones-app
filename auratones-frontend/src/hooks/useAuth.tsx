@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuthContext } from '../contexts/AuthContext';
 
 export const useAuth = (
     showToast: (message: string, type: 'success' | 'error' | 'info') => void,
@@ -8,10 +9,8 @@ export const useAuth = (
     const [isLoginView, setIsLoginView] = useState(true);
     const [showUserSetupModal, setShowUserSetupModal] = useState(false);
     const navigate = useNavigate();
-    const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    // Kiểm tra ngay khi hook khởi tạo
-        return Boolean(localStorage.getItem('authToken'));
-    });
+    const {setIsAuthenticated} = useAuthContext()
+        setIsAuthenticated(Boolean(localStorage.getItem('authToken')));
 
 
     const handleUsernameLogin = async (username: string, password: string) => {
@@ -40,7 +39,21 @@ export const useAuth = (
             onClose?.();       // 👈 đóng modal nếu được truyền
             navigate('/');
         } catch (error: any) {
-            showToast(`Lỗi đăng nhập: ${error.message}`, 'error');
+            // Kiểm tra xem lỗi có phải là từ phản hồi của server hay không
+            console.log(error);
+            if (error.response && error.response.status) {
+                // Nếu lỗi là do người dùng không tồn tại
+                if (error.response.status === 404) {
+                    setShowUserSetupModal(true);
+                } else if (error.response.status === 401) {
+                    showToast('Mật khẩu không đúng.', 'error');
+                } else {
+                    showToast(`Lỗi đăng nhập: ${error.message}`, 'error');
+                }
+            } else {
+                // Lỗi mạng hoặc lỗi không xác định
+                showToast(`Lỗi kết nối: ${error.message}`, 'error');
+            }
         }
     };
 
@@ -106,7 +119,6 @@ export const useAuth = (
     };
 
     return {
-        isAuthenticated,
         isLoginView,
         setIsLoginView,
         showUserSetupModal,

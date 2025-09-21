@@ -4,23 +4,19 @@ import { Routes, Route } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 
 interface AppRoutesProps {
-  isLoggedIn: boolean;
   onLoginClick: () => void;
   onLogout: () => void;
-  userAvatar: string | null;
 }
 
-const AppRoutes: React.FC<AppRoutesProps> = ({ isLoggedIn, onLoginClick, onLogout, userAvatar }) => {
+const AppRoutes: React.FC<AppRoutesProps> = ({ onLoginClick, onLogout }) => {
   return (
     <Routes>
       <Route
         path="/"
         element={
           <HomePage
-            isLoggedIn={isLoggedIn}
             onLoginClick={onLoginClick}
             onLogout={onLogout}
-            userAvatar={userAvatar}
           />
         }
       />

@@ -2,22 +2,20 @@
 import React from 'react';
 import Header from '../components/Header';
 import '../styles/homepage.scss';
+import { useAuthContext } from '../contexts/AuthContext';
 
 interface HomePageProps {
-  isLoggedIn: boolean;
   onLoginClick: () => void;
   onLogout: () => void;
-  userAvatar: string | null;
 }
 
-const HomePage: React.FC<HomePageProps> = ({ isLoggedIn, onLoginClick, onLogout, userAvatar }) => {
+const HomePage: React.FC<HomePageProps> = ({ onLoginClick, onLogout }) => {
+  const {isAuthenticated} = useAuthContext()
   return (
     <>
       <Header
-        isLoggedIn={isLoggedIn}
         onLoginClick={onLoginClick}
         onLogout={onLogout}
-        userAvatar={userAvatar}
       />
       <div className='homepage-container'>
         <div className="homepage-content">
@@ -25,7 +23,7 @@ const HomePage: React.FC<HomePageProps> = ({ isLoggedIn, onLoginClick, onLogout,
             <section className="hero-section">
               <h1>Chào mừng đến với Auratones</h1>
               <p>Nền tảng học nhạc cụ tốt nhất dành cho bạn.</p>
-              {isLoggedIn ? (
+              {isAuthenticated ? (
                 <div className="logged-in-message">
                   <p>Bạn đã đăng nhập thành công. Hãy bắt đầu hành trình âm nhạc của mình!</p>
                   {/* Thêm các nút hoặc link dành cho người dùng đã đăng nhập */}
