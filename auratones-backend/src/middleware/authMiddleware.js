@@ -1,20 +1,19 @@
 // src/middleware/authMiddleware.js
-
 const jwt = require('jsonwebtoken');
-const { secret } = require('../config/jwt');
 
 function authMiddleware(req, res, next) {
-  const authHeader = req.headers['authorization'];
-  if (!authHeader) return res.status(401).json({ message: 'No token provided.' });
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(' ')[1];
 
-  const token = authHeader.split(' ')[1]; // "Bearer <token>"
-  if (!token) return res.status(401).json({ message: 'Token missing.' });
+  if (!token) return res.status(401).json({ message: 'No token provided' });
 
-  jwt.verify(token, secret, (err, decoded) => {
-    if (err) return res.status(403).json({ message: 'Invalid token.' });
-    req.user = decoded; // decoded = { uid, username, iat, exp }
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.userId = decoded.userId;
     next();
-  });
+  } catch (err) {
+    return res.status(401).json({ message: 'Invalid token' });
+  }
 }
 
-module.exports = authMiddleware;
+module.exports = authMiddleware; // 👈 export chuẩn CommonJS

@@ -182,7 +182,8 @@ router.get('/me', authMiddleware, async (req, res) => {
     res.json({
       uid: req.user.uid,
       username: data.username,
-      email: data.email || null
+      email: data.email || null,
+      avatar: data.photoURL || null
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
