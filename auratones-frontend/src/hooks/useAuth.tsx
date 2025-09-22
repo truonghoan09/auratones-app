@@ -28,7 +28,14 @@ export const useAuth = (
 
             const data = await response.json();
             if (!response.ok) {
-                throw new Error(data.message || 'Lỗi đăng nhập.');
+                if (response.status === 404) {
+                    setShowUserSetupModal(true);
+                } else if (response.status === 401) {
+                    showToast('Mật khẩu không đúng.', 'error');
+                } else {
+                    showToast(`Lỗi đăng nhập: ${data.message || 'Không xác định'}`, 'error');
+                }
+                return;
             }
 
             // Lưu token hoặc thông tin người dùng từ backend vào localStorage
@@ -39,21 +46,8 @@ export const useAuth = (
             onClose?.();       // 👈 đóng modal nếu được truyền
             navigate('/');
         } catch (error: any) {
-            // Kiểm tra xem lỗi có phải là từ phản hồi của server hay không
-            console.log(error);
-            if (error.response && error.response.status) {
-                // Nếu lỗi là do người dùng không tồn tại
-                if (error.response.status === 404) {
-                    setShowUserSetupModal(true);
-                } else if (error.response.status === 401) {
-                    showToast('Mật khẩu không đúng.', 'error');
-                } else {
-                    showToast(`Lỗi đăng nhập: ${error.message}`, 'error');
-                }
-            } else {
                 // Lỗi mạng hoặc lỗi không xác định
                 showToast(`Lỗi kết nối: ${error.message}`, 'error');
-            }
         }
     };
 
