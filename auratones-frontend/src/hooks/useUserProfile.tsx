@@ -2,54 +2,42 @@
 import { useEffect, useRef } from 'react';
 import { useAuthContext } from '../contexts/AuthContext';
 
+/**
+ * Hook đọc hồ sơ người dùng từ AuthContext.
+ * - Tự gọi refreshMe() một lần khi mount nếu có token.
+ * - Không đụng localStorage & không hardcode URL.
+ * - Trả về state gọn: isAuthenticated, isLoading, user, userAvatar.
+ */
 export const useUserProfile = () => {
-    const { setIsAuthenticated, setIsLoading, setUserAvatar } = useAuthContext();
-    const isInitialCheckDone = useRef(false); 
+  const {
+    isAuthenticated,
+    isLoading,
+    user,
+    userAvatar,
+    getToken,
+    refreshMe,
+  } = useAuthContext();
 
-    useEffect(() => {
-        if (isInitialCheckDone.current) {
-            return;
-        }
-        const checkAuthStatus = async () => {
-            setIsLoading(true);
-            
-            const token = localStorage.getItem('authToken');
-            if (token) {
-                try {
-                    // Gọi API backend để lấy thông tin user
-                    const response = await fetch('http://localhost:3001/api/auth/me', {
-                        method: 'GET',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`
-                        },
-                    });
+  const didHydrate = useRef(false);
 
-                    if (response.ok) {
-                        const userData = await response.json();
-                        setIsAuthenticated(true);
-                        setUserAvatar(userData.photoURL || null);
-                    } else {
-                        // Token không hợp lệ, xóa token và đăng xuất
-                        localStorage.removeItem('authToken');
-                        setIsAuthenticated(false);
-                        setUserAvatar(null);
-                    }
-                } catch (error) {
-                    // Lỗi mạng hoặc lỗi khác, xóa token và đăng xuất
-                    localStorage.removeItem('authToken');
-                    setIsAuthenticated(false);
-                    setUserAvatar(null);
-                }
-            } else {
-                setIsAuthenticated(false);
-                setUserAvatar(null);
-            }
-            setIsLoading(false);
-        };
+  useEffect(() => {
+    if (didHydrate.current) return;
+    didHydrate.current = true;
 
-        checkAuthStatus();
-        isInitialCheckDone.current = true;
-    }, [setIsAuthenticated, setIsLoading, setUserAvatar]);
+    // Nếu đã có token trong storage → hydrate /auth/me
+    const token = getToken();
+    if (token) {
+      // refreshMe tự xử lý set user + isAuthenticated trong AuthProvider
+      refreshMe().catch(() => {
+        // nuốt lỗi lặt vặt, AuthProvider sẽ tự reset state khi lỗi
+      });
+    }
+  }, [getToken, refreshMe]);
 
+  return {
+    isAuthenticated,
+    isLoading,
+    user,
+    userAvatar,
+  };
 };

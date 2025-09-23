@@ -2,6 +2,8 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import HomePage from './pages/HomePage';
+import AuthSuccess from './pages/AuthSuccess';
+import AuthError from './pages/AuthError';
 
 interface AppRoutesProps {
   onLoginClick: () => void;
@@ -20,6 +22,8 @@ const AppRoutes: React.FC<AppRoutesProps> = ({ onLoginClick, onLogout }) => {
           />
         }
       />
+      <Route path="/auth/success" element={<AuthSuccess />} />
+      <Route path="/auth/error" element={<AuthError />} />
       {/* Thêm các route khác của bạn ở đây */}
     </Routes>
   );

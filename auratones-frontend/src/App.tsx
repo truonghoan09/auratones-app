@@ -11,6 +11,7 @@ import LoadingModal from './components/LoadingModal';
 import Auth from './components/Auth';
 import { AuthProvider, useAuthContext } from './contexts/AuthContext';
 import { useUserProfile } from './hooks/useUserProfile';
+import { I18nProvider } from './contexts/I18nContext';
 
 const AppContent = () => {
     useUserProfile();
@@ -51,11 +52,13 @@ const AppContent = () => {
 function App() {
     return (
         <Router>
-            <ThemeProvider>
-                <AuthProvider>
-                    <AppContent />
-                </AuthProvider>
-            </ThemeProvider>
+            <I18nProvider>
+                <ThemeProvider>
+                    <AuthProvider>
+                        <AppContent />
+                    </AuthProvider>
+                </ThemeProvider>
+            </I18nProvider>
         </Router>
     );
 }

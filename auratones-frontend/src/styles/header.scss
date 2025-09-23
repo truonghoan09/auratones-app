@@ -1,105 +1,161 @@
-/* src/styles/header.scss */
+/* Theme-aware header */
+
 .main-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 2rem;
-  background-color: var(--card-background);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   position: sticky;
   top: 0;
-  z-index: 1000;
-  transition: background-color 0.3s ease;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  padding: 10px 16px;
+  background: var(--card-background);        /* 🟢 theo theme */
+  color: var(--text-color);                  /* 🟢 theo theme */
+  box-shadow: var(--box-shadow);
+}
 
-  .header-left, .header-right {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-  }
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
 
-  .header-logo {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: var(--primary-color);
+.header-logo {
+  font-weight: 800;
+  text-transform: lowercase;
+  letter-spacing: 0.6px;
+  color: var(--primary-color);               /* 🟢 theo theme */
+  text-decoration: none;
+}
+
+.header-nav {
+  display: flex;
+  gap: 10px;
+
+  .nav-link {
+    padding: 6px 10px;
+    border-radius: 999px;
     text-decoration: none;
-    margin-right: 20px;
-  }
+    color: var(--text-color);                /* 🟢 theo theme */
+    transition: background 120ms ease, color 120ms ease;
 
-  .header-nav {
-    display: flex;
-    gap: 15px;
-    .nav-link {
-      text-decoration: none;
-      color: var(--text-color);
-      font-weight: 500;
-      transition: color 0.3s ease;
-      &:hover {
-        color: var(--primary-color);
-      }
-    }
-  }
-
-  .auth-buttons .btn-primary {
-    margin-left: 1rem;
-    padding: 0.5rem 1rem;
-    border: none;
-    border-radius: 5px;
-    font-weight: 600;
-    cursor: pointer;
-    background-color: var(--primary-color);
-    color: #fff;
     &:hover {
-      background-color: var(--accent-color);
+      background: rgba(var(--accent-color-rgb), 0.12); /* 🟢 theo theme */
+      color: var(--accent-color);
+    }
+  }
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-primary {
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  font-weight: 700;
+  background: var(--accent-color);                 /* 🟢 theo theme */
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(var(--accent-color-rgb), 0.28);
+  transition: transform 120ms ease, box-shadow 120ms ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 22px rgba(var(--accent-color-rgb), 0.36);
+  }
+}
+
+/* Avatar + dropdown */
+.user-profile { position: relative; display: flex; align-items: center; gap: 8px; }
+
+.user-avatar {
+  position: relative;
+  width: 40px; height: 40px;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 2px solid rgba(var(--accent-color-rgb), 0.25); /* 🟢 */
+  background: rgba(var(--accent-color-rgb), 0.08);       /* 🟢 */
+  display: grid; place-items: center;
+  cursor: pointer;
+
+  img { width: 100%; height: 100%; object-fit: cover; }
+
+  .avatar-fallback {
+    font-weight: 700; font-size: 0.9rem;
+    color: var(--accent-color);                          /* 🟢 */
+  }
+  .avatar-skeleton {
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, rgba(0,0,0,0.08), rgba(0,0,0,0.16), rgba(0,0,0,0.08));
+    background-size: 200% 100%;
+    animation: shimmer 1.2s infinite;
+  }
+}
+
+.dropdown-menu {
+  position: absolute;
+  right: 0; top: calc(100% + 8px);
+  min-width: 280px;
+  background: var(--card-background);          /* 🟢 */
+  color: var(--text-color);                    /* 🟢 */
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--box-shadow);
+  padding: 8px;
+}
+
+.dropdown-header {
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  gap: 12px; padding: 10px 12px 6px;
+
+  .dropdown-avatar {
+    width: 48px; height: 48px; border-radius: 999px; object-fit: cover;
+    &.fallback {
+      display: grid; place-items: center;
+      background: rgba(var(--accent-color-rgb), 0.12);   /* 🟢 */
+      color: var(--accent-color);                        /* 🟢 */
+      font-weight: 700;
     }
   }
 
-  .user-profile {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
+  .dropdown-name { font-weight: 800; }
+  .dropdown-email { opacity: 0.8; font-size: 0.92rem; }
+}
 
-    .user-avatar {
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 0;
-      img {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        object-fit: cover;
-      }
-    }
+/* Badge theo theme — tránh hard-code */
+.plan-badge {
+  margin-top: 6px;
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem; font-weight: 800;
+  background: rgba(var(--accent-color-rgb), 0.12);       /* 🟢 */
+  color: var(--accent-color);                            /* 🟢 */
+}
 
-    .dropdown-menu {
-      position: absolute;
-      top: calc(100% + 10px);
-      right: 0;
-      z-index: 1001;
-    //   transform: translateX(calc(-100% - 1rem));
-      transition: transform 0.3s ease-out;
-      background-color: var(--card-background);
-      border-radius: 5px;
-      box-shadow: 0 0px 8px var(--text-color);
-      display: flex;
-      flex-direction: column;
-      min-width: 150px;
-      overflow: hidden;
+/* Nếu vẫn muốn khác màu giữa các plan, map nhẹ theo theme */
+.plan-free       { opacity: 0.9; }
+.plan-pro        { background: rgba(0, 0, 0, 0.10); color: var(--text-color); }
+.plan-enterprise { background: rgba(var(--accent-color-rgb), 0.18); color: var(--accent-color); }
 
-      .dropdown-item {
-        padding: 10px 15px;
-        text-decoration: none;
-        color: var(--text-color);
-        background-color: transparent;
-        border: none;
-        width: 100%;
-        text-align: left;
-        cursor: pointer;
-        &:hover {
-          background-color: var(--bg-color);
-        }
-      }
-    }
-  }
+.dropdown-sep { margin: 6px 0; height: 1px; background: rgba(0,0,0,0.08); }
+
+.dropdown-item {
+  width: 100%; text-align: left;
+  background: transparent; border: none; cursor: pointer;
+  padding: 10px 12px; border-radius: 8px;
+  color: var(--text-color); text-decoration: none;
+  display: block;
+
+  &:hover { background: rgba(var(--accent-color-rgb), 0.10); }  /* 🟢 */
+  &.danger { color: var(--danger-color); }                      /* 🟢 */
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
