@@ -1,5 +1,5 @@
 // src/pages/AuthSuccess.tsx
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthContext } from '../contexts/AuthContext';
 import '../styles/auth-success.scss';
@@ -8,14 +8,23 @@ export default function AuthSuccess() {
   const navigate = useNavigate();
   const { loginWithToken } = useAuthContext();
 
+  // progress bar state
   const [progress, setProgress] = useState(0);
 
+  // refs để chống chạy lặp (StrictMode) & quản lý timer
+  const ranRef = useRef(false);
+  const tickRef = useRef<number | null>(null);
+  const timeoutRef = useRef<number | null>(null);
+
   useEffect(() => {
-    // lấy token từ query
+    if (ranRef.current) return;
+    ranRef.current = true;
+
     const params = new URLSearchParams(window.location.search);
     const token = params.get('token');
+    const returnTo = params.get('returnTo'); // tuỳ chọn: trang cần quay về
 
-    // tiện: hàm dọn sạch query (?token=...)
+    // dọn sạch query (?token=...&returnTo=...)
     const cleanUrl = () =>
       window.history.replaceState({}, document.title, window.location.pathname);
 
@@ -25,9 +34,9 @@ export default function AuthSuccess() {
       return;
     }
 
-    // tiến trình giả lập: tăng dần tới 90% trong lúc hydrate
+    // tăng progress dần tới 90% trong lúc hydrate
     let done = false;
-    const tick = setInterval(() => {
+    tickRef.current = window.setInterval(() => {
       setProgress((p) => {
         if (done) return p;
         const next = p + 2;
@@ -37,21 +46,33 @@ export default function AuthSuccess() {
 
     (async () => {
       try {
-        await loginWithToken(token); // ⬅️ lưu token + gọi /auth/me để hydrate
+        await loginWithToken(token); // Lưu token + gọi /auth/me
         done = true;
         setProgress(100);
         cleanUrl();
-        // chờ nhẹ để người dùng thấy 100%, rồi về trang chủ
-        setTimeout(() => navigate('/', { replace: true }), 220);
+
+        // chờ nhẹ để người dùng thấy 100%, sau đó điều hướng
+        const target = returnTo && returnTo.startsWith('/') ? returnTo : '/';
+        timeoutRef.current = window.setTimeout(
+          () => navigate(target, { replace: true }),
+          220
+        );
       } catch {
         cleanUrl();
         navigate('/auth/error?reason=hydrate_failed', { replace: true });
       } finally {
-        clearInterval(tick);
+        if (tickRef.current) {
+          clearInterval(tickRef.current);
+          tickRef.current = null;
+        }
       }
     })();
 
-    return () => clearInterval(tick);
+    // cleanup timers khi unmount
+    return () => {
+      if (tickRef.current) clearInterval(tickRef.current);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
   }, [loginWithToken, navigate]);
 
   return (
@@ -65,7 +86,7 @@ export default function AuthSuccess() {
         </div>
 
         <h1 className="title">Đăng nhập thành công</h1>
-        <p className="subtitle">Đang chuẩn bị đưa bạn về trang chủ Auratones 🎵</p>
+        <p className="subtitle">Đang chuẩn bị đưa bạn về Auratones 🎵</p>
 
         <div
           className="progress"

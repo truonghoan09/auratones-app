@@ -1,0 +1,28 @@
+/* Áp dụng font cho toàn app + form controls để tránh fallback */
+:root {
+  /* Đảm bảo biến này đã có sẵn trong _variables.scss; nếu chưa thì giữ ở đây */
+  --font-family-sans-serif: 'Be Vietnam Pro', Inter, Roboto, system-ui, -apple-system,
+    'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji',
+    'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
+}
+
+/* Nhiều browser không kế thừa font cho button/input → ép ở đây */
+html, body, button, input, select, textarea {
+  font-family: var(--font-family-sans-serif);
+  color: var(--text-color);
+  background-color: var(--background-color);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Nhẹ nhàng cho button để chữ sắc nét hơn */
+button {
+  letter-spacing: 0.2px;
+}
+
+/* Fallback nếu có framework khác định nghĩa .btn */
+.btn {
+  font-family: var(--font-family-sans-serif);
+  font-weight: 700; /* 700 an toàn hơn 800 trên Windows, nếu muốn 800 nhớ load weight 800 */
+}

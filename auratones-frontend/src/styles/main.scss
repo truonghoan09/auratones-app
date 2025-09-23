@@ -1,45 +1,45 @@
 // src/styles/main.scss
 
-// Import variables and mixins first
+// 1) Core trước
 @import 'variables';
 @import 'mixins';
+
+// 2) Base (font + smoothing + resets chung)
+@import 'base';
+
+// 3) Các phần global/tiện ích khác
 @import 'loading-modal';
 
-// Import component-specific styles
+// 4) Component/page styles
 @import 'auth';
 @import 'dashboard';
+// (tuỳ bạn) @import 'homepage'; // nếu muốn gom tại đây thay vì import riêng trong TSX
 
-
-// Global styles
+/* --- Global styles tối giản (đã cover ở _base.scss) --- */
 body {
   margin: 0;
   padding: 0;
-  font-family: var(--font-family-sans-serif); // Sử dụng biến CSS
-  color: var(--text-color); // Sử dụng biến CSS
-  background-color: var(--background-color); // Sử dụng biến CSS
 }
 
-// Global button reset (giữ nguyên)
+/* Reset appearance giữ lại */
 button {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
 }
 
-// Styles cho nút đổi theme trong App.tsx
+/* Styles cho nút đổi theme trong App.tsx (giữ nguyên) */
 .theme-toggle-btn {
   position: fixed;
   bottom: var(--spacing-md);
   right: var(--spacing-md);
   padding: var(--spacing-sm) var(--spacing-md);
   background-color: var(--primary-color);
-  color: var(--card-background); // Hoặc màu trắng
+  color: var(--card-background);
   border: none;
   border-radius: var(--border-radius-sm);
   cursor: pointer;
   z-index: 1000;
   box-shadow: var(--box-shadow);
-  &:hover {
-    filter: brightness(1.1);
-  }
+  &:hover { filter: brightness(1.1); }
 }

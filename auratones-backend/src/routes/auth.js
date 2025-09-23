@@ -15,64 +15,57 @@ const { FieldValue } = require('firebase-admin/firestore');
 const { checkR2, uploadFile, deleteFile, generateKey } = require('../config/r2');
 const { getAuthUrl, exchangeCodeForTokens, fetchUserInfo } = require('../config/google');
 
+// ---------- OAuth constants ----------
 const STATE_COOKIE = (process.env.OAUTH_STATE_COOKIE_NAME || 'auratones_oauth_state').trim();
-const SUCCESS_REDIRECT = (process.env.OAUTH_SUCCESS_REDIRECT || '').trim();
-const FAILURE_REDIRECT = (process.env.OAUTH_FAILURE_REDIRECT || '').trim();
+const SUCCESS_REDIRECT = (process.env.OAUTH_SUCCESS_REDIRECT || 'http://localhost:5173/auth/success').trim();
+const FAILURE_REDIRECT = (process.env.OAUTH_FAILURE_REDIRECT || 'http://localhost:5173/auth/error').trim();
 
-// --------------------------- Helpers ---------------------------
+// ============================================================================
+// Helpers
+// ============================================================================
 
-// Chuẩn hóa profile mặc định (để mở rộng tương lai dễ)
 function defaultProfile(overrides = {}) {
   return {
-    // định danh
+    // identity
     uid: null,
     email: null,
     username: null,
     displayName: null,
 
-    // liên kết nhà cung cấp (providers)
+    // providers
     providers: {
-      password: false,              // true nếu đã đặt password
-      google: { linked: false, sub: null }, // sub = Google subject id
+      password: false,
+      google: { linked: false, sub: null },
     },
 
-    // phân quyền & gói
-    role: 'user',                   // user | admin | ...
-    plan: 'free',                   // free | pro | enterprise ...
+    // roles / plan
+    role: 'user',
+    plan: 'free',
     subscription: {
-      status: 'inactive',           // inactive | active | past_due | canceled ...
+      status: 'inactive',
       renewAt: null,
     },
 
-    // quyền sử dụng / tài nguyên (tuỳ app)
+    // entitlements
     entitlements: {
-      // ví dụ: số slot sheet, số project tối đa, ...
       sheetSlots: 10,
       storageGB: 1,
     },
 
-    // thống kê & hành vi
-    storage: {
-      usedBytes: 0,
-    },
-    usage: {
-      lastActiveAt: null,
-      totalSessions: 0,
-    },
+    // telemetry
+    storage: { usedBytes: 0 },
+    usage: { lastActiveAt: null, totalSessions: 0 },
 
-    // hiển thị
+    // avatar
     avatarURL: null,
     avatarKey: null,
     photoURLOriginal: null,
     photoHash: null,
 
-    // cấu hình UI
-    settings: {
-      lang: 'vi',
-      theme: 'light',
-    },
+    // ui settings
+    settings: { lang: 'vi', theme: 'light' },
 
-    // mốc thời gian
+    // timestamps
     createdAt: FieldValue.serverTimestamp(),
     lastLogin: FieldValue.serverTimestamp(),
 
@@ -80,7 +73,6 @@ function defaultProfile(overrides = {}) {
   };
 }
 
-// Tạo JWT với claims hữu ích cho FE (nhẹ, đủ dùng UI gating)
 function signAppToken(user) {
   const claims = {
     uid: user.uid,
@@ -92,9 +84,15 @@ function signAppToken(user) {
   return jwt.sign(claims, secret, { expiresIn });
 }
 
-// Tải avatar Google, so sánh hash, upload R2 nếu thay đổi
+// Best-effort avatar sync to R2; never throw to break login flow
 async function ensureAvatarUpToDate(userRef, current, googlePhotoURL) {
-  if (!googlePhotoURL) return { avatarURL: current?.avatarURL || null, avatarKey: current?.avatarKey || null, photoHash: current?.photoHash || null };
+  if (!googlePhotoURL) {
+    return {
+      avatarURL: current?.avatarURL || null,
+      avatarKey: current?.avatarKey || null,
+      photoHash: current?.photoHash || null,
+    };
+  }
 
   const resp = await axios.get(googlePhotoURL, { responseType: 'arraybuffer' });
   const buffer = Buffer.from(resp.data);
@@ -111,11 +109,9 @@ async function ensureAvatarUpToDate(userRef, current, googlePhotoURL) {
 
   const key = generateKey('avatars', `${userRef.id}.jpg`);
   const url = await uploadFile(key, buffer, 'image/jpeg');
-
   return { avatarURL: url, avatarKey: key, photoHash: hash };
 }
 
-// Lấy user theo email (nếu có)
 async function findUserByEmail(email) {
   if (!email) return null;
   const q = await db.collection('users').where('email', '==', email).limit(1).get();
@@ -124,7 +120,6 @@ async function findUserByEmail(email) {
   return { id: doc.id, data: doc.data() };
 }
 
-// Lấy user theo username (nếu có)
 async function findUserByUsername(username) {
   if (!username) return null;
   const q = await db.collection('users').where('username', '==', username).limit(1).get();
@@ -133,29 +128,38 @@ async function findUserByUsername(username) {
   return { id: doc.id, data: doc.data() };
 }
 
-// ------------------------ Routes: Health ------------------------
+// ============================================================================
+// Health
+// ============================================================================
+
 router.get('/r2-health', async (_req, res) => {
   try {
     const result = await checkR2();
-    res.status(200).json({ status: 'ok', message: `Connected to R2 bucket: ${result.bucket}` });
+    return res.status(200).json({ status: 'ok', message: `Connected to R2 bucket: ${result.bucket}` });
   } catch (err) {
-    res.status(500).json({ status: 'error', message: err.message });
+    return res.status(500).json({ status: 'error', message: err.message });
   }
 });
 
-// ------------------------ Routes: Username Check ----------------
+// ============================================================================
+// Username check
+// ============================================================================
+
 router.get('/check-username', async (req, res) => {
   const { username } = req.query;
   if (!username) return res.status(400).json({ message: 'Username is required.' });
   try {
     const existed = await findUserByUsername(username);
-    res.status(200).json({ isUsernameTaken: Boolean(existed) });
+    return res.status(200).json({ isUsernameTaken: Boolean(existed) });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: error.message });
   }
 });
 
-// ------------------------ Routes: Register (username/password) --
+// ============================================================================
+// Register (username/password)
+// ============================================================================
+
 router.post('/register', async (req, res) => {
   const { username, password, email } = req.body;
   if (!username || !password) {
@@ -172,26 +176,20 @@ router.post('/register', async (req, res) => {
     }
 
     const hash = await bcrypt.hash(password, 12);
-    const userRef = db.collection('users').doc(); // tạo uid riêng (không dùng sub Google)
+    const userRef = db.collection('users').doc();
 
     const profile = defaultProfile({
       uid: userRef.id,
       username,
       email: email || null,
       displayName: username,
-      providers: {
-        password: true,
-        google: { linked: false, sub: null },
-      },
+      providers: { password: true, google: { linked: false, sub: null } },
     });
 
-    await userRef.set({
-      ...profile,
-      passwordHash: hash,
-    });
+    await userRef.set({ ...profile, passwordHash: hash });
 
     const token = signAppToken(profile);
-    res.status(201).json({
+    return res.status(201).json({
       message: 'User registered and logged in',
       token,
       user: {
@@ -205,11 +203,14 @@ router.post('/register', async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: error.message });
   }
 });
 
-// ------------------------ Routes: Login (username/password) -----
+// ============================================================================
+// Login (username/password)
+// ============================================================================
+
 router.post('/login', async (req, res) => {
   const { username, password } = req.body;
   if (!username || !password) return res.status(400).json({ message: 'Username and password are required.' });
@@ -219,15 +220,20 @@ router.post('/login', async (req, res) => {
     if (!found) return res.status(404).json({ message: 'User not found.' });
 
     const user = found.data;
-    if (!user.passwordHash) return res.status(400).json({ message: 'This account has no password. Please login with Google or set a password.' });
+    if (!user.passwordHash) {
+      return res.status(400).json({ message: 'This account has no password. Please login with Google or set a password.' });
+    }
 
     const ok = await bcrypt.compare(password, user.passwordHash);
     if (!ok) return res.status(401).json({ message: 'Incorrect password.' });
 
-    await db.collection('users').doc(found.id).set({ lastLogin: FieldValue.serverTimestamp(), 'usage.totalSessions': (user.usage?.totalSessions || 0) + 1 }, { merge: true });
+    await db.collection('users').doc(found.id).set({
+      lastLogin: FieldValue.serverTimestamp(),
+      'usage.totalSessions': (user.usage?.totalSessions || 0) + 1,
+    }, { merge: true });
 
     const token = signAppToken({ ...user, uid: found.id });
-    res.status(200).json({
+    return res.status(200).json({
       message: 'Login successful',
       token,
       user: {
@@ -241,12 +247,15 @@ router.post('/login', async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: error.message });
   }
 });
 
-// ------------------------ Routes: Google OAuth (server-side) ----
-router.get('/google', (req, res) => {
+// ============================================================================
+// Google OAuth (server-side)
+// ============================================================================
+
+router.get('/google', (_req, res) => {
   const state = crypto.randomBytes(12).toString('hex');
   res.cookie(STATE_COOKIE, state, {
     httpOnly: true,
@@ -260,103 +269,113 @@ router.get('/google', (req, res) => {
 
 router.get('/google/callback', async (req, res) => {
   try {
-    const { code, state } = req.query;
+    const { code, state, error } = req.query;
+
+    if (error) {
+      const reason = encodeURIComponent(String(error));
+      return res.redirect(`${FAILURE_REDIRECT}?reason=google_${reason}`);
+    }
+
     const saved = req.cookies ? req.cookies[STATE_COOKIE] : null;
-    if (!code || !state || !saved || state !== saved) throw new Error('Invalid OAuth state');
+    if (!code || !state || !saved || state !== saved) {
+      return res.redirect(`${FAILURE_REDIRECT}?reason=state_mismatch`);
+    }
     res.clearCookie(STATE_COOKIE);
 
-    // 1) Đổi code lấy tokens
-    const tokens = await exchangeCodeForTokens(code.toString());
-    if (!tokens.access_token) throw new Error('No access token from Google');
+    // 1) Exchange code -> tokens
+    let tokens;
+    try {
+      tokens = await exchangeCodeForTokens(code.toString());
+    } catch {
+      return res.redirect(`${FAILURE_REDIRECT}?reason=exchange_failed`);
+    }
+    if (!tokens.access_token) {
+      return res.redirect(`${FAILURE_REDIRECT}?reason=no_access_token`);
+    }
 
-    // 2) Lấy user info từ Google
-    const info = await fetchUserInfo(tokens.access_token);
+    // 2) Fetch Google user info
+    let info;
+    try {
+      info = await fetchUserInfo(tokens.access_token);
+    } catch {
+      return res.redirect(`${FAILURE_REDIRECT}?reason=userinfo_failed`);
+    }
+
     const googleSub = info.sub;
     const email = info.email || null;
     const displayName = info.name || null;
     const googlePhotoURL = info.picture || null;
 
-    // 3) Xác định user chính (merge theo email nếu có)
-    let userDocId = null;
-    let userData = null;
-
-    // Ưu tiên: user theo email (nếu đã đăng ký username trước đó cùng email)
+    // 3) Pick or create user (merge by email if exists)
+    let userDocId, userData;
     const byEmail = await findUserByEmail(email);
     if (byEmail) {
       userDocId = byEmail.id;
       userData = byEmail.data;
     } else {
-      // Không có email trùng → tạo user mới
       const newRef = db.collection('users').doc();
       userDocId = newRef.id;
       userData = defaultProfile({
         uid: userDocId,
         email,
         displayName,
-        providers: {
-          password: false,
-          google: { linked: true, sub: googleSub },
-        },
+        providers: { password: false, google: { linked: true, sub: googleSub } },
       });
       await newRef.set(userData);
     }
 
-    // 4) Đồng bộ avatar về R2 (nếu thay đổi)
+    // 4) Best-effort avatar sync (never fail login)
     const userRef = db.collection('users').doc(userDocId);
     const currentSnap = await userRef.get();
     const current = currentSnap.exists ? currentSnap.data() : {};
-    const { avatarURL, avatarKey, photoHash } = await ensureAvatarUpToDate(userRef, current, googlePhotoURL);
 
-    // 5) Cập nhật hồ sơ: đánh dấu đã liên kết Google
+    let avatarURL  = current?.avatarURL || null;
+    let avatarKey  = current?.avatarKey || null;
+    let photoHash  = current?.photoHash || null;
+
+    try {
+      const r = await ensureAvatarUpToDate(userRef, current, googlePhotoURL);
+      avatarURL = r.avatarURL;
+      avatarKey = r.avatarKey;
+      photoHash = r.photoHash;
+    } catch (e) {
+      // fallback: use Google's direct url
+      avatarURL = googlePhotoURL || avatarURL;
+    }
+
+    // 5) Update profile (do not override other provider flags)
     await userRef.set({
       email: email || current.email || null,
       displayName: displayName || current.displayName || null,
-      providers: {
-        ...(current.providers || {}),
-        google: { linked: true, sub: googleSub },
-        password: Boolean(current.passwordHash), // giữ nguyên trạng thái password
-      },
+      'providers.google': { linked: true, sub: googleSub },
+      'providers.password': Boolean(current.passwordHash),
       photoURLOriginal: googlePhotoURL || current.photoURLOriginal || null,
-      avatarURL: avatarURL || current.avatarURL || null,
-      avatarKey: avatarKey || current.avatarKey || null,
-      photoHash: photoHash || current.photoHash || null,
+      avatarURL,
+      avatarKey,
+      photoHash,
       lastLogin: FieldValue.serverTimestamp(),
     }, { merge: true });
 
-    // 6) Cấp JWT
+    // 6) Issue JWT & redirect
     const freshSnap = await userRef.get();
     const mergedUser = freshSnap.data();
     const token = signAppToken({ ...mergedUser, uid: userDocId });
 
-    if (SUCCESS_REDIRECT) {
-      const url = new URL(SUCCESS_REDIRECT);
-      url.searchParams.set('token', token);
-      url.searchParams.set('uid', userDocId);
-      return res.redirect(url.toString());
-    }
-    return res.json({
-      message: 'Google login successful',
-      token,
-      user: {
-        uid: userDocId,
-        username: mergedUser.username || null,
-        email: mergedUser.email || null,
-        displayName: mergedUser.displayName || null,
-        role: mergedUser.role || 'user',
-        plan: mergedUser.plan || 'free',
-        avatar: mergedUser.avatarURL || null,
-      },
-    });
+    const url = new URL(SUCCESS_REDIRECT);
+    url.searchParams.set('token', token);
+    url.searchParams.set('uid', userDocId);
+    return res.redirect(url.toString());
   } catch (err) {
-    console.error('Google login error:', err);
-    if (FAILURE_REDIRECT) return res.redirect(FAILURE_REDIRECT);
-    res.status(500).json({ message: err.message });
+    const reason = encodeURIComponent(err?.message || 'unknown');
+    return res.redirect(`${FAILURE_REDIRECT}?reason=${reason}`);
   }
 });
 
-// ------------------------ Routes: Linking & Profile Ops ----------
+// ============================================================================
+// Linking & Profile Ops
+// ============================================================================
 
-// Đặt/đổi password cho tài khoản đã đăng nhập (kể cả gốc Google)
+// Set / change password for logged-in account (even if originally Google)
 router.post('/link/set-password', authMiddleware, async (req, res) => {
   const { newPassword } = req.body;
   if (!newPassword || newPassword.length < 6) {
@@ -367,16 +386,16 @@ router.post('/link/set-password', authMiddleware, async (req, res) => {
     const ref = db.collection('users').doc(req.user.uid);
     await ref.set({
       passwordHash: hash,
-      providers: { password: true },
+      'providers.password': true, // do not override providers.google
     }, { merge: true });
 
-    res.json({ message: 'Password set successfully.' });
+    return res.json({ message: 'Password set successfully.' });
   } catch (e) {
-    res.status(500).json({ message: e.message });
+    return res.status(500).json({ message: e.message });
   }
 });
 
-// Đặt username (sau khi login bằng Google, để có username riêng)
+// Set username after Google login (or change it)
 router.post('/link/set-username', authMiddleware, async (req, res) => {
   const { username } = req.body;
   if (!username) return res.status(400).json({ message: 'Username is required.' });
@@ -386,44 +405,45 @@ router.post('/link/set-username', authMiddleware, async (req, res) => {
     if (existed && existed.id !== req.user.uid) {
       return res.status(409).json({ message: 'Username already taken.' });
     }
-    const ref = db.collection('users').doc(req.user.uid);
-    await ref.set({ username }, { merge: true });
-    res.json({ message: 'Username set successfully.' });
+    await db.collection('users').doc(req.user.uid).set({ username }, { merge: true });
+    return res.json({ message: 'Username set successfully.' });
   } catch (e) {
-    res.status(500).json({ message: e.message });
+    return res.status(500).json({ message: e.message });
   }
 });
 
-// Cập nhật các trường hồ sơ (role/plan/settings/entitlements...) — có thể thêm authz riêng
+// Update profile (whitelisted fields)
 router.post('/profile', authMiddleware, async (req, res) => {
   try {
     const allowed = ['displayName', 'settings', 'subscription', 'entitlements', 'plan'];
     const patch = {};
-    for (const k of allowed) {
-      if (req.body[k] !== undefined) patch[k] = req.body[k];
-    }
+    for (const k of allowed) if (req.body[k] !== undefined) patch[k] = req.body[k];
     if (Object.keys(patch).length === 0) return res.status(400).json({ message: 'Nothing to update.' });
 
     await db.collection('users').doc(req.user.uid).set(patch, { merge: true });
-    res.json({ message: 'Profile updated.' });
+    return res.json({ message: 'Profile updated.' });
   } catch (e) {
-    res.status(500).json({ message: e.message });
+    return res.status(500).json({ message: e.message });
   }
 });
 
-// ------------------------ Routes: Me ------------------------------
+// ============================================================================
+// Me
+// ============================================================================
+
 router.get('/me', authMiddleware, async (req, res) => {
   try {
     const snap = await db.collection('users').doc(req.user.uid).get();
     if (!snap.exists) return res.status(404).json({ message: 'User not found.' });
-    const d = snap.data();
+    const d = snap.data() || {};
 
-    res.json({
+    return res.json({
       uid: req.user.uid,
       username: d.username || null,
       email: d.email || null,
       displayName: d.displayName || d.username || null,
-      avatar: d.avatarURL || null,
+      // prefer normalized avatar field; fallback to any legacy field
+      avatar: d.avatarURL || d.photoURL || null,
 
       role: d.role || 'user',
       plan: d.plan || 'free',
@@ -437,14 +457,14 @@ router.get('/me', authMiddleware, async (req, res) => {
       settings: d.settings || { lang: 'vi', theme: 'light' },
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: error.message });
   }
 });
 
-// ------------------------ Routes: Logout -------------------------
-router.post('/logout', (_req, res) => {
-  // Nếu sau này dùng cookie HttpOnly -> clear ở đây
-  res.status(200).json({ message: 'Logged out' });
-});
+// ============================================================================
+// Logout (stateless JWT -> client just drops the token)
+// ============================================================================
+
+router.post('/logout', (_req, res) => res.status(200).json({ message: 'Logged out' }));
 
 module.exports = router;
