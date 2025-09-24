@@ -4,6 +4,7 @@ import { Routes, Route } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import AuthSuccess from './pages/AuthSuccess';
 import AuthError from './pages/AuthError';
+import ChordsPage from './pages/ChordsPage';
 
 interface AppRoutesProps {
   onLoginClick: () => void;
@@ -22,6 +23,7 @@ const AppRoutes: React.FC<AppRoutesProps> = ({ onLoginClick, onLogout }) => {
           />
         }
       />
+      <Route path="/chords" element={<ChordsPage />} />
       <Route path="/auth/success" element={<AuthSuccess />} />
       <Route path="/auth/error" element={<AuthError />} />
       {/* Thêm các route khác của bạn ở đây */}

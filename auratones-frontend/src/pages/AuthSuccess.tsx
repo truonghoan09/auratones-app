@@ -1,96 +1,107 @@
-import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+// src/pages/AuthSuccess.tsx
+
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAuthContext } from '../contexts/AuthContext';
 import '../styles/auth-intents.scss';
 
 export default function AuthSuccess() {
   const { loginWithToken } = useAuthContext();
-  const navigate = useNavigate();
-
   const [progress, setProgress] = useState(0);
 
-  // chống rerun + setState sau unmount
   const startedRef = useRef(false);
   const aliveRef = useRef(true);
 
-  // giữ bản ổn định cho effect []
-  const loginRef = useRef(loginWithToken);
-  useEffect(() => { loginRef.current = loginWithToken; }, [loginWithToken]);
+  // confetti random: vị trí, delay, duration, xoay, scale
+  const confetti = useMemo(
+    () =>
+      Array.from({ length: 18 }).map(() => ({
+        left: 5 + Math.random() * 90,       // 5% → 95%
+        delay: Math.random() * 0.9,         // 0s → 0.9s
+        dur: 1.5 + Math.random() * 1.6,     // 1.5s → 3.1s
+        rot: Math.floor(Math.random() * 360),
+        scale: 0.8 + Math.random() * 0.6,   // 0.8 → 1.4
+      })),
+    []
+  );
 
-  const navRef = useRef(navigate);
-  useEffect(() => { navRef.current = navigate; }, [navigate]);
-
-  // tiện: gom tất cả cách quay về home
-  const goHome = useRef(() => {
-    try { navRef.current('/', { replace: true }); } catch {}
-    // 3 lớp fallback cứng
-    setTimeout(() => { try { window.location.assign('/'); } catch {} }, 180);
-    setTimeout(() => { try { window.location.replace('/'); } catch {} }, 700);
-    setTimeout(() => { (window.location as any).href = '/'; }, 1400);
-  }).current;
-
-  useEffect(() => () => { aliveRef.current = false; }, []);
+  useEffect(() => {
+    return () => {
+      aliveRef.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (startedRef.current) return;
     startedRef.current = true;
 
+    console.log('[auth-success] init', window.location.href);
+
     const params = new URLSearchParams(window.location.search);
     const token = params.get('token');
 
     const cleanUrl = () => {
-      try {
-        const url = new URL(window.location.href);
-        url.searchParams.delete('token');
-        window.history.replaceState({}, document.title, url.pathname + (url.search || ''));
-      } catch {}
+      const url = new URL(window.location.href);
+      url.searchParams.delete('token');
+      window.history.replaceState({}, document.title, url.pathname + url.search);
     };
 
     if (!token) {
+      console.warn('[auth-success] missing token');
       cleanUrl();
-      goHome(); // hoặc đẩy về /auth/error nếu bạn thích
+      window.location.replace('/auth/error?reason=missing_token');
       return;
     }
 
-    // progress animation ~0→90% khi hydrate
-    let startTs: number | null = null;
-    let rafId = 0;
-    const step = (t: number) => {
+    console.log('[auth-success] got token → start progress');
+    // chạy progress tới 95% trong lúc hydrate
+    let raf = 0;
+    const tick = () => {
       if (!aliveRef.current) return;
-      if (startTs == null) startTs = t;
-      const elapsed = t - startTs;
-      const pct = Math.min(0.9, 1 - Math.pow(1 - Math.min(elapsed / 1000, 1), 3));
-      setProgress(Math.floor(pct * 100));
-      rafId = requestAnimationFrame(step);
+      setProgress((p) => (p < 95 ? p + 1.8 : 95));
+      raf = requestAnimationFrame(tick);
     };
-    rafId = requestAnimationFrame(step);
+    raf = requestAnimationFrame(tick);
+
+    // Fallback an toàn: 5s vẫn chưa xong thì cứ về home (đã có overlay loading ở Home)
+    const fallback = window.setTimeout(() => {
+      if (!aliveRef.current) return;
+      console.warn('[auth-success] fallback redirect after 5s');
+      cleanUrl();
+      window.location.replace('/');
+    }, 5000);
+
+    let redirectTimer: number | undefined;
 
     (async () => {
       try {
-        await loginRef.current(token);       // lưu token + /auth/me
-        if (!aliveRef.current) return;
+        console.log('[auth-success] loginWithToken → begin');
+        await loginWithToken(token);
+        console.log('[auth-success] loginWithToken → done (token saved & /me hydrated)');
 
+        // if (!aliveRef.current) return;
         setProgress(100);
         cleanUrl();
 
-        // cho user kịp thấy 100% rồi rời trang
-        setTimeout(() => aliveRef.current && goHome(), 420);
-      } catch {
+        redirectTimer = window.setTimeout(() => {
+          console.log('[auth-success] redirect → /');
+          window.location.replace('/');
+        }, 2000); // để người dùng kịp thấy 100%
+      } catch (e) {
+        console.log('[auth-success] loginWithToken failed', e);
         cleanUrl();
-        goHome(); // hoặc window.location.replace('/auth/error?reason=hydrate_failed')
+        window.location.replace('/auth/error?reason=hydrate_failed');
       } finally {
-        if (rafId) cancelAnimationFrame(rafId);
+        if (raf) cancelAnimationFrame(raf);
       }
     })();
 
-    // watchdog: nếu vì lý do gì vẫn chưa rời trang thì ép rời
-    const watchdog = setTimeout(() => goHome(), 3000);
-
     return () => {
-      if (rafId) cancelAnimationFrame(rafId);
-      clearTimeout(watchdog);
+      if (raf) cancelAnimationFrame(raf);
+      if (redirectTimer) clearTimeout(redirectTimer);
+      clearTimeout(fallback);
+      console.log('[auth-success] cleanup');
     };
-  }, [goHome]);
+  }, [loginWithToken]);
 
   return (
     <div className="auth-success">
@@ -103,7 +114,7 @@ export default function AuthSuccess() {
         </div>
 
         <h1 className="title">Đăng nhập thành công</h1>
-        <p className="subtitle">Đang chuyển bạn về trang chủ Auratones 🎵</p>
+        <p className="subtitle">Đang chuẩn bị đưa bạn về trang chủ Auratones 🎵</p>
 
         <div
           className="progress"
@@ -115,14 +126,23 @@ export default function AuthSuccess() {
           <div className="bar" style={{ width: `${progress}%` }} />
         </div>
 
-        <button className="primary-btn" onClick={goHome}>
+        <button className="primary-btn" onClick={() => window.location.replace('/')}>
           Về trang chủ ngay
         </button>
       </div>
 
+      {/* confetti random (không dồn cục) */}
       <div className="confetti" aria-hidden="true">
-        {Array.from({ length: 14 }).map((_, i) => (
-          <span key={i} style={{ ['--d' as any]: `${i * 0.12}s` }} />
+        {confetti.map((c, i) => (
+          <span
+            key={i}
+            style={{
+              left: `${c.left}%`,
+              animationDelay: `${c.delay}s`,
+              animationDuration: `${c.dur}s`,
+              transform: `rotate(${c.rot}deg) scale(${c.scale})`,
+            }}
+          />
         ))}
       </div>
     </div>

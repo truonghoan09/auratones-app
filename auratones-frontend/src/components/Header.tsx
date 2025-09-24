@@ -86,7 +86,7 @@ const Header: React.FC<HeaderProps> = ({ onLoginClick, onLogout }) => {
                 // skeleton nhỏ khi đang hydrate
                 <span className="avatar-skeleton" aria-hidden="true" />
               ) : userAvatar ? (
-                <img src={userAvatar} alt="User Avatar" />
+                <img className='avatar-onheader' src={userAvatar} alt="User Avatar" />
               ) : (
                 <span className="avatar-fallback" aria-hidden="true">{initials}</span>
               )}

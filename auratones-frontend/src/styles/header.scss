@@ -75,14 +75,24 @@
 .user-avatar {
   position: relative;
   width: 40px; height: 40px;
-  border-radius: 999px;
+  flex-shrink: 0;
+  border-radius: 50%;
   overflow: hidden;
-  border: 2px solid rgba(var(--accent-color-rgb), 0.25); /* 🟢 */
-  background: rgba(var(--accent-color-rgb), 0.08);       /* 🟢 */
-  display: grid; place-items: center;
+  padding: 0;                // tránh đệm làm hụt ảnh
+  border: 0;                 // ring sẽ dùng box-shadow
+  background: transparent;
+  display: inline-grid; place-items: center;
   cursor: pointer;
+  box-shadow: 0 0 0 1px rgb(var(--accent-color-rgb));
 
-  img { width: 100%; height: 100%; object-fit: cover; }
+  img { 
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;       // fill đủ
+    border-radius: inherit;  // tròn theo wrapper
+    transform: translateZ(0); // fix vài case blur nhẹ
+  }
 
   .avatar-fallback {
     font-weight: 700; font-size: 0.9rem;
