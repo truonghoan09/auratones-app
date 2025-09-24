@@ -11,6 +11,8 @@
   --spacing-md: 16px;
   --spacing-xl: 32px;
   --danger-color: #d32f2f;
+  --positive-color: #2e7d32;
+  --positive-color-rgb: 46, 125, 50;
 }
 
 // Default Theme (light)
@@ -22,6 +24,8 @@
   --card-background: #ffffff; // Nền trắng cho form
   --accent-color: #3b7ad1; // Xanh dương cho nút
   --accent-color-rgb: 59, 122, 209;
+  --positive-color: #2e7d32;
+  --positive-color-rgb: 46, 125, 50;
 }
 
 // Dark Theme (màu tối)
@@ -33,6 +37,8 @@
   --card-background: #2b2b2b; // Nền xám đậm cho form
   --accent-color: #8c42c2; // Tím đậm cho nút
   --accent-color-rgb: 140, 66, 194;
+  --positive-color: #66bb6a;
+  --positive-color-rgb: 102, 187, 106;
 }
 
 // Green Theme
@@ -44,6 +50,8 @@
   --card-background: #f2fff3; // Nền xanh lá rất nhạt
   --accent-color: #4caf50; // Xanh lá nổi bật cho nút
   --accent-color-rgb: 76, 175, 80;
+  --positive-color: #2e7d32;
+  --positive-color-rgb: 46, 125, 50;
 }
 
 // Blue Theme
@@ -55,6 +63,8 @@
   --card-background: #e3f2fd; // Tông xanh dương nhạt hơn
   --accent-color: #1e88e5; // Xanh dương nổi bật
   --accent-color-rgb: 30, 136, 229;
+  --positive-color: #2e7d32;
+  --positive-color-rgb: 46, 125, 50;
 }
 
 // Yellow Theme
@@ -66,4 +76,6 @@
   --card-background: #fffbd4; // Tông vàng nhạt hơn
   --accent-color: #fbc02d;      // Vàng nổi bật cho nút
   --accent-color-rgb: 251, 192, 45;
+  --positive-color: #43a047;
+  --positive-color-rgb: 67, 160, 71;
 }

@@ -1,30 +1,29 @@
-// src/contexts/AuthContext.tsx
 import {
   createContext,
   useContext,
-  useState,
-  useMemo,
   useEffect,
+  useMemo,
+  useRef,
+  useState,
   useCallback,
   type ReactNode,
 } from 'react';
 import { jwtDecode } from 'jwt-decode';
 
-// ===================== Types =====================
+// ==== Types ====
 export type AuthUser = {
   uid: string;
   username?: string | null;
   email?: string | null;
   displayName?: string | null;
   avatar?: string | null;
-  role?: string;                 // 'user' | 'admin' | ...
-  plan?: string;                 // 'free' | 'pro' | ...
+  role?: string;
+  plan?: string;
   subscription?: { status?: string | null; renewAt?: string | null } | null;
   entitlements?: Record<string, unknown> | null;
   storage?: { usedBytes?: number } | null;
   usage?: { lastActiveAt?: string | null; totalSessions?: number } | null;
   settings?: Record<string, unknown> | null;
-  // mở rộng thoải mái về sau
   [k: string]: unknown;
 };
 
@@ -34,49 +33,41 @@ type JWTPayload = {
   email?: string;
   role?: string;
   plan?: string;
-  exp?: number; // giây kể từ epoch
+  exp?: number;
   iat?: number;
   [k: string]: unknown;
 };
 
 type AuthContextType = {
-  // state chính
   isAuthenticated: boolean;
   isLoading: boolean;
   user: AuthUser | null;
 
-  // helpers
   getToken: () => string;
-  loginWithToken: (token: string) => Promise<void>; // lưu token + hydrate /me
-  refreshMe: () => Promise<void>;                   // gọi lại /auth/me
-  logout: () => void;                               // xoá token + clear state
+  loginWithToken: (token: string) => Promise<void>;
+  logout: () => void;
+  refreshMe: () => Promise<void>;
 
-  // 🧯 tương thích cũ
+  // giữ tương thích
   setIsAuthenticated: (v: boolean) => void;
-
-  // 🧯 tương thích cũ: avatar + setter
   userAvatar: string | null;
   setUserAvatar: (v: string | null) => void;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// ===================== ENV (Vite) =====================
-const API_BASE = (import.meta.env.VITE_API_BASE as string) || 'http://localhost:3001/api';
+// ==== ENV (Vite) ====
+const API_BASE = import.meta.env.VITE_API_BASE as string;
 const TOKEN_KEY =
   (import.meta.env.VITE_TOKEN_STORAGE_KEY as string) || 'auratones_token';
 
-// ===================== Token helpers =====================
-const getStoredToken = () => localStorage.getItem(TOKEN_KEY);
-const setStoredToken = (t: string) => localStorage.setItem(TOKEN_KEY, t);
-const clearStoredToken = () => localStorage.removeItem(TOKEN_KEY);
+// ==== Helpers ====
+const getStoredToken = () => localStorage.getItem(TOKEN_KEY) || '';
 
-// Kiểm tra token hết hạn (dựa vào exp). Nếu token lỗi format → coi như hết hạn.
-const isTokenExpired = (token: string | null) => {
-  if (!token) return true;
+const isTokenExpired = (token: string) => {
   try {
     const payload = jwtDecode<JWTPayload>(token);
-    if (!payload?.exp) return false; // không có exp thì coi như còn hạn
+    if (!payload?.exp) return false;
     const nowSec = Math.floor(Date.now() / 1000);
     return payload.exp <= nowSec;
   } catch {
@@ -84,92 +75,136 @@ const isTokenExpired = (token: string | null) => {
   }
 };
 
-// ===================== Provider =====================
+// ==== Provider ====
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [isAuthenticated, setIsAuthenticatedState] = useState<boolean>(Boolean(getStoredToken()));
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isAuthenticated, setIsAuthenticatedState] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<AuthUser | null>(null);
 
-  // userAvatar suy ra từ user; vẫn expose setter để tương thích với code hiện tại
+  // avatar suy từ user (giữ setter để tương thích)
   const userAvatar = user?.avatar ?? null;
   const setUserAvatar = useCallback((v: string | null) => {
     setUser((prev) => (prev ? { ...prev, avatar: v ?? null } : prev));
   }, []);
 
-  // setter tương thích cũ (ưu tiên dùng loginWithToken/logout thay vì gọi trực tiếp)
-  const setIsAuthenticated = useCallback((v: boolean) => {
-    setIsAuthenticatedState(v);
-  }, []);
-
-  // Lấy token hiện tại (string rỗng nếu không có)
-  const getToken = useCallback(() => getStoredToken() || '', []);
-
-  // Gọi /auth/me để hydrate user (an toàn: tự xử lý 401 & clear token)
-  const refreshMe = useCallback(async () => {
-    const token = getStoredToken();
-    if (isTokenExpired(token)) {
-      clearStoredToken();
-      setUser(null);
-      setIsAuthenticatedState(false);
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      const res = await fetch(`${API_BASE}/auth/me`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        credentials: 'omit',
-      });
-
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data: AuthUser = await res.json();
-
-      setUser(data);
-      setIsAuthenticatedState(true);
-    } catch {
-      // token không hợp lệ / hết hạn / lỗi mạng → đăng xuất cục bộ
-      clearStoredToken();
-      setUser(null);
-      setIsAuthenticatedState(false);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  // Lưu token & hydrate ngay
-  const loginWithToken = useCallback(
-    async (token: string) => {
-      setStoredToken(token);
-      await refreshMe(); // đọc /auth/me sau khi lưu token
-    },
-    [refreshMe]
+  // setter tương thích (ưu tiên dùng loginWithToken/logout)
+  const setIsAuthenticated = useCallback(
+    (v: boolean) => setIsAuthenticatedState(v),
+    []
   );
 
-  // Xoá token & clear state (stateless JWT)
-  const logout = useCallback(() => {
-    clearStoredToken();
-    setUser(null);
-    setIsAuthenticatedState(false);
-  }, []);
+  // token reader ổn định
+  const getToken = useCallback(() => getStoredToken(), []);
 
-  // Bootstrap khi app mount: nếu có token và chưa hết hạn → hydrate
+  // dedupe / throttle cho /auth/me
+  const meInFlight = useRef<Promise<void> | null>(null);
+  const lastMeAt = useRef(0);
+
+const refreshMe = useCallback(async () => {
+  const token = getToken();
+  if (!token) {
+    console.debug('[auth] refreshMe: no token → clear state');
+    setUser(null);
+    setIsAuthenticated(false);
+    return;
+  }
+
+  const now = Date.now();
+
+  // ⏱️ throttle 2s: nếu vừa gọi xong và vẫn còn promise đang bay → reuse
+  if (now - lastMeAt.current < 2000 && meInFlight.current) {
+    console.debug('[auth] refreshMe: throttled → awaiting inflight');
+    await meInFlight.current;
+    return;
+  }
+
+  // 🔁 dedupe: đã có request đang bay → reuse
+  if (meInFlight.current) {
+    console.debug('[auth] refreshMe: inflight exists → awaiting');
+    await meInFlight.current;
+    return;
+  }
+
+  lastMeAt.current = now;
+  setIsLoading(true);
+
+  // 🛟 safety timer: nếu vì lý do gì finally không chạy, vẫn tắt loading
+  let safetyId: number | undefined;
+  const t0 = performance.now();
+
+  const job = (async () => {
+    try {
+      safetyId = window.setTimeout(() => {
+        console.warn('[auth] refreshMe: safety timeout fired (10s) → clearing loading');
+        setIsLoading(false);
+        meInFlight.current = null;
+      }, 10_000);
+
+      console.debug('[auth] refreshMe: GET /auth/me start');
+      const res = await fetch(`${API_BASE}/auth/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      console.debug(
+        `[auth] refreshMe: /auth/me status=${res.status} in ${(performance.now() - t0).toFixed(0)}ms`
+      );
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+      const data: AuthUser = await res.json();
+      setUser(data);
+      setIsAuthenticated(true);
+      console.debug('[auth] refreshMe: success → user hydrated');
+    } catch (e) {
+      console.warn('[auth] refreshMe: failed → clearing token', e);
+      localStorage.removeItem(TOKEN_KEY);
+      setUser(null);
+      setIsAuthenticated(false);
+    } finally {
+      if (safetyId) clearTimeout(safetyId);
+      setIsLoading(false);
+      meInFlight.current = null;
+      console.debug('[auth] refreshMe: cleanup done');
+    }
+  })();
+
+  meInFlight.current = job;
+  await job; // cho ai gọi trực tiếp có thể await
+}, [getToken, setIsAuthenticated]);
+
+  const loginWithToken = useCallback(
+    async (token: string) => {
+      localStorage.setItem(TOKEN_KEY, token);
+      setIsAuthenticated(true);
+      await refreshMe();
+    },
+    [refreshMe, setIsAuthenticated]
+  );
+
+  const logout = useCallback(() => {
+    localStorage.removeItem(TOKEN_KEY);
+    setUser(null);
+    setIsAuthenticated(false);
+  }, [setIsAuthenticated]);
+
+  // Bootstrap (chạy đúng 1 lần trong StrictMode)
+  const bootstrappedRef = useRef(false);
   useEffect(() => {
+    if (bootstrappedRef.current) return;
+    bootstrappedRef.current = true;
+
     const token = getStoredToken();
-    if (isTokenExpired(token)) {
-      clearStoredToken();
+    if (!token || isTokenExpired(token)) {
+      if (token) localStorage.removeItem(TOKEN_KEY);
       setUser(null);
       setIsAuthenticatedState(false);
+      setIsLoading(false);
       return;
     }
-    // token còn hạn → load profile
     refreshMe();
   }, [refreshMe]);
 
-  const value: AuthContextType = useMemo(
+  const value = useMemo(
     () => ({
       isAuthenticated,
       isLoading,
@@ -177,21 +212,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       getToken,
       loginWithToken,
-      refreshMe,
       logout,
+      refreshMe,
 
-      // tương thích
       setIsAuthenticated,
       userAvatar,
       setUserAvatar,
     }),
-    [isAuthenticated, isLoading, user, getToken, loginWithToken, refreshMe, logout, setIsAuthenticated, userAvatar, setUserAvatar]
+    [
+      isAuthenticated,
+      isLoading,
+      user,
+      getToken,
+      loginWithToken,
+      logout,
+      refreshMe,
+      setIsAuthenticated,
+      userAvatar,
+      setUserAvatar,
+    ]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-// ===================== Hook =====================
+// ==== Hook ====
 export function useAuthContext() {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error('useAuthContext must be used within AuthProvider');

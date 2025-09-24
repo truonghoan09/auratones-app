@@ -15,6 +15,8 @@
 @import 'dashboard';
 // (tuỳ bạn) @import 'homepage'; // nếu muốn gom tại đây thay vì import riêng trong TSX
 
+@import 'auth-intents'; 
+
 /* --- Global styles tối giản (đã cover ở _base.scss) --- */
 body {
   margin: 0;

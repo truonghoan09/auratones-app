@@ -1,79 +1,96 @@
-// src/pages/AuthSuccess.tsx
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthContext } from '../contexts/AuthContext';
-import '../styles/auth-success.scss';
+import '../styles/auth-intents.scss';
 
 export default function AuthSuccess() {
-  const navigate = useNavigate();
   const { loginWithToken } = useAuthContext();
+  const navigate = useNavigate();
 
-  // progress bar state
   const [progress, setProgress] = useState(0);
 
-  // refs để chống chạy lặp (StrictMode) & quản lý timer
-  const ranRef = useRef(false);
-  const tickRef = useRef<number | null>(null);
-  const timeoutRef = useRef<number | null>(null);
+  // chống rerun + setState sau unmount
+  const startedRef = useRef(false);
+  const aliveRef = useRef(true);
+
+  // giữ bản ổn định cho effect []
+  const loginRef = useRef(loginWithToken);
+  useEffect(() => { loginRef.current = loginWithToken; }, [loginWithToken]);
+
+  const navRef = useRef(navigate);
+  useEffect(() => { navRef.current = navigate; }, [navigate]);
+
+  // tiện: gom tất cả cách quay về home
+  const goHome = useRef(() => {
+    try { navRef.current('/', { replace: true }); } catch {}
+    // 3 lớp fallback cứng
+    setTimeout(() => { try { window.location.assign('/'); } catch {} }, 180);
+    setTimeout(() => { try { window.location.replace('/'); } catch {} }, 700);
+    setTimeout(() => { (window.location as any).href = '/'; }, 1400);
+  }).current;
+
+  useEffect(() => () => { aliveRef.current = false; }, []);
 
   useEffect(() => {
-    if (ranRef.current) return;
-    ranRef.current = true;
+    if (startedRef.current) return;
+    startedRef.current = true;
 
     const params = new URLSearchParams(window.location.search);
     const token = params.get('token');
-    const returnTo = params.get('returnTo'); // tuỳ chọn: trang cần quay về
 
-    // dọn sạch query (?token=...&returnTo=...)
-    const cleanUrl = () =>
-      window.history.replaceState({}, document.title, window.location.pathname);
+    const cleanUrl = () => {
+      try {
+        const url = new URL(window.location.href);
+        url.searchParams.delete('token');
+        window.history.replaceState({}, document.title, url.pathname + (url.search || ''));
+      } catch {}
+    };
 
     if (!token) {
       cleanUrl();
-      navigate('/auth/error?reason=missing_token', { replace: true });
+      goHome(); // hoặc đẩy về /auth/error nếu bạn thích
       return;
     }
 
-    // tăng progress dần tới 90% trong lúc hydrate
-    let done = false;
-    tickRef.current = window.setInterval(() => {
-      setProgress((p) => {
-        if (done) return p;
-        const next = p + 2;
-        return next >= 90 ? 90 : next;
-      });
-    }, 40);
+    // progress animation ~0→90% khi hydrate
+    let startTs: number | null = null;
+    let rafId = 0;
+    const step = (t: number) => {
+      if (!aliveRef.current) return;
+      if (startTs == null) startTs = t;
+      const elapsed = t - startTs;
+      const pct = Math.min(0.9, 1 - Math.pow(1 - Math.min(elapsed / 1000, 1), 3));
+      setProgress(Math.floor(pct * 100));
+      rafId = requestAnimationFrame(step);
+    };
+    rafId = requestAnimationFrame(step);
 
     (async () => {
       try {
-        await loginWithToken(token); // Lưu token + gọi /auth/me
-        done = true;
+        await loginRef.current(token);       // lưu token + /auth/me
+        if (!aliveRef.current) return;
+
         setProgress(100);
         cleanUrl();
 
-        // chờ nhẹ để người dùng thấy 100%, sau đó điều hướng
-        const target = returnTo && returnTo.startsWith('/') ? returnTo : '/';
-        timeoutRef.current = window.setTimeout(
-          () => navigate(target, { replace: true }),
-          220
-        );
+        // cho user kịp thấy 100% rồi rời trang
+        setTimeout(() => aliveRef.current && goHome(), 420);
       } catch {
         cleanUrl();
-        navigate('/auth/error?reason=hydrate_failed', { replace: true });
+        goHome(); // hoặc window.location.replace('/auth/error?reason=hydrate_failed')
       } finally {
-        if (tickRef.current) {
-          clearInterval(tickRef.current);
-          tickRef.current = null;
-        }
+        if (rafId) cancelAnimationFrame(rafId);
       }
     })();
 
-    // cleanup timers khi unmount
+    // watchdog: nếu vì lý do gì vẫn chưa rời trang thì ép rời
+    const watchdog = setTimeout(() => goHome(), 3000);
+
     return () => {
-      if (tickRef.current) clearInterval(tickRef.current);
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      if (rafId) cancelAnimationFrame(rafId);
+      clearTimeout(watchdog);
     };
-  }, [loginWithToken, navigate]);
+  }, [goHome]);
 
   return (
     <div className="auth-success">
@@ -86,7 +103,7 @@ export default function AuthSuccess() {
         </div>
 
         <h1 className="title">Đăng nhập thành công</h1>
-        <p className="subtitle">Đang chuẩn bị đưa bạn về Auratones 🎵</p>
+        <p className="subtitle">Đang chuyển bạn về trang chủ Auratones 🎵</p>
 
         <div
           className="progress"
@@ -98,12 +115,11 @@ export default function AuthSuccess() {
           <div className="bar" style={{ width: `${progress}%` }} />
         </div>
 
-        <button className="primary-btn" onClick={() => navigate('/', { replace: true })}>
+        <button className="primary-btn" onClick={goHome}>
           Về trang chủ ngay
         </button>
       </div>
 
-      {/* confetti nhẹ nhàng */}
       <div className="confetti" aria-hidden="true">
         {Array.from({ length: 14 }).map((_, i) => (
           <span key={i} style={{ ['--d' as any]: `${i * 0.12}s` }} />

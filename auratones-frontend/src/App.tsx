@@ -10,11 +10,9 @@ import { useModal } from './hooks/useModal';
 import LoadingModal from './components/LoadingModal';
 import Auth from './components/Auth';
 import { AuthProvider, useAuthContext } from './contexts/AuthContext';
-import { useUserProfile } from './hooks/useUserProfile';
 import { I18nProvider } from './contexts/I18nContext';
 
 const AppContent = () => {
-    useUserProfile();
     const { theme } = useTheme();
     const { message, type, showToast, hideToast } = useToast();
     const { showModal, isClosing, handleOpenModal, handleCloseModal } = useModal();
@@ -23,29 +21,20 @@ const AppContent = () => {
 
     return (
         <div className={`app-container ${theme}`}>
-            {isLoading ? (
-                <LoadingModal isOpen={true} />
-            ) : (
-                <AppRoutes
-                    onLoginClick={handleOpenModal}
-                    onLogout={handleLogout}
-                />
-            )}
+      {/* ✅ luôn render routes */}
+      <AppRoutes onLoginClick={handleOpenModal} onLogout={handleLogout} />
 
-            {showModal && (
-                <div
-                    className={`auth-modal-overlay ${isClosing ? 'fade-out' : ''}`}
-                >
-                    <Auth
-                        showToast={showToast}
-                        isModal={true}
-                        onClose={handleCloseModal}
-                    />
-                </div>
-            )}
+      {/* ✅ overlay loading, KHÔNG unmount routes */}
+      <LoadingModal isOpen={isLoading} />
 
-            {message && <Toast message={message} type={type} onClose={hideToast} />}
+      {showModal && (
+        <div className={`auth-modal-overlay ${isClosing ? 'fade-out' : ''}`}>
+          <Auth showToast={showToast} isModal={true} onClose={handleCloseModal} />
         </div>
+      )}
+
+      {message && <Toast message={message} type={type} onClose={hideToast} />}
+    </div>
     );
 };
 
