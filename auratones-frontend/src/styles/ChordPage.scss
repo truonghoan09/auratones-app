@@ -1,0 +1,21 @@
+/* src/styles/ChordPage.scss */
+.chord-page { padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+
+.toolbar { display: flex; gap: 12px; justify-content: space-between; align-items: center; }
+.toolbar .left, .toolbar .right { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+
+.seg {
+  display: inline-flex; border: 1px solid #ddd; border-radius: 10px; overflow: hidden; background: #fff;
+}
+.seg > * { padding: 6px 10px; border: none; background: transparent; cursor: pointer; font-weight: 600; }
+.seg > *.active { background: #111; color: #fff; }
+.seg select { border: none; padding: 6px 10px; }
+
+.search {
+  padding: 8px 10px; border-radius: 10px; border: 1px solid #ddd; min-width: 240px;
+}
+
+.grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px;
+}
+.cell { width: 100%; }

@@ -1,0 +1,61 @@
+/* src/styles/ChordDiagram.scss */
+.chord-diagram {
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+}
+
+.string-line { stroke: #111; }
+.fret-line   { stroke: #bdbdbd; stroke-width: 1; }
+.nut         { fill: #111; }
+
+.dot {
+  fill: #111;
+}
+.dot-label {
+  fill: #fff;
+  font-weight: 700;
+  font-size: 16px;
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+
+.fret-number {
+  fill: #111;
+  font-size: 14px;
+  font-weight: 600;
+  text-anchor: middle;
+}
+
+.chord-name {
+  fill: #111;
+  font-weight: 800;
+  font-size: 26px;
+  text-anchor: middle;
+}
+
+.string-index {
+  fill: #444;
+  font-size: 12px;
+  text-anchor: end;
+}
+
+.open-marker {
+  fill: none;
+  stroke: #111;
+  stroke-width: 1.8;
+}
+
+.mute-marker {
+  fill: #111;
+  font-size: 16px;
+  text-anchor: middle;
+}
+
+.root-inline {
+  fill: #111;
+  font-weight: 700;
+}
+.root-left {
+  fill: #111;
+  font-weight: 700;
+  text-anchor: middle;
+}

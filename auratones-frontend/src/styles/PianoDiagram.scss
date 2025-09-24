@@ -1,0 +1,10 @@
+/* src/styles/PianoDiagram.scss */
+.piano-diagram {
+  .white-key { fill: #fff; stroke: #111; stroke-width: 1; }
+  .black-key { fill: #111; }
+  .white-key.active { fill: #e8f0ff; }
+  .black-key.active { fill: #4d6fff; }
+  .piano-label {
+    fill: #111; font-weight: 700; font-size: 16px; text-anchor: middle;
+  }
+}
