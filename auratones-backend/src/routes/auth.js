@@ -27,9 +27,35 @@ const STATE_COOKIE = (process.env.OAUTH_STATE_COOKIE_NAME || 'auratones_oauth_st
 const SUCCESS_REDIRECT = (process.env.OAUTH_SUCCESS_REDIRECT || '').trim();
 const FAILURE_REDIRECT = (process.env.OAUTH_FAILURE_REDIRECT || '').trim();
 
+// Cookie lưu return_to tạm thời cho Google OAuth
+const RETURN_TO_COOKIE = (process.env.OAUTH_RETURN_TO_COOKIE_NAME || 'aur_rt').trim();
+
 // ===================================================================
 // Helpers
 // ===================================================================
+
+// Chỉ cho phép đường dẫn nội bộ (relative path), tránh open-redirect.
+// Ví dụ hợp lệ: "/", "/chords", "/chords?x=1#y"
+function sanitizeReturnTo(raw) {
+  if (typeof raw !== 'string' || !raw) return null;
+  if (!raw.startsWith('/')) return null;      // chỉ nhận relative path
+  if (raw.startsWith('//')) return null;      // chặn protocol-relative
+  return raw;
+}
+
+// Nhận returnTo từ body (hỗ trợ string, và backward-compat object)
+function getReturnToFromBody(body) {
+  const v = body?.returnTo;
+  if (!v) return null;
+  // ưu tiên string chuẩn mới
+  if (typeof v === 'string') return sanitizeReturnTo(v);
+  // backward-compat: nếu ai đó còn gửi object cũ
+  if (typeof v === 'object' && v !== null) {
+    const candidate = v.path || v.href || null;
+    return sanitizeReturnTo(candidate);
+  }
+  return null;
+}
 
 // Hồ sơ mặc định (dễ mở rộng về sau)
 function defaultProfile(overrides = {}) {
@@ -80,7 +106,6 @@ function signAppToken(user) {
 
 // So sánh, đồng bộ avatar Google -> R2 (trả về public r2.dev URL)
 async function ensureAvatarUpToDate(userRef, current, googlePhotoURL) {
-  // Không có ảnh Google → chỉ chuẩn hoá URL từ key cũ (nếu có)
   if (!googlePhotoURL) {
     return {
       avatarURL: current?.avatarKey ? publicUrlForKey(current.avatarKey) : (current?.avatarURL || null),
@@ -89,15 +114,12 @@ async function ensureAvatarUpToDate(userRef, current, googlePhotoURL) {
     };
   }
 
-  // Tải ảnh Google
   const resp = await axios.get(googlePhotoURL, { responseType: 'arraybuffer' });
   const buffer = Buffer.from(resp.data);
 
-  // Hash để so sánh có thay đổi
   const hash = crypto.createHash('sha256').update(buffer).digest('hex');
   const changed = !current?.photoHash || current.photoHash !== hash || !current?.avatarKey;
 
-  // Không thay đổi → chuẩn hoá URL từ key
   if (!changed) {
     return {
       avatarURL: current?.avatarKey ? publicUrlForKey(current.avatarKey) : (current?.avatarURL || null),
@@ -106,19 +128,16 @@ async function ensureAvatarUpToDate(userRef, current, googlePhotoURL) {
     };
   }
 
-  // Xoá avatar cũ nếu có
   if (current?.avatarKey) {
     try { await deleteFile(current.avatarKey); } catch (_) {}
   }
 
-  // Đoán content-type/đuôi
   let contentType = resp.headers['content-type'] || mime.lookup(googlePhotoURL) || 'image/jpeg';
   if (contentType === 'image/jpg') contentType = 'image/jpeg';
   const ext = mime.extension(contentType) || 'jpg';
 
-  // Upload lên R2
   const key = generateKey('avatars', `${userRef.id}.${ext}`);
-  const publicUrl = await uploadFile(key, buffer, contentType); // luôn trả r2.dev
+  const publicUrl = await uploadFile(key, buffer, contentType);
 
   return { avatarURL: publicUrl, avatarKey: key, photoHash: hash };
 }
@@ -170,6 +189,8 @@ router.get('/check-username', async (req, res) => {
 // ===================================================================
 router.post('/register', async (req, res) => {
   const { username, password, email } = req.body;
+  const return_to = getReturnToFromBody(req.body); // sanitized string or null
+
   if (!username || !password) {
     return res.status(400).json({ message: 'Username and password are required.' });
   }
@@ -199,6 +220,7 @@ router.post('/register', async (req, res) => {
     res.status(201).json({
       message: 'User registered and logged in',
       token,
+      return_to, // 👈 FE dùng để điều hướng
       user: {
         uid: profile.uid,
         username: profile.username,
@@ -219,6 +241,8 @@ router.post('/register', async (req, res) => {
 // ===================================================================
 router.post('/login', async (req, res) => {
   const { username, password } = req.body;
+  const return_to = getReturnToFromBody(req.body); // sanitized string or null
+
   if (!username || !password) return res.status(400).json({ message: 'Username and password are required.' });
 
   try {
@@ -242,6 +266,7 @@ router.post('/login', async (req, res) => {
     res.status(200).json({
       message: 'Login successful',
       token,
+      return_to, // 👈 FE dùng để điều hướng
       user: {
         uid: found.id,
         username: user.username,
@@ -262,14 +287,31 @@ router.post('/login', async (req, res) => {
 // ===================================================================
 
 // Bắt đầu OAuth → redirect sang Google
+// Cho phép FE đính kèm ?return_to=/path-nguoi-dung-dang-đứng
 router.get('/google', (req, res) => {
   const state = crypto.randomBytes(12).toString('hex');
+
+  // lưu state chống CSRF
   res.cookie(STATE_COOKIE, state, {
     httpOnly: true,
     sameSite: 'lax',
     secure: process.env.NODE_ENV === 'production',
     maxAge: 10 * 60 * 1000,
   });
+
+  // lưu return_to (nếu có & hợp lệ) vào cookie ngắn hạn
+  const rt = sanitizeReturnTo(req.query.return_to);
+  if (rt) {
+    res.cookie(RETURN_TO_COOKIE, rt, {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 10 * 60 * 1000,
+    });
+  } else {
+    res.clearCookie(RETURN_TO_COOKIE);
+  }
+
   const url = getAuthUrl(state);
   return res.redirect(url);
 });
@@ -281,6 +323,15 @@ router.get('/google/callback', async (req, res) => {
     const saved = req.cookies ? req.cookies[STATE_COOKIE] : null;
     if (!code || !state || !saved || state !== saved) throw new Error('Invalid OAuth state');
     res.clearCookie(STATE_COOKIE);
+
+    // Lấy return_to tạm từ cookie
+    let return_to = null;
+    try {
+      const fromCookie = req.cookies ? req.cookies[RETURN_TO_COOKIE] : null;
+      if (fromCookie) return_to = sanitizeReturnTo(fromCookie);
+    } finally {
+      res.clearCookie(RETURN_TO_COOKIE);
+    }
 
     // 1) Đổi code -> access token
     const tokens = await exchangeCodeForTokens(code.toString());
@@ -346,11 +397,13 @@ router.get('/google/callback', async (req, res) => {
       const url = new URL(SUCCESS_REDIRECT);
       url.searchParams.set('token', token);
       url.searchParams.set('uid', userDocId);
+      if (return_to) url.searchParams.set('return_to', return_to);
       return res.redirect(url.toString());
     }
     return res.json({
       message: 'Google login successful',
       token,
+      return_to, // 👈 FE điều hướng
       user: {
         uid: userDocId,
         username: mergedUser.username || null,
@@ -371,7 +424,6 @@ router.get('/google/callback', async (req, res) => {
 // Linking & Profile
 // ===================================================================
 
-// Đặt/đổi password (yêu cầu đã đăng nhập)
 router.post('/link/set-password', authMiddleware, async (req, res) => {
   const { newPassword } = req.body;
   if (!newPassword || newPassword.length < 6) {
@@ -387,7 +439,6 @@ router.post('/link/set-password', authMiddleware, async (req, res) => {
   }
 });
 
-// Đặt username
 router.post('/link/set-username', authMiddleware, async (req, res) => {
   const { username } = req.body;
   if (!username) return res.status(400).json({ message: 'Username is required.' });
@@ -404,7 +455,6 @@ router.post('/link/set-username', authMiddleware, async (req, res) => {
   }
 });
 
-// Cập nhật hồ sơ (limit các trường cho an toàn)
 router.post('/profile', authMiddleware, async (req, res) => {
   try {
     const allowed = ['displayName', 'settings', 'subscription', 'entitlements', 'plan'];
@@ -454,12 +504,11 @@ router.get('/me', authMiddleware, async (req, res) => {
 });
 
 router.post('/logout', (_req, res) => {
-  // Nếu sau này dùng cookie HttpOnly -> clear ở đây
   res.status(200).json({ message: 'Logged out' });
 });
 
 // ===================================================================
-// Debug (tùy chọn, hữu ích khi dev)
+// Debug
 // ===================================================================
 router.get('/_debug/token', (req, res) => {
   res.json({

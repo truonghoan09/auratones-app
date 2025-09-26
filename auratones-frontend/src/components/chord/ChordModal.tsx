@@ -1,5 +1,5 @@
 // src/components/chord/ChordModal.tsx
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import type { ChordEntry } from "../../types/chord";
 import ChordDiagram from "./ChordDiagram";
 import PianoDiagram from "./PianoDiagram";

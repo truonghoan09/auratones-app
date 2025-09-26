@@ -52,6 +52,9 @@ type AuthContextType = {
   setIsAuthenticated: (v: boolean) => void;
   userAvatar: string | null;
   setUserAvatar: (v: string | null) => void;
+
+  // mới thêm (tùy chọn) để Header có thể tự gọi login nếu bạn muốn
+  login?: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -100,77 +103,77 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const meInFlight = useRef<Promise<void> | null>(null);
   const lastMeAt = useRef(0);
 
-const refreshMe = useCallback(async () => {
-  const token = getToken();
-  if (!token) {
-    console.debug('[auth] refreshMe: no token → clear state');
-    setUser(null);
-    setIsAuthenticated(false);
-    return;
-  }
-
-  const now = Date.now();
-
-  // ⏱️ throttle 2s: nếu vừa gọi xong và vẫn còn promise đang bay → reuse
-  if (now - lastMeAt.current < 2000 && meInFlight.current) {
-    console.debug('[auth] refreshMe: throttled → awaiting inflight');
-    await meInFlight.current;
-    return;
-  }
-
-  // 🔁 dedupe: đã có request đang bay → reuse
-  if (meInFlight.current) {
-    console.debug('[auth] refreshMe: inflight exists → awaiting');
-    await meInFlight.current;
-    return;
-  }
-
-  lastMeAt.current = now;
-  setIsLoading(true);
-
-  // 🛟 safety timer: nếu vì lý do gì finally không chạy, vẫn tắt loading
-  let safetyId: number | undefined;
-  const t0 = performance.now();
-
-  const job = (async () => {
-    try {
-      safetyId = window.setTimeout(() => {
-        console.warn('[auth] refreshMe: safety timeout fired (10s) → clearing loading');
-        setIsLoading(false);
-        meInFlight.current = null;
-      }, 10_000);
-
-      console.debug('[auth] refreshMe: GET /auth/me start');
-      const res = await fetch(`${API_BASE}/auth/me`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      console.debug(
-        `[auth] refreshMe: /auth/me status=${res.status} in ${(performance.now() - t0).toFixed(0)}ms`
-      );
-
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-      const data: AuthUser = await res.json();
-      setUser(data);
-      setIsAuthenticated(true);
-      console.debug('[auth] refreshMe: success → user hydrated');
-    } catch (e) {
-      console.warn('[auth] refreshMe: failed → clearing token', e);
-      localStorage.removeItem(TOKEN_KEY);
+  const refreshMe = useCallback(async () => {
+    const token = getToken();
+    if (!token) {
+      console.debug('[auth] refreshMe: no token → clear state');
       setUser(null);
       setIsAuthenticated(false);
-    } finally {
-      if (safetyId) clearTimeout(safetyId);
-      setIsLoading(false);
-      meInFlight.current = null;
-      console.debug('[auth] refreshMe: cleanup done');
+      return;
     }
-  })();
 
-  meInFlight.current = job;
-  await job; // cho ai gọi trực tiếp có thể await
-}, [getToken, setIsAuthenticated]);
+    const now = Date.now();
+
+    // ⏱️ throttle 2s
+    if (now - lastMeAt.current < 2000 && meInFlight.current) {
+      console.debug('[auth] refreshMe: throttled → awaiting inflight');
+      await meInFlight.current;
+      return;
+    }
+
+    // 🔁 dedupe
+    if (meInFlight.current) {
+      console.debug('[auth] refreshMe: inflight exists → awaiting');
+      await meInFlight.current;
+      return;
+    }
+
+    lastMeAt.current = now;
+    setIsLoading(true);
+
+    // 🛟 safety timer
+    let safetyId: number | undefined;
+    const t0 = performance.now();
+
+    const job = (async () => {
+      try {
+        safetyId = window.setTimeout(() => {
+          console.warn('[auth] refreshMe: safety timeout fired (10s) → clearing loading');
+          setIsLoading(false);
+          meInFlight.current = null;
+        }, 10_000);
+
+        console.debug('[auth] refreshMe: GET /auth/me start');
+        const res = await fetch(`${API_BASE}/auth/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        console.debug(
+          `[auth] refreshMe: /auth/me status=${res.status} in ${(performance.now() - t0).toFixed(0)}ms`
+        );
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        const data: AuthUser = await res.json();
+        setUser(data);
+        setIsAuthenticated(true);
+        console.debug('[auth] refreshMe: success → user hydrated');
+      } catch (e) {
+        console.warn('[auth] refreshMe: failed → clearing token', e);
+        localStorage.removeItem(TOKEN_KEY);
+        setUser(null);
+        setIsAuthenticated(false);
+      } finally {
+        if (safetyId) clearTimeout(safetyId);
+        setIsLoading(false);
+        meInFlight.current = null;
+        console.debug('[auth] refreshMe: cleanup done');
+      }
+    })();
+
+    meInFlight.current = job;
+    await job; // cho ai gọi trực tiếp có thể await
+  }, [getToken, setIsAuthenticated]);
 
   const loginWithToken = useCallback(
     async (token: string) => {
@@ -187,7 +190,12 @@ const refreshMe = useCallback(async () => {
     setIsAuthenticated(false);
   }, [setIsAuthenticated]);
 
-  // Bootstrap (chạy đúng 1 lần trong StrictMode)
+  // ✅ tuỳ chọn: để Header/Home có thể gọi login() mà không cần props
+  const login = useCallback(async () => {
+    window.location.href = '/login';
+  }, []);
+
+  // Bootstrap
   const bootstrappedRef = useRef(false);
   useEffect(() => {
     if (bootstrappedRef.current) return;
@@ -218,6 +226,8 @@ const refreshMe = useCallback(async () => {
       setIsAuthenticated,
       userAvatar,
       setUserAvatar,
+
+      login, // thêm mới, không bắt buộc dùng
     }),
     [
       isAuthenticated,
@@ -230,6 +240,7 @@ const refreshMe = useCallback(async () => {
       setIsAuthenticated,
       userAvatar,
       setUserAvatar,
+      login,
     ]
   );
 

@@ -93,7 +93,7 @@ export const GUITAR_CHORDS: ChordEntry[] = [
     aliases: [],
     variants: [
       { baseFret: 1, frets: [1, 1, 2, 3, 3, 1], barres: [{ fret: 1, from: 1, to: 6, finger: 1 }], rootString: 6 },
-      { baseFret: 8, frets: [1, 1, 2, 3, 3, 1], barres: [{ fret: 8, from: 1, to: 6, finger: 1 }], rootString: 6 }
+      { baseFret: 8, frets: [8, 10, 10, 10, 8, -1], barres: [{ fret: 8, from: 1, to: 5, finger: 1 }], rootString: 5 }
     ]
   },
   {

@@ -1,5 +1,4 @@
-// src/pages/ChordPage.tsx
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import type { ChordDictionary, ChordEntry, Instrument } from "../types/chord";
 import { GUITAR_CHORDS } from "../data/chords/guitar";
 import { UKULELE_CHORDS } from "../data/chords/ukulele";
@@ -7,6 +6,7 @@ import { PIANO_CHORDS } from "../data/chords/piano";
 import ChordCard from "../components/chord/ChordCard";
 import ChordModal from "../components/chord/ChordModal";
 import "../styles/ChordPage.scss";
+import Header from "../components/Header";
 
 const DICT: ChordDictionary = {
   guitar: GUITAR_CHORDS,
@@ -14,7 +14,6 @@ const DICT: ChordDictionary = {
   piano: PIANO_CHORDS
 };
 
-// Các filter mẫu cho âm giai C
 const FILTERS = {
   none: [] as string[],
   chordOfCMajor: ["C", "Dm", "Em", "F", "G", "Am"],
@@ -36,13 +35,11 @@ export default function ChordPage() {
   const chords = useMemo(() => {
     let list = DICT[instrument];
 
-    // filter theo âm giai C (nếu chọn)
     if (filterKey !== "none") {
       const allow = new Set(FILTERS[filterKey].map(normalize));
       list = list.filter(c => allow.has(normalize(c.symbol)));
     }
 
-    // search tên (cả alias; hỗ trợ Δ/maj7)
     if (query.trim()) {
       const q = normalize(query);
       list = list.filter(c => {
@@ -52,12 +49,13 @@ export default function ChordPage() {
       });
     }
 
-    // sort gọn gàng
     return [...list].sort((a, b) => a.symbol.localeCompare(b.symbol));
   }, [instrument, query, filterKey]);
 
   return (
-    <div className="chord-page">
+    <>
+      <Header />
+      <div className="chord-page">
       <header className="toolbar">
         <div className="left">
           <div className="seg">
@@ -99,5 +97,6 @@ export default function ChordPage() {
 
       <ChordModal chord={openChord} notation={notation} onClose={() => setOpenChord(null)} />
     </div>
+    </>
   );
 }

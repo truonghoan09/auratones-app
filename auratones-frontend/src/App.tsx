@@ -11,8 +11,10 @@ import LoadingModal from './components/LoadingModal';
 import Auth from './components/Auth';
 import { AuthProvider, useAuthContext } from './contexts/AuthContext';
 import { I18nProvider } from './contexts/I18nContext';
+import usePersistRoute from './hooks/usePersistRoute';
 
 const AppContent = () => {
+    usePersistRoute();
     const { theme } = useTheme();
     const { message, type, showToast, hideToast } = useToast();
     const { showModal, isClosing, handleOpenModal, handleCloseModal } = useModal();

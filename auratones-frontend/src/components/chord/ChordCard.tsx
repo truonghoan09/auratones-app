@@ -1,4 +1,3 @@
-// src/components/chord/ChordCard.tsx
 import React from "react";
 import type { ChordEntry } from "../../types/chord";
 import ChordDiagram from "./ChordDiagram";
@@ -12,7 +11,6 @@ type Props = {
 };
 
 function formatName(symbol: string, notation: "long" | "symbol") {
-  // ví dụ Cmaj7 <-> CΔ
   if (notation === "symbol") return symbol.replace(/maj7/gi, "Δ");
   return symbol.replace(/Δ/gi, "maj7");
 }
@@ -20,21 +18,42 @@ function formatName(symbol: string, notation: "long" | "symbol") {
 export default function ChordCard({ chord, onOpen, notation }: Props) {
   const name = formatName(chord.symbol, notation);
 
+  const handleKey = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      onOpen(chord);
+    }
+  };
+
   return (
-    <button className="chord-card" onClick={() => onOpen(chord)} aria-label={`Open ${name}`}>
-      <div className="thumb">
-        {chord.instrument !== "piano" ? (
-          <ChordDiagram
-            shape={{ ...chord.variants[0], name }}
-            size={220}
-            numStrings={chord.instrument === "guitar" ? 6 : 4}
-            showName={false}
-          />
-        ) : (
-          <PianoDiagram notes={[0, 4, 7]} label={name} /> /* placeholder */
-        )}
+    <div
+      className="chord-card"
+      role="button"
+      tabIndex={0}
+      aria-label={`Open ${name}`}
+      onClick={() => onOpen(chord)}
+      onKeyDown={handleKey}
+    >
+      {/* HÀNG 1–8: vùng chứa SVG */}
+      <div className="thumb" aria-hidden>
+        <div className="thumb__canvas">
+          {chord.instrument !== "piano" ? (
+            <ChordDiagram
+              shape={{ ...chord.variants[0], name }}
+              size={920} // base; thật ra SVG fill theo CSS
+              numStrings={chord.instrument === "guitar" ? 6 : 4}
+              showName={false}
+            />
+          ) : (
+            <PianoDiagram notes={[0, 4, 7]} label={name} />
+          )}
+        </div>
       </div>
-      <div className="title">{name}</div>
-    </button>
+
+      {/* HÀNG 9: tên hợp âm */}
+      <div className="title" title={name}>
+        {name}
+      </div>
+    </div>
   );
 }

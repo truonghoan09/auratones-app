@@ -1,5 +1,4 @@
 // src/components/chord/PianoDiagram.tsx
-import React from "react";
 import "../../styles/PianoDiagram.scss";
 
 // Very lightweight ref: 2 quãng tám, highlight nốt bằng cách tô đậm phím
@@ -8,12 +7,10 @@ type Props = {
   height?: number;
   // danh sách các phím trắng/đen cần tô (0..23), 0 = C, 1 = C#, 2 = D ...
   notes: number[];
-  label?: string; // tên hợp âm
 };
 
-export default function PianoDiagram({ width = 320, height = 120, notes, label }: Props) {
+export default function PianoDiagram({ width = 320, height = 120, notes }: Props) {
   const whiteKeys = [0, 2, 4, 5, 7, 9, 11]; // pattern trong 1 octave
-  const blackIndex = new Set([1, 3, 6, 8, 10]);
 
   const keysCount = 14; // 2 octave trắng = 14 phím trắng
   const whiteW = width / keysCount;
@@ -56,7 +53,6 @@ export default function PianoDiagram({ width = 320, height = 120, notes, label }
               className={shouldHighlight(b.note) ? "black-key active" : "black-key"} />
       ))}
 
-      {label && <text x={width / 2} y={height - 4} className="piano-label">{label}</text>}
     </svg>
   );
 }

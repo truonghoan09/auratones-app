@@ -1,19 +1,28 @@
 // src/pages/HomePage.tsx
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import '../styles/homepage.scss';
 import { useAuthContext } from '../contexts/AuthContext';
 import { useI18n } from '../contexts/I18nContext';
 
-interface HomePageProps {
-  onLoginClick: () => void;
-  onLogout: () => void;
-}
-
-const HomePage: React.FC<HomePageProps> = ({ onLoginClick, onLogout }) => {
-  const { isAuthenticated, user } = useAuthContext();
+const HomePage: React.FC = () => {
+  const navigate = useNavigate();
+  const { isAuthenticated, user, login, isLoading } = useAuthContext() as any; // login có thể có/không tùy triển khai
   const { t, lang } = useI18n();
+
+  const handleLogin = useCallback(async () => {
+    try {
+      if (typeof login === 'function') {
+        await login();
+      } else {
+        navigate('/login');
+      }
+    } catch (e) {
+      // có thể log hoặc toast tuỳ ý
+      navigate('/login');
+    }
+  }, [login, navigate]);
 
   const displayName =
     user?.displayName || user?.username || user?.email?.split('@')[0] || (lang === 'vi' ? 'bạn' : 'you');
@@ -61,7 +70,7 @@ const HomePage: React.FC<HomePageProps> = ({ onLoginClick, onLogout }) => {
   const [idx, setIdx] = useState(0);
   const autoRef = useRef<number | null>(null);
   const SLIDE_MS = 5800;
-  const go = (to: number) => setIdx((p) => (to + tools.length) % tools.length);
+  const go = (to: number) => setIdx((to + tools.length) % tools.length);
   const next = () => go(idx + 1);
   const prev = () => go(idx - 1);
 
@@ -90,7 +99,7 @@ const HomePage: React.FC<HomePageProps> = ({ onLoginClick, onLogout }) => {
 
   return (
     <>
-      <Header onLoginClick={onLoginClick} onLogout={onLogout} />
+      <Header />
 
       <main className="homepage">
         {/* HERO */}
@@ -115,7 +124,7 @@ const HomePage: React.FC<HomePageProps> = ({ onLoginClick, onLogout }) => {
                 </div>
               ) : (
                 <div className="cta-row">
-                  <button className="btn btn-primary" onClick={onLoginClick}>
+                  <button className="btn btn-primary" onClick={handleLogin} disabled={isLoading}>
                     {t('home.hero.cta_primary_guest')}
                   </button>
                   <Link to="/theory" className="btn btn-ghost">
@@ -214,7 +223,9 @@ const HomePage: React.FC<HomePageProps> = ({ onLoginClick, onLogout }) => {
                 </div>
               ) : (
                 <div className="cta-row">
-                  <button className="btn btn-primary" onClick={onLoginClick}>{t('home.edu.cta_guest_primary')}</button>
+                  <button className="btn btn-primary" onClick={handleLogin} disabled={isLoading}>
+                    {t('home.edu.cta_guest_primary')}
+                  </button>
                   <Link to="/courses" className="btn btn-ghost">{t('home.edu.cta_guest_secondary')}</Link>
                 </div>
               )}
@@ -275,7 +286,9 @@ const HomePage: React.FC<HomePageProps> = ({ onLoginClick, onLogout }) => {
           {isAuthenticated ? (
             <Link to="/practice" className="btn btn-primary">{t('home.ribbon.to_practice')}</Link>
           ) : (
-            <button className="btn btn-primary" onClick={onLoginClick}>{t('home.ribbon.register_now')}</button>
+            <button className="btn btn-primary" onClick={handleLogin} disabled={isLoading}>
+              {t('home.ribbon.register_now')}
+            </button>
           )}
         </section>
       </main>
