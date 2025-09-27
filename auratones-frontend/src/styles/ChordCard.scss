@@ -10,20 +10,14 @@
   cursor: pointer;
   transition: box-shadow 0.15s ease, transform 0.05s ease;
 
-  &:hover {
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-  }
-  &:focus-visible {
-    outline: 2px solid var(--accent-color);
-    outline-offset: 2px;
-  }
-  &:active {
-    transform: translateY(1px);
-  }
+  &:hover { box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08); }
+  &:focus-visible { outline: 2px solid var(--accent-color); outline-offset: 2px; }
+  &:active { transform: translateY(1px); }
 
   .thumb {
     padding: 10px 12px 6px;
     min-height: 0;
+
     .thumb__canvas {
       width: 100%;
       aspect-ratio: 920 / 500;
@@ -31,6 +25,37 @@
       align-items: center;
       justify-content: center;
       overflow: hidden;
+      position: relative;
+
+      /* Giữ SVG hiển thị đúng và scale 0.9 */
+      svg {
+        display: block;
+        width: 100%;
+        height: auto;
+        max-width: 100%;
+        max-height: 100%;
+        transform: scale(.9);
+        transform-origin: center;
+      }
+
+      /* Piano fit gọn: không tràn xuống meta */
+      &[data-instrument="piano"] {
+        /* giữ center + fit */
+        align-items: center;
+        justify-content: center;
+
+        > * {
+          max-width: 100%;
+          max-height: 100%;
+        }
+
+        svg, canvas, img {
+          width: 100%;
+          height: auto;
+          max-height: 100%;
+          display: block;
+        }
+      }
     }
   }
 
@@ -70,3 +95,4 @@
     }
   }
 }
+  

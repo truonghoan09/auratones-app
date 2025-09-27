@@ -46,7 +46,7 @@ export default function ChordCard({ chord, onOpen }: Props) {
     >
       {/* Diagram preview */}
       <div className="thumb" aria-hidden>
-        <div className="thumb__canvas">
+        <div className="thumb__canvas" data-instrument={chord.instrument}>
           {chord.instrument !== "piano" ? (
             <ChordDiagram
               shape={{ ...chord.variants[0], name }}

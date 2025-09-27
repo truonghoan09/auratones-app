@@ -2,12 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import "../../styles/AddChordDialog.scss";
 
 type Instrument = "guitar" | "ukulele" | "piano";
-type Visibility = "private" | "contribute";
 
-type AddChordPayload = {
+type NextPayload = {
   instrument: Instrument;
   symbol: string;
-  visibility: Visibility;
 };
 
 type Props = {
@@ -15,7 +13,8 @@ type Props = {
   defaultInstrument?: Instrument;
   initialSymbol?: string;
   onClose: () => void;
-  onSubmit: (data: AddChordPayload) => Promise<void> | void;
+  /** Luồng mới: chỉ chuyển tiếp qua editor, không xử lý visibility ở đây */
+  onNext: (data: NextPayload) => Promise<void> | void;
 };
 
 export default function AddChordDialog({
@@ -23,31 +22,41 @@ export default function AddChordDialog({
   defaultInstrument = "guitar",
   initialSymbol = "",
   onClose,
-  onSubmit,
+  onNext,
 }: Props) {
   const [instrument, setInstrument] = useState<Instrument>(defaultInstrument);
   const [symbol, setSymbol] = useState(initialSymbol);
-  const [submitting, setSubmitting] = useState<Visibility | null>(null);
+  const [busy, setBusy] = useState(false);
 
   const dialogRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // focus vào input khi mở
+  // Reset khi mở lại dialog
+  useEffect(() => {
+    if (isOpen) {
+      setInstrument(defaultInstrument);
+      setSymbol(initialSymbol);
+    }
+  }, [isOpen, defaultInstrument, initialSymbol]);
+
+  // focus input khi mở
   useEffect(() => {
     if (!isOpen) return;
     const t = setTimeout(() => inputRef.current?.focus(), 0);
     return () => clearTimeout(t);
   }, [isOpen]);
 
-  // ESC đóng; Ctrl/Cmd+Enter => Lưu riêng tư
+  // ESC đóng; Enter → Tiếp theo
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
+      if (!isOpen) return;
       if (e.key === "Escape") onClose();
-      if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
-        void handleSubmit("private");
+      if (e.key === "Enter") {
+        e.preventDefault();
+        void handleNext();
       }
     };
-    if (isOpen) document.addEventListener("keydown", handler);
+    document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
   }, [isOpen, instrument, symbol]);
 
@@ -62,17 +71,16 @@ export default function AddChordDialog({
     return true;
   };
 
-  const handleSubmit = async (visibility: Visibility) => {
+  const handleNext = async () => {
     if (!validate()) return;
     try {
-      setSubmitting(visibility);
-      await onSubmit({
+      setBusy(true);
+      await onNext({
         instrument,
         symbol: symbol.trim(),
-        visibility,
       });
     } finally {
-      setSubmitting(null);
+      setBusy(false);
     }
   };
 
@@ -113,34 +121,20 @@ export default function AddChordDialog({
           />
         </label>
 
-        <div className="actions split-actions">
-          <button
-            className="btn btn-secondary"
-            onClick={onClose}
-            aria-label="Hủy"
-          >
+        <div className="actions">
+          <button className="btn btn-secondary" onClick={onClose} aria-label="Hủy">
             Hủy
           </button>
 
-          <div className="cta-group">
-            <button
-              className="btn btn-ghost"
-              onClick={() => handleSubmit("contribute")}
-              disabled={!!submitting}
-              aria-label="Gửi đóng góp"
-            >
-              {submitting === "contribute" ? "Đang gửi…" : "Gửi đóng góp"}
-            </button>
-            <button
-              className="btn btn-primary"
-              onClick={() => handleSubmit("private")}
-              disabled={!!submitting}
-              aria-label="Lưu riêng tư"
-              title="Ctrl/⌘ + Enter"
-            >
-              {submitting === "private" ? "Đang lưu…" : "Lưu riêng tư"}
-            </button>
-          </div>
+          <button
+            className="btn btn-primary"
+            onClick={handleNext}
+            disabled={busy}
+            aria-label="Tiếp theo"
+            title="Enter"
+          >
+            {busy ? "Đang mở…" : "Tiếp theo"}
+          </button>
         </div>
       </div>
     </div>

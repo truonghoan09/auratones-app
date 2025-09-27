@@ -1,0 +1,208 @@
+/* ===== ChordEditor (theme-aware) ===== */
+
+.editor-body {
+  display: grid;
+  gap: 12px;
+}
+
+/* 1/4 - 3/4 */
+.editor-split {
+  grid-template-columns: 1fr 3fr;         /* 25% | 75% */
+  grid-template-areas:
+    "controls controls"
+    "preview  canvas";
+  align-items: start;
+}
+
+.editor-controls {
+  grid-area: controls;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+
+  .lbl { min-width: 120px; font-weight: 700; }
+}
+
+/* Base fret stepper */
+.basefret-stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--text-color) 16%, transparent);
+  background: color-mix(in srgb, var(--card-background) 92%, var(--background-color) 8%);
+
+  .bf-label { font-weight: 700; margin-right: 2px; }
+  .bf-btn {
+    width: 28px; height: 28px;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--text-color) 20%, transparent);
+    background: var(--card-background);
+    cursor: pointer;
+  }
+  .bf-value {
+    min-width: 28px;
+    text-align: center;
+    font-weight: 800;
+  }
+  .bf-auto {
+    margin-left: 6px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--accent-color) 40%, transparent);
+    background: rgba(var(--accent-color-rgb), .08);
+    color: var(--accent-color);
+    cursor: pointer;
+    font-weight: 700;
+  }
+}
+
+/* Preview trái */
+.editor-preview {
+  grid-area: preview;
+  background: var(--card-background);
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: var(--box-shadow);
+  border: 1px solid color-mix(in srgb, var(--text-color) 10%, transparent);
+
+  .chord-svg {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+}
+
+/* Canvas phải */
+.editor-canvas {
+  grid-area: canvas;
+}
+
+/* Grid nút edit */
+.editor-grid {
+  border-radius: var(--border-radius-md);
+  background: var(--card-background);
+  box-shadow: var(--box-shadow);
+  border: 1px solid color-mix(in srgb, var(--text-color) 10%, transparent);
+  padding: 10px;
+  overflow-x: auto;
+
+  .row {
+    display: grid;
+    grid-template-columns: auto repeat(5, minmax(56px, 1fr)) auto;
+    gap: 6px;
+    align-items: center;
+
+    &.header {
+      font-weight: 800;
+      color: var(--text-color);
+      opacity: 0.9;
+
+      .cell.head { display: inline-flex; justify-content: center; align-items: center; }
+      .cell.stub { visibility: hidden; }
+    }
+  }
+
+  .cell {
+    height: 40px;
+    min-width: 56px;
+    border-radius: 10px;
+    border: 1px dashed color-mix(in srgb, var(--text-color) 18%, transparent);
+    background: color-mix(in srgb, var(--card-background) 92%, var(--background-color) 8%);
+    color: var(--text-color);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    cursor: pointer;
+    transition: background 120ms ease, color 120ms ease, border-color 120ms ease, transform 60ms ease;
+
+    &:hover {
+      background: rgba(var(--accent-color-rgb), .09);
+      color: var(--accent-color);
+      border-color: rgba(var(--accent-color-rgb), .35);
+    }
+
+    &.on {
+      background: var(--accent-color);
+      color: #fff;
+      border-color: var(--accent-color);
+      font-weight: 800;
+      box-shadow: 0 6px 16px rgba(var(--accent-color-rgb), .25);
+    }
+
+    &.barre {
+      background: color-mix(in srgb, var(--accent-color) 80%, #000 0%);
+      color: #fff;
+      border-color: var(--accent-color);
+      font-weight: 900;
+    }
+
+    &.side {
+      min-width: 48px;
+      width: 48px;
+      border-style: solid;
+
+      &.mute.active {
+        background: rgba(0,0,0,.08);
+        color: var(--danger-color);
+        border-color: color-mix(in srgb, var(--danger-color) 60%, transparent);
+        font-weight: 900;
+      }
+      &.open.active {
+        background: rgba(var(--accent-color-rgb), .10);
+        color: var(--accent-color);
+        border-color: rgba(var(--accent-color-rgb), .45);
+        font-weight: 900;
+      }
+    }
+  }
+}
+
+/* Footer */
+.editor-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.editor-footer-note { opacity: .78; }
+
+.btn-primary {
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  font-weight: 700;
+  background: var(--accent-color);
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(var(--accent-color-rgb), 0.28);
+  transition: transform 120ms ease, box-shadow 120ms ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 22px rgba(var(--accent-color-rgb), 0.36);
+  }
+}
+.btn-secondary {
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--text-color) 20%, transparent);
+  background: transparent;
+  color: var(--text-color);
+  cursor: pointer;
+}
+
+/* responsive */
+@media (max-width: 960px) {
+  .editor-split {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "controls"
+      "preview"
+      "canvas";
+  }
+}
+ 

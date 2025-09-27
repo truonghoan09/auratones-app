@@ -1,3 +1,4 @@
+// src/pages/ChordPage.tsx
 import { useMemo, useState, useCallback } from "react";
 import type { ChordDictionary, ChordEntry, Instrument } from "../types/chord";
 import { GUITAR_CHORDS } from "../data/chords/guitar";
@@ -11,13 +12,7 @@ import { useAuthContext } from "../contexts/AuthContext";
 import Auth from "../components/Auth";
 import { useDialog } from "../contexts/DialogContext";
 import AddChordDialog from "../components/chord/AddChordDialog";
-
-type AddChordPayload = {
-  instrument: "guitar" | "ukulele" | "piano";
-  symbol: string;
-  visibility: "private" | "contribute";
-  note?: string;
-};
+import ChordEditorDialog from "../components/chord/ChordEditorDialog";
 
 const DICT: ChordDictionary = {
   guitar: GUITAR_CHORDS,
@@ -61,6 +56,14 @@ export default function ChordPage() {
   const [authOpen, setAuthOpen] = useState(false);
   const { addChord, openAddChord, closeAddChord } = useDialog();
 
+  // TODO: thay bằng flag thực từ AuthContext nếu có
+  const isAdmin = false;
+
+  // ====== Editor state (mở sau khi bấm "Tiếp theo" ở AddChordDialog) ======
+  const [editorOpen, setEditorOpen] = useState(false);
+  const [editorInstrument, setEditorInstrument] = useState<Instrument>("guitar");
+  const [editorSymbol, setEditorSymbol] = useState<string>("");
+
   const chords = useMemo(() => {
     let list = DICT[instrument];
 
@@ -81,6 +84,7 @@ export default function ChordPage() {
     return [...list].sort((a, b) => a.symbol.localeCompare(b.symbol));
   }, [instrument, query, filterKey]);
 
+  // ====== CTA mở AddChord ======
   const handleOpenAddChord = useCallback(() => {
     if (!isAuthenticated) {
       setAuthOpen(true);
@@ -89,20 +93,48 @@ export default function ChordPage() {
     openAddChord({ defaultInstrument: instrument });
   }, [isAuthenticated, instrument, openAddChord]);
 
-  const handleSubmitAddChord = useCallback(
-    async (payload: AddChordPayload) => {
-      console.log("[add-chord] payload:", payload);
+  // ====== Nhận sự kiện Next từ AddChordDialog -> mở Editor ======
+  const handleNextAddChord = useCallback(
+    ({ instrument: ins, symbol }: { instrument: Instrument; symbol: string }) => {
+      closeAddChord();
+      setEditorInstrument(ins);
+      setEditorSymbol(symbol);
+      setEditorOpen(true);
+    },
+    [closeAddChord]
+  );
+
+  // ====== Submit từ Editor (system/private/contribute) ======
+  const handleSubmitEditor = useCallback(
+    (payload: {
+      instrument: Instrument;
+      symbol: string;
+      variants: any[]; // ChordShape[]
+      visibility: "system" | "private" | "contribute";
+    }) => {
+      // Chặn nếu user không phải admin mà chọn "system"
+      if (payload.visibility === "system" && !isAdmin) {
+        (window as any).__toast?.("Bạn không có quyền thêm vào hệ thống.", "error");
+        return;
+      }
+
+      // TODO: gọi API tương ứng ở đây
+      // - system: POST /api/chords/system
+      // - private: POST /api/chords/my
+      // - contribute: POST /api/chords/contributions (đợi duyệt)
+      console.log("[editor-submit]", payload);
 
       (window as any).__toast?.(
-        payload.visibility === "private"
+        payload.visibility === "system"
+          ? "Đã bổ sung vào hệ thống."
+          : payload.visibility === "private"
           ? "Đã lưu hợp âm vào kho cá nhân."
           : "Đã gửi hợp âm để kiểm duyệt. Cảm ơn bạn!",
         "success"
       );
-
-      closeAddChord();
+      setEditorOpen(false);
     },
-    [closeAddChord]
+    [isAdmin]
   );
 
   return (
@@ -202,6 +234,7 @@ export default function ChordPage() {
         </div>
       </div>
 
+      {/* Auth modal khi chưa đăng nhập */}
       {authOpen && (
         <Auth
           isModal
@@ -212,13 +245,26 @@ export default function ChordPage() {
         />
       )}
 
+      {/* Bước 1: AddChord (nhận “Tiếp theo”) */}
       {addChord.isOpen && (
         <AddChordDialog
           isOpen
           defaultInstrument={addChord.defaultInstrument}
           initialSymbol={addChord.initialSymbol}
           onClose={closeAddChord}
-          onSubmit={handleSubmitAddChord}
+          onNext={handleNextAddChord}
+        />
+      )}
+
+      {/* Bước 2: Editor */}
+      {editorOpen && (
+        <ChordEditorDialog
+          isOpen
+          instrument={editorInstrument}
+          initialSymbol={editorSymbol}
+          isAdmin={isAdmin}
+          onClose={() => setEditorOpen(false)}
+          onSubmit={handleSubmitEditor}
         />
       )}
     </>
