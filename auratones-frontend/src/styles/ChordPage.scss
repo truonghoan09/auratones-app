@@ -1,21 +1,126 @@
-/* src/styles/ChordPage.scss */
-.chord-page { padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+/* ====== Chord Page (theme-aware, center layout, soft background) ====== */
 
-.toolbar { display: flex; gap: 12px; justify-content: space-between; align-items: center; }
-.toolbar .left, .toolbar .right { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+/* Lớp nền mờ giống homepage: phủ nhẹ accent lên background */
+.chord-page__surface {
+  background:
+    radial-gradient(1200px 600px at 10% -10%, rgba(var(--accent-color-rgb), 0.06), transparent 50%),
+    radial-gradient(1000px 500px at 100% 0%, rgba(var(--accent-color-rgb), 0.05), transparent 55%),
+    var(--background-color);
+  min-height: 100vh;
+}
 
+/* Gom nội dung vào giữa, giống container của homepage */
+.chord-page__container {
+  width: min(1120px, 100% - 32px);
+  margin-inline: auto;
+  padding: 16px 0 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Toolbar nằm trên một card nhẹ nhàng */
+.toolbar {
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+
+  padding: 12px;
+  border-radius: var(--border-radius-md);
+  background: var(--card-background);
+  box-shadow: var(--box-shadow);
+  border: 1px solid color-mix(in srgb, var(--text-color) 10%, transparent);
+}
+
+.toolbar .left,
+.toolbar .right {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Nhóm nút (segment) theme-aware */
 .seg {
-  display: inline-flex; border: 1px solid #ddd; border-radius: 10px; overflow: hidden; background: #fff;
+  display: inline-flex;
+  align-items: stretch;
+  gap: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--text-color) 12%, transparent);
+  background: color-mix(in srgb, var(--card-background) 92%, var(--background-color) 8%);
 }
-.seg > * { padding: 6px 10px; border: none; background: transparent; cursor: pointer; font-weight: 600; }
-.seg > *.active { background: #111; color: #fff; }
-.seg select { border: none; padding: 6px 10px; }
 
+.seg > * {
+  padding: 6px 12px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--text-color);
+  transition: background 140ms ease, color 140ms ease, transform 100ms ease;
+}
+
+.seg > *:hover {
+  background: rgba(var(--accent-color-rgb), 0.10);
+  color: var(--accent-color);
+}
+
+.seg > *.active {
+  background: var(--accent-color);
+  color: #fff;
+}
+
+.seg select {
+  border: none;
+  padding: 6px 12px;
+  background: transparent;
+  font-weight: 600;
+  outline: none;
+
+  /* Màu mặc định: text rõ, không ngả theme */
+  color: var(--text-color);
+
+  /* Đảm bảo arrow cũng theme-aware (nếu browser hỗ trợ) */
+  appearance: none;
+  background-image: none; // tránh bị nền xám ở vài browser
+}
+
+.seg select:hover,
+.seg select:focus {
+  color: var(--accent-color);
+  background: rgba(var(--accent-color-rgb), 0.08);
+}
+
+/* Ô tìm kiếm */
 .search {
-  padding: 8px 10px; border-radius: 10px; border: 1px solid #ddd; min-width: 240px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--text-color) 12%, transparent);
+  min-width: 260px;
+  background: var(--card-background);
+  color: var(--text-color);
+  outline: none;
+  transition: border-color 140ms ease, box-shadow 140ms ease;
 }
 
-.grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px;
+.search:focus {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(var(--accent-color-rgb), 0.18);
 }
+
+/* Lưới hợp âm — nằm trong container giữa */
+.grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat( auto-fill, minmax(200px, 1fr) );
+}
+
 .cell { width: 100%; }
+
+/* Optional: spacing dưới modal overlay nếu có */
+.chord-page__spacer {
+  height: 8px;
+}

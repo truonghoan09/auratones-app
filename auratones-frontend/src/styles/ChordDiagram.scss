@@ -1,84 +1,72 @@
 .chord-svg {
   display: block;
   width: 100%;
-  height: auto;         /* giữ tỉ lệ viewBox */
+  height: auto;
   max-width: 100%;
   max-height: 100%;
+
+  /* 🎯 Màu thống nhất cho mọi ký hiệu R */
+  --root-color: var(--accent-color);
 }
 
 /* ===== GRID & STRINGS ===== */
-.string-line { stroke: #111; }
-
+.string-line {
+  stroke: var(--text-color);
+  opacity: 0.85;
+}
 .fret-line {
-  stroke: #bdbdbd;
+  stroke: color-mix(in srgb, var(--text-color) 40%, transparent);
   stroke-width: 1;
 }
-
-/* Nut = 2 vạch fill, không stroke */
-.nut-bar {
-  fill: #111;
-  stroke: none;
-}
+.nut-bar { fill: var(--text-color); stroke: none; }
 
 /* ===== DOTS & LABELS ===== */
-.dot {
-  fill: #111;
-}
-
+.dot { fill: var(--accent-color); }
 .dot-label {
   fill: #fff;
   font-weight: 800;
   text-anchor: middle;
-  dominant-baseline: middle;   /* canh tâm dọc */
+  dominant-baseline: middle;
 }
-
-/* Barre */
-.barre {
-  fill: #111;
-}
+.barre { fill: var(--accent-color); }
 
 /* ===== LEFT COLUMNS ===== */
-/* MID column: số dây + open */
 .string-index {
-  fill: #222;
+  fill: var(--text-color);
   font-weight: 600;
-  text-anchor: middle;         /* canh giữa ngang */
-  dominant-baseline: middle;   /* canh giữa dọc */
+  text-anchor: middle;
+  dominant-baseline: middle;
 }
-
 .open-marker {
   fill: none;
-  stroke: #111;
+  stroke: var(--accent-color);
   stroke-width: 1.6;
 }
 
-/* LEFT column: mute / R (open) */
-.mute-marker,
-.root-left {
-  fill: #111;
+/* ❗Thống nhất màu cho mọi R (open ở cột trái & R dưới dot) */
+.mute-marker {
+  fill: var(--danger-color);
   text-anchor: middle;
   dominant-baseline: middle;
   font-weight: 700;
+  font-size: 16px;
 }
-.mute-marker { font-size: 16px; }
-
-/* R dưới dot (fretted) */
+.root-left,
 .root-inline {
-  fill: #111;
-  font-weight: 700;
+  fill: var(--root-color);          /* ✅ cùng màu */
   text-anchor: middle;
   dominant-baseline: middle;
+  font-weight: 700;
 }
 
-/* ===== FRETS NUMBERS & CHORD NAME ===== */
+/* ===== FRETS NUMBERS & NAME ===== */
 .fret-number {
-  fill: #111;
+  fill: var(--text-color);
   font-weight: 700;
   text-anchor: middle;
 }
-
 .chord-name {
-  fill: #111;
+  fill: var(--accent-color);
   font-weight: 800;
   font-size: 26px;
   text-anchor: middle;

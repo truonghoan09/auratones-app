@@ -9,8 +9,8 @@
   justify-content: space-between;
   gap: var(--spacing-md);
   padding: 10px 16px;
-  background: var(--card-background);        /* 🟢 theo theme */
-  color: var(--text-color);                  /* 🟢 theo theme */
+  background: var(--card-background);  /* 🟢 theo theme */
+  color: var(--text-color);            /* 🟢 theo theme */
   box-shadow: var(--box-shadow);
 }
 
@@ -24,25 +24,68 @@
   font-weight: 800;
   text-transform: lowercase;
   letter-spacing: 0.6px;
-  color: var(--primary-color);               /* 🟢 theo theme */
+  color: var(--primary-color);         /* 🟢 theo theme */
   text-decoration: none;
 }
 
+/* NAV + link states */
 .header-nav {
   display: flex;
   gap: 10px;
 
   .nav-link {
+    position: relative;                /* cho underline */
     padding: 6px 10px;
     border-radius: 999px;
     text-decoration: none;
-    color: var(--text-color);                /* 🟢 theo theme */
-    transition: background 120ms ease, color 120ms ease;
+    color: var(--text-color);          /* 🟢 theo theme */
+    transition: background 120ms ease, color 120ms ease, opacity 120ms ease;
+
+    /* underline slide-in (dùng currentColor để tương thích theme) */
+    &::after {
+      content: "";
+      position: absolute;
+      left: 10px;
+      right: 10px;
+      bottom: 3px;
+      height: 2px;
+      background: currentColor;
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 160ms ease;
+      opacity: .9;
+    }
 
     &:hover {
       background: rgba(var(--accent-color-rgb), 0.12); /* 🟢 theo theme */
       color: var(--accent-color);
     }
+    &:hover::after {
+      transform: scaleX(1);
+    }
+
+    /* focus a11y */
+    &:focus-visible {
+      outline: 2px solid var(--accent-color);
+      outline-offset: 2px;
+    }
+  }
+
+  /* trạng thái ĐANG CHỌN (được set bằng .active từ Header.tsx hoặc aria-current="page") */
+  .nav-link.active,
+  .nav-link[aria-current="page"] {
+    position: relative;
+    background: rgba(var(--accent-color-rgb), 0.16); /* nền pill highlight */
+    color: var(--accent-color);
+    font-weight: 700;
+
+    /* bỏ underline */
+    &::after {
+      display: none;
+    }
+
+    /* hiệu ứng mượt pill */
+    transition: background 200ms ease, color 200ms ease, font-weight 160ms ease;
   }
 }
 

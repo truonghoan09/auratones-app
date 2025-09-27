@@ -1,6 +1,5 @@
-// src/components/Header.tsx
 import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import ThemeSwitcher from "./ThemeSwitcher";
 import "../styles/header.scss";
 import { useAuthContext } from "../contexts/AuthContext";
@@ -9,10 +8,10 @@ import Auth from "./Auth";
 
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [authOpen, setAuthOpen] = useState(false); // mở/đóng Auth modal
+  const [authOpen, setAuthOpen] = useState(false);
 
   const { isAuthenticated, user, userAvatar, isLoading, logout } = useAuthContext();
-
+  const location = useLocation();
   const userProfileRef = useRef<HTMLDivElement>(null);
 
   const handleToggleMenu = useCallback(() => {
@@ -37,6 +36,20 @@ const Header: React.FC = () => {
     return () => window.removeEventListener("keydown", onKey);
   }, [isMenuOpen]);
 
+  // ===== Active helpers =====
+  const isActive = useCallback(
+    (to: string) => {
+      const cur = location.pathname.replace(/\/+$/, "");
+      const base = to.replace(/\/+$/, "");
+      return cur === base || cur.startsWith(base + "/");
+    },
+    [location.pathname]
+  );
+  const navClass = useCallback(
+    (to: string) => `nav-link${isActive(to) ? " active" : ""}`,
+    [isActive]
+  );
+
   // helpers hiển thị
   const displayName = useMemo(() => {
     if (user?.displayName) return user.displayName;
@@ -55,14 +68,10 @@ const Header: React.FC = () => {
   const plan = (user?.plan || "free") as "free" | "pro" | "enterprise";
   const planLabel = plan === "pro" ? "Pro" : plan === "enterprise" ? "Enterprise" : "Free";
 
-  // mở/đóng Auth modal (giữ đúng pattern cũ: chỉ mở modal, không thêm logic auth khác)
   const openAuth = useCallback(() => setAuthOpen(true), []);
   const closeAuth = useCallback(() => setAuthOpen(false), []);
-
-  // “cầu nối” showToast để truyền xuống Auth (nếu bạn có toast riêng, thay thế ở đây)
   const showToast = useCallback((message: string, type: "success" | "error" | "info") => {
     (window as any).__toast?.(message, type);
-    // fallback an toàn:
     if (type === "error") console.error(message);
     else if (type === "success") console.log(message);
     else console.info(message);
@@ -78,12 +87,43 @@ const Header: React.FC = () => {
       <header className="main-header">
         <div className="header-left">
           <Link to="/" className="header-logo">auratones</Link>
+
           <nav className="header-nav">
-            <Link to="/chords" className="nav-link">Kho hợp âm</Link>
-            <Link to="/songs" className="nav-link">Kho bài hát</Link>
-            <Link to="/practice" className="nav-link">Ứng dụng học bài</Link>
-            <Link to="/courses" className="nav-link">Khóa học</Link>
-            <Link to="/theory" className="nav-link">Music theory</Link>
+            <Link
+              to="/chords"
+              className={navClass("/chords")}
+              aria-current={isActive("/chords") ? "page" : undefined}
+            >
+              Kho hợp âm
+            </Link>
+            <Link
+              to="/songs"
+              className={navClass("/songs")}
+              aria-current={isActive("/songs") ? "page" : undefined}
+            >
+              Kho bài hát
+            </Link>
+            <Link
+              to="/practice"
+              className={navClass("/practice")}
+              aria-current={isActive("/practice") ? "page" : undefined}
+            >
+              Ứng dụng học bài
+            </Link>
+            <Link
+              to="/courses"
+              className={navClass("/courses")}
+              aria-current={isActive("/courses") ? "page" : undefined}
+            >
+              Khóa học
+            </Link>
+            <Link
+              to="/theory"
+              className={navClass("/theory")}
+              aria-current={isActive("/theory") ? "page" : undefined}
+            >
+              Music theory
+            </Link>
           </nav>
         </div>
 
@@ -157,7 +197,6 @@ const Header: React.FC = () => {
         </div>
       </header>
 
-      {/* Auth modal theo đúng pattern cũ */}
       {authOpen && (
         <Auth
           showToast={showToast}

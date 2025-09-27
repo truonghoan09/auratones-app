@@ -3,52 +3,43 @@ import { useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 
 const STORAGE_KEY = "auth:return_to";
+const SCROLL_KEY  = "auth:return_scroll"; // (tuỳ chọn) tách riêng scroll
 
-// có thể loại trừ vài trang không muốn lưu (vd: /login)
+// có thể loại trừ vài trang không muốn lưu (vd: /login, /auth)
 const SHOULD_TRACK = (pathname: string) => !/^\/(login|auth)/i.test(pathname);
 
 export default function usePersistRoute() {
   const location = useLocation();
   const rafRef = useRef<number | null>(null);
 
-  // ghi URL mỗi khi route đổi
+  // Ghi relative path mỗi khi route đổi
   useEffect(() => {
     if (!SHOULD_TRACK(location.pathname)) return;
 
-    const payload = {
-      href: window.location.href,
-      path: location.pathname,
-      search: location.search,
-      hash: location.hash,
-      // để sau này có muốn ưu tiên “mới nhất”
-      ts: Date.now(),
-    };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    const relative = `${location.pathname}${location.search}${location.hash}`;
+    localStorage.setItem(STORAGE_KEY, relative); // 👈 chỉ lưu string
   }, [location]);
 
-  // (tuỳ chọn) ghi thêm scroll Y (throttle bằng rAF)
+  // (tuỳ chọn) ghi thêm scroll Y (throttle bằng rAF) vào key riêng
   useEffect(() => {
     const onScroll = () => {
       if (rafRef.current != null) return;
       rafRef.current = requestAnimationFrame(() => {
         rafRef.current = null;
         try {
-          const raw = localStorage.getItem(STORAGE_KEY);
-          if (!raw) return;
-          const saved = JSON.parse(raw);
-          if (!saved || typeof saved !== "object") return;
+          const savedPath = localStorage.getItem(STORAGE_KEY);
+          if (!savedPath) return;
           // chỉ ghi nếu vẫn đang ở cùng trang đã lưu
-          if (saved.path === location.pathname) {
-            saved.scrollY = window.scrollY ?? 0;
-            saved.ts = Date.now();
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
+          const currentPath = `${location.pathname}${location.search}${location.hash}`;
+          if (savedPath === currentPath) {
+            localStorage.setItem(SCROLL_KEY, String(window.scrollY ?? 0));
           }
         } catch {}
       });
     };
 
     window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("beforeunload", onScroll); // chốt lần cuối
+    window.addEventListener("beforeunload", onScroll);
     return () => {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("beforeunload", onScroll);

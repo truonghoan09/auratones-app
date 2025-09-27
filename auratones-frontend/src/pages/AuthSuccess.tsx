@@ -4,12 +4,44 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAuthContext } from '../contexts/AuthContext';
 import '../styles/auth-intents.scss';
 
+const RETURN_TO_KEY = 'auth:return_to';
+// Nếu bạn có lưu scroll ở hook khác thì có thể dùng thêm:
+// const SCROLL_KEY  = 'auth:return_scroll';
+
+function sanitizeReturnTo(raw?: string | null): string | null {
+  if (!raw || typeof raw !== 'string') return null;
+  if (!raw.startsWith('/')) return null;   // chỉ allow relative path nội bộ
+  if (raw.startsWith('//')) return null;   // chặn protocol-relative
+  return raw;
+}
+
+// Đọc return_to từ localStorage, hỗ trợ cả định dạng JSON cũ {path, href, ...}
+function getReturnToFromStorage(): string | null {
+  const raw = localStorage.getItem(RETURN_TO_KEY) || '';
+  if (!raw) return null;
+
+  // backward-compat: nếu là JSON cũ
+  if (raw.startsWith('{')) {
+    try {
+      const obj = JSON.parse(raw);
+      const candidate: string | undefined = obj?.path || obj?.href;
+      return sanitizeReturnTo(candidate) || null;
+    } catch {
+      // ignore
+    }
+  }
+
+  // kiểu mới: plain string "/abc?x#y"
+  return sanitizeReturnTo(raw);
+}
+
 export default function AuthSuccess() {
   const { loginWithToken } = useAuthContext();
   const [progress, setProgress] = useState(0);
 
   const startedRef = useRef(false);
   const aliveRef = useRef(true);
+  const targetRef = useRef<string>('/'); // giữ lại để dùng cho nút "đi ngay"
 
   // confetti random: vị trí, delay, duration, xoay, scale
   const confetti = useMemo(
@@ -34,25 +66,31 @@ export default function AuthSuccess() {
     if (startedRef.current) return;
     startedRef.current = true;
 
-    console.log('[auth-success] init', window.location.href);
-
     const params = new URLSearchParams(window.location.search);
     const token = params.get('token');
+
+    // Ưu tiên return_to từ query, fallback localStorage
+    const fromQuery = sanitizeReturnTo(params.get('return_to'));
+    const fromStorage = getReturnToFromStorage();
+    const target = fromQuery || fromStorage || '/';
+    targetRef.current = target;
 
     const cleanUrl = () => {
       const url = new URL(window.location.href);
       url.searchParams.delete('token');
+      url.searchParams.delete('return_to'); // dọn luôn
       window.history.replaceState({}, document.title, url.pathname + url.search);
     };
 
+    // đã dùng thì xoá localStorage để lần sau lấy mới
+    if (fromStorage) localStorage.removeItem(RETURN_TO_KEY);
+
     if (!token) {
-      console.warn('[auth-success] missing token');
       cleanUrl();
       window.location.replace('/auth/error?reason=missing_token');
       return;
     }
 
-    console.log('[auth-success] got token → start progress');
     // chạy progress tới 95% trong lúc hydrate
     let raf = 0;
     const tick = () => {
@@ -62,32 +100,27 @@ export default function AuthSuccess() {
     };
     raf = requestAnimationFrame(tick);
 
-    // Fallback an toàn: 5s vẫn chưa xong thì cứ về home (đã có overlay loading ở Home)
+    // Fallback an toàn: 5s vẫn chưa xong thì cứ về target (không phải "/")
     const fallback = window.setTimeout(() => {
       if (!aliveRef.current) return;
-      console.warn('[auth-success] fallback redirect after 5s');
       cleanUrl();
-      window.location.replace('/');
+      window.location.replace(targetRef.current);
     }, 5000);
 
     let redirectTimer: number | undefined;
 
     (async () => {
       try {
-        console.log('[auth-success] loginWithToken → begin');
         await loginWithToken(token);
-        console.log('[auth-success] loginWithToken → done (token saved & /me hydrated)');
 
-        // if (!aliveRef.current) return;
         setProgress(100);
         cleanUrl();
 
+        // chờ 2s cho user thấy 100% rồi về đúng trang cần
         redirectTimer = window.setTimeout(() => {
-          console.log('[auth-success] redirect → /');
-          window.location.replace('/');
-        }, 2000); // để người dùng kịp thấy 100%
+          window.location.replace(targetRef.current);
+        }, 2000);
       } catch (e) {
-        console.log('[auth-success] loginWithToken failed', e);
         cleanUrl();
         window.location.replace('/auth/error?reason=hydrate_failed');
       } finally {
@@ -96,10 +129,9 @@ export default function AuthSuccess() {
     })();
 
     return () => {
-      if (raf) cancelAnimationFrame(raf);
       if (redirectTimer) clearTimeout(redirectTimer);
       clearTimeout(fallback);
-      console.log('[auth-success] cleanup');
+      if (raf) cancelAnimationFrame(raf);
     };
   }, [loginWithToken]);
 
@@ -114,7 +146,7 @@ export default function AuthSuccess() {
         </div>
 
         <h1 className="title">Đăng nhập thành công</h1>
-        <p className="subtitle">Đang chuẩn bị đưa bạn về trang chủ Auratones 🎵</p>
+        <p className="subtitle">Đang đưa bạn về trang trước đó…</p>
 
         <div
           className="progress"
@@ -126,8 +158,11 @@ export default function AuthSuccess() {
           <div className="bar" style={{ width: `${progress}%` }} />
         </div>
 
-        <button className="primary-btn" onClick={() => window.location.replace('/')}>
-          Về trang chủ ngay
+        <button
+          className="primary-btn"
+          onClick={() => window.location.replace(targetRef.current)}
+        >
+          Đi ngay
         </button>
       </div>
 

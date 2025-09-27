@@ -1,0 +1,111 @@
+.addchord-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: grid;
+  place-items: center;
+  z-index: 100;
+}
+
+.addchord-dialog {
+  width: min(520px, calc(100% - 32px));
+  background: var(--card-background);
+  color: var(--text-color);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--box-shadow);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.addchord-dialog h2 {
+  margin: 0;
+  font-weight: 800;
+  font-size: 1.15rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field > span {
+  font-size: 0.92rem;
+  opacity: 0.9;
+}
+
+.addchord-dialog input,
+.addchord-dialog select {
+  border: 1px solid color-mix(in srgb, var(--text-color) 16%, transparent);
+  background: var(--background-color);
+  color: var(--text-color);
+  border-radius: 10px;
+  padding: 10px 12px;
+  outline: none;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+
+  &:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(var(--accent-color-rgb), 0.18);
+  }
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4px;
+}
+
+.split-actions .cta-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn {
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-weight: 700;
+  transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease, color 120ms ease;
+}
+
+.btn:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+.btn-primary {
+  background: var(--accent-color);
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(var(--accent-color-rgb), 0.30);
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 24px rgba(var(--accent-color-rgb), 0.36);
+  }
+}
+
+.btn-ghost {
+  background: rgba(var(--accent-color-rgb), 0.12);
+  color: var(--accent-color);
+  border-color: rgba(var(--accent-color-rgb), 0.24);
+
+  &:hover:not(:disabled) {
+    background: rgba(var(--accent-color-rgb), 0.18);
+  }
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--text-color);
+  border: 1px solid color-mix(in srgb, var(--text-color) 16%, transparent);
+
+  &:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--text-color) 8%, transparent);
+  }
+}

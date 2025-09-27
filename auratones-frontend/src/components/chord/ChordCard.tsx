@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import type { ChordEntry } from "../../types/chord";
 import ChordDiagram from "./ChordDiagram";
 import PianoDiagram from "./PianoDiagram";
@@ -7,52 +7,70 @@ import "../../styles/ChordCard.scss";
 type Props = {
   chord: ChordEntry;
   onOpen: (chord: ChordEntry) => void;
-  notation: "long" | "symbol";
 };
 
-function formatName(symbol: string, notation: "long" | "symbol") {
-  if (notation === "symbol") return symbol.replace(/maj7/gi, "Δ");
-  return symbol.replace(/Δ/gi, "maj7");
-}
+export default function ChordCard({ chord, onOpen }: Props) {
+  const name = chord.symbol;
+  const total = chord.variants?.length ?? 0;
 
-export default function ChordCard({ chord, onOpen, notation }: Props) {
-  const name = formatName(chord.symbol, notation);
+  const rootRef = useRef<HTMLDivElement | null>(null);
 
   const handleKey = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      onOpen(chord);
+    switch (e.key) {
+      case "Enter":
+      case " ":
+        e.preventDefault();
+        onOpen(chord);
+        break;
+      case "Escape":
+        e.preventDefault();
+        rootRef.current?.blur();
+        break;
+      default:
+        break;
     }
   };
 
+  // Piano demo cơ bản
+  const pianoNotes = [0, 4, 7];
+
   return (
     <div
+      ref={rootRef}
       className="chord-card"
       role="button"
       tabIndex={0}
-      aria-label={`Open ${name}`}
+      aria-label={`${name}. Nhấn Enter để mở chi tiết`}
       onClick={() => onOpen(chord)}
       onKeyDown={handleKey}
     >
-      {/* HÀNG 1–8: vùng chứa SVG */}
+      {/* Diagram preview */}
       <div className="thumb" aria-hidden>
         <div className="thumb__canvas">
           {chord.instrument !== "piano" ? (
             <ChordDiagram
               shape={{ ...chord.variants[0], name }}
-              size={920} // base; thật ra SVG fill theo CSS
               numStrings={chord.instrument === "guitar" ? 6 : 4}
               showName={false}
             />
           ) : (
-            <PianoDiagram notes={[0, 4, 7]} label={name} />
+            <PianoDiagram notes={pianoNotes} />
           )}
         </div>
       </div>
 
-      {/* HÀNG 9: tên hợp âm */}
-      <div className="title" title={name}>
-        {name}
+      {/* Meta info */}
+      <div className="meta">
+        <div className="title" title={name}>
+          {name}
+        </div>
+        {total > 1 ? (
+          <div className="voicing-badge">{total}</div>
+        ) : (
+          <div className="voicing-badge voicing--single" aria-hidden="true">
+            &nbsp;
+          </div>
+        )}
       </div>
     </div>
   );

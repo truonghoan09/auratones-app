@@ -1,48 +1,72 @@
-/* Card giữ 920:650 như đang dùng */
 .chord-card {
   width: 100%;
   aspect-ratio: 920 / 650;
-  border: 1px solid #e5e7eb;
+  border: 1px solid color-mix(in srgb, var(--text-color) 10%, transparent);
   border-radius: 12px;
-  background: #fff;
+  background: var(--card-background);
   overflow: hidden;
   display: grid;
   grid-template-rows: 1fr auto;
   cursor: pointer;
-  transition: box-shadow .15s ease, transform .05s ease;
-  &:hover { box-shadow: 0 8px 24px rgba(0,0,0,.08); }
-  &:focus-visible { outline: 2px solid #3b82f6; outline-offset: 2px; }
-  &:active { transform: translateY(1px); }
-}
+  transition: box-shadow 0.15s ease, transform 0.05s ease;
 
-/* Hàng trên: vùng chứa SVG */
-.chord-card .thumb {
-  padding: 10px 12px 6px;
-  min-height: 0;
-}
+  &:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  }
+  &:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+  }
+  &:active {
+    transform: translateY(1px);
+  }
 
-/* ✅ Container của SVG: GIỮ tỉ lệ 920:500, canh GIỮA bằng Flex */
-.chord-card .thumb__canvas {
-  width: 100%;
-  aspect-ratio: 920 / 500;
-  max-height: 100%;
-  /* canh giữa ngang + dọc và không cho tràn */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  /* “trừ hao” nhẹ để mọi chord đều lọt (tùy chỉnh 2–6%) */
-}
+  .thumb {
+    padding: 10px 12px 6px;
+    min-height: 0;
+    .thumb__canvas {
+      width: 100%;
+      aspect-ratio: 920 / 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+  }
 
-/* Hàng dưới: tên hợp âm */
-.chord-card .title {
-//   padding: 6px 12px 12px;
-  font-size: clamp(0.9rem, 1.1vw, 1rem);
-  font-weight: 600;
-  line-height: 1.15;
-  text-align: center;
-  color: #111827;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  .meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 12px 10px;
+
+    .title {
+      font-size: clamp(0.9rem, 1.1vw, 1rem);
+      font-weight: 600;
+      line-height: 1.2;
+      color: var(--text-color);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .voicing-badge {
+      min-width: 28px;
+      height: 22px;
+      padding: 0 8px;
+      border-radius: 999px;
+      background: rgba(var(--accent-color-rgb), 0.12);
+      color: var(--accent-color);
+      font-size: 0.8rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .voicing--single {
+      background: transparent;
+      color: transparent;
+    }
+  }
 }

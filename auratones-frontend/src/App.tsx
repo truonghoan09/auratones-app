@@ -12,6 +12,7 @@ import Auth from './components/Auth';
 import { AuthProvider, useAuthContext } from './contexts/AuthContext';
 import { I18nProvider } from './contexts/I18nContext';
 import usePersistRoute from './hooks/usePersistRoute';
+import { DialogProvider } from './contexts/DialogContext';
 
 const AppContent = () => {
     usePersistRoute();
@@ -46,7 +47,9 @@ function App() {
             <I18nProvider>
                 <ThemeProvider>
                     <AuthProvider>
-                        <AppContent />
+                        <DialogProvider>
+                            <AppContent />
+                        </DialogProvider>
                     </AuthProvider>
                 </ThemeProvider>
             </I18nProvider>

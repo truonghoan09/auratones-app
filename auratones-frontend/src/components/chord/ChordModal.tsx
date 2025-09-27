@@ -1,4 +1,3 @@
-// src/components/chord/ChordModal.tsx
 import React, { useEffect, useRef, useState } from "react";
 import type { ChordEntry } from "../../types/chord";
 import ChordDiagram from "./ChordDiagram";
@@ -8,33 +7,52 @@ import "../../styles/ChordModal.scss";
 type Props = {
   chord: ChordEntry | null;
   onClose: () => void;
-  notation: "long" | "symbol";
 };
 
-function formatName(symbol: string, notation: "long" | "symbol") {
-  return notation === "symbol" ? symbol.replace(/maj7/gi, "Δ") : symbol.replace(/Δ/gi, "maj7");
-}
-
-export default function ChordModal({ chord, onClose, notation }: Props) {
+export default function ChordModal({ chord, onClose }: Props) {
   const [index, setIndex] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => { setIndex(0); }, [chord]);
+  useEffect(() => {
+    setIndex(0);
+  }, [chord]);
 
-  // swipe gesture
+  // Keyboard handler
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (!chord) return;
+
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onClose();
+      }
+      if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+        setIndex((i) => Math.min(chord.variants.length - 1, i + 1));
+      }
+      if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+        setIndex((i) => Math.max(0, i - 1));
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [chord, onClose]);
+
+  // Swipe gesture
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
-    let startX = 0, dx = 0, active = false;
+    let startX = 0,
+      dx = 0,
+      active = false;
 
     const onStart = (e: TouchEvent | MouseEvent) => {
       active = true;
-      startX = ("touches" in e ? e.touches[0].clientX : e.clientX);
+      startX = "touches" in e ? e.touches[0].clientX : e.clientX;
       dx = 0;
     };
     const onMove = (e: TouchEvent | MouseEvent) => {
       if (!active) return;
-      const x = ("touches" in e ? e.touches[0].clientX : e.clientX);
+      const x = "touches" in e ? e.touches[0].clientX : e.clientX;
       dx = x - startX;
       el.style.setProperty("--offset", `${dx}px`);
       el.classList.add("dragging");
@@ -69,7 +87,7 @@ export default function ChordModal({ chord, onClose, notation }: Props) {
   }, [index, chord]);
 
   if (!chord) return null;
-  const name = formatName(chord.symbol, notation);
+  const name = chord.symbol;
   const isPiano = chord.instrument === "piano";
   const count = chord.variants.length;
 
@@ -79,22 +97,26 @@ export default function ChordModal({ chord, onClose, notation }: Props) {
       <div className="panel" ref={containerRef}>
         <header>
           <div className="title">{name}</div>
-          <button className="close" onClick={onClose} aria-label="Close">×</button>
+          <button className="close" onClick={onClose} aria-label="Close">
+            ×
+          </button>
         </header>
 
         <div className="viewer">
-          <div className="carousel" style={{ "--index": index } as React.CSSProperties}>
+          <div
+            className="carousel"
+            style={{ "--index": index } as React.CSSProperties}
+          >
             {chord.variants.map((v, i) => (
               <div className="slide" key={v.id ?? i}>
                 {!isPiano ? (
                   <ChordDiagram
                     shape={{ ...v, name }}
-                    size={520}
                     numStrings={chord.instrument === "guitar" ? 6 : 4}
                     showName={false}
                   />
                 ) : (
-                  <PianoDiagram notes={[0,4,7]} label={name} />
+                  <PianoDiagram notes={[0, 4, 7]} />
                 )}
               </div>
             ))}
@@ -102,9 +124,23 @@ export default function ChordModal({ chord, onClose, notation }: Props) {
         </div>
 
         <footer>
-          <button disabled={index === 0} onClick={() => setIndex(i => Math.max(0, i - 1))}>←</button>
-          <div className="pager">{index + 1} / {count}</div>
-          <button disabled={index === count - 1} onClick={() => setIndex(i => Math.min(count - 1, i + 1))}>→</button>
+          <button
+            disabled={index === 0}
+            onClick={() => setIndex((i) => Math.max(0, i - 1))}
+          >
+            ←
+          </button>
+          <div className="pager">
+            {index + 1} / {count}
+          </div>
+          <button
+            disabled={index === count - 1}
+            onClick={() =>
+              setIndex((i) => Math.min(count - 1, i + 1))
+            }
+          >
+            →
+          </button>
         </footer>
       </div>
     </div>
