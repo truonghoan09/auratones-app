@@ -7,7 +7,7 @@
 
 /* 1/4 - 3/4 */
 .editor-split {
-  grid-template-columns: 1fr 3fr;         /* 25% | 75% */
+  grid-template-columns: 1fr 3fr; /* 25% | 75% */
   grid-template-areas:
     "controls controls"
     "preview  canvas";
@@ -35,18 +35,27 @@
   background: color-mix(in srgb, var(--card-background) 92%, var(--background-color) 8%);
 
   .bf-label { font-weight: 700; margin-right: 2px; }
+
   .bf-btn {
     width: 28px; height: 28px;
     border-radius: 999px;
     border: 1px solid color-mix(in srgb, var(--text-color) 20%, transparent);
     background: var(--card-background);
     cursor: pointer;
+    user-select: none; /* tránh bị quét đen khi bấm */
   }
+
   .bf-value {
-    min-width: 28px;
+    min-width: 44px;
+    height: 28px;
     text-align: center;
     font-weight: 800;
+    border: 1px solid color-mix(in srgb, var(--text-color) 20%, transparent);
+    border-radius: 8px;
+    background: var(--card-background);
+    color: var(--text-color);
   }
+
   .bf-auto {
     margin-left: 6px;
     padding: 6px 10px;
@@ -75,13 +84,44 @@
   }
 }
 
+/* Root select dưới preview */
+.root-select {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  label {
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  select {
+    border-radius: 8px;
+    border: 1px solid color-mix(in srgb, var(--text-color) 20%, transparent);
+    background: var(--card-background);
+    color: var(--text-color);
+    height: 28px;
+    padding: 0 6px;
+    font-weight: 700;
+  }
+}
+
 /* Canvas phải */
 .editor-canvas {
   grid-area: canvas;
 }
 
-/* Grid nút edit */
+/* Grid nút edit — co giãn theo số ngăn */
 .editor-grid {
+  /* mặc định biến */
+  --fret-cols: 5;
+  --side-col: 8%;
+  --finger-col: 12%;
+  --cell-min: 56px;
+
   border-radius: var(--border-radius-md);
   background: var(--card-background);
   box-shadow: var(--box-shadow);
@@ -91,7 +131,12 @@
 
   .row {
     display: grid;
-    grid-template-columns: auto repeat(5, minmax(56px, 1fr)) auto;
+    /* MUTE | FRETxN | OPEN | FINGER */
+    grid-template-columns:
+      minmax(44px, var(--side-col))
+      repeat(var(--fret-cols), minmax(var(--cell-min), 1fr))
+      minmax(44px, var(--side-col))
+      minmax(84px, var(--finger-col));
     gap: 6px;
     align-items: center;
 
@@ -100,14 +145,32 @@
       color: var(--text-color);
       opacity: 0.9;
 
-      .cell.head { display: inline-flex; justify-content: center; align-items: center; }
-      .cell.stub { visibility: hidden; }
+      .cell.head {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .cell.stub {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .finger-head {
+        text-align: center;
+      }
     }
+  }
+
+  /* Khi chỉ 4 ngăn → nở ra: tăng cell-min, giảm % cột phụ */
+  &.fret-4 {
+    --fret-cols: 4;
+    --side-col: 7%;
+    --finger-col: 10%;
+    --cell-min: 88px; /* lớn hơn để “nở” rõ rệt */
   }
 
   .cell {
     height: 40px;
-    min-width: 56px;
     border-radius: 10px;
     border: 1px dashed color-mix(in srgb, var(--text-color) 18%, transparent);
     background: color-mix(in srgb, var(--card-background) 92%, var(--background-color) 8%);
@@ -141,21 +204,84 @@
     }
 
     &.side {
-      min-width: 48px;
-      width: 48px;
       border-style: solid;
+      font-weight: 800;
 
       &.mute.active {
         background: rgba(0,0,0,.08);
         color: var(--danger-color);
         border-color: color-mix(in srgb, var(--danger-color) 60%, transparent);
-        font-weight: 900;
       }
       &.open.active {
         background: rgba(var(--accent-color-rgb), .10);
         color: var(--accent-color);
         border-color: rgba(var(--accent-color-rgb), .45);
-        font-weight: 900;
+      }
+    }
+
+    &.finger-cell {
+      cursor: default;
+      border-style: solid;
+
+      select {
+        width: 100%;
+        max-width: 86px;
+        height: 28px;
+        border-radius: 8px;
+        border: 1px solid color-mix(in srgb, var(--text-color) 20%, transparent);
+        background: var(--card-background);
+        color: var(--text-color);
+        font-weight: 800;
+        text-align: center;
+        cursor: pointer;
+
+        &:disabled {
+          opacity: .6;
+          cursor: not-allowed;
+        }
+      }
+    }
+  }
+
+  .barre-list {
+    margin-top: 10px;
+    display: grid;
+    gap: 6px;
+
+    .barre-item {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      padding: 6px 8px;
+      border: 1px solid color-mix(in srgb, var(--text-color) 14%, transparent);
+      border-radius: 10px;
+      background: color-mix(in srgb, var(--card-background) 94%, var(--background-color) 6%);
+    }
+
+    select {
+      height: 28px;
+      border-radius: 8px;
+      border: 1px solid color-mix(in srgb, var(--text-color) 20%, transparent);
+      background: var(--card-background);
+      color: var(--text-color);
+      font-weight: 800;
+    }
+
+    .barre-remove {
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid color-mix(in srgb, var(--danger-color) 50%, transparent);
+      background: color-mix(in srgb, var(--danger-color) 10%, transparent);
+      color: var(--danger-color);
+      font-weight: 700;
+      cursor: pointer;
+
+      .icon {
+        display: inline-block;
+        width: 10px; height: 10px;
+        margin-right: 6px;
+        border-radius: 999px;
+        background: var(--danger-color);
       }
     }
   }
@@ -205,4 +331,3 @@
       "canvas";
   }
 }
- 

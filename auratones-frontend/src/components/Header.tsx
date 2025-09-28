@@ -172,6 +172,17 @@ const Header: React.FC = () => {
                   <Link to="/profile" className="dropdown-item" onClick={() => setIsMenuOpen(false)}>Hồ sơ</Link>
                   <Link to="/dashboard" className="dropdown-item" onClick={() => setIsMenuOpen(false)}>Dashboard</Link>
 
+                  {/* 👇 thêm option Admin nếu user là admin */}
+                  {user?.role === 'admin' && (
+                    <Link
+                      to="/admin"
+                      className="dropdown-item"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Admin Page
+                    </Link>
+                  )}
+
                   <div className="dropdown-sep" />
 
                   <button className="dropdown-item danger" onClick={handleLogout}>

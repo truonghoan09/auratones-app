@@ -19,7 +19,20 @@
   gap: 16px;
 }
 
-/* Toolbar nằm trên một card nhẹ nhàng */
+/* Khi có sidebar mục lục, chuyển layout sang grid 2 cột */
+.chord-page__container.with-toc {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 16px;
+}
+
+/* Chế độ compact: chỉ 1 cột, ẩn sidebar (áp dụng trên mobile hoặc khi ít kết quả) */
+.chord-page__container.compact {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== Toolbar nằm trên một card nhẹ nhàng ===== */
 .toolbar {
   display: flex;
   gap: 12px;
@@ -42,7 +55,7 @@
   flex-wrap: wrap;
 }
 
-/* Nhóm nút (segment) theme-aware */
+/* ===== Nhóm nút (segment) theme-aware ===== */
 .seg {
   display: inline-flex;
   align-items: stretch;
@@ -79,13 +92,9 @@
   background: transparent;
   font-weight: 600;
   outline: none;
-
-  /* Màu mặc định: text rõ, không ngả theme */
   color: var(--text-color);
-
-  /* Đảm bảo arrow cũng theme-aware (nếu browser hỗ trợ) */
   appearance: none;
-  background-image: none; // tránh bị nền xám ở vài browser
+  background-image: none; /* tránh nền xám ở vài browser */
 }
 
 .seg select:hover,
@@ -94,7 +103,7 @@
   background: rgba(var(--accent-color-rgb), 0.08);
 }
 
-/* Ô tìm kiếm */
+/* ===== Ô tìm kiếm ===== */
 .search {
   padding: 8px 12px;
   border-radius: 10px;
@@ -111,7 +120,133 @@
   box-shadow: 0 0 0 3px rgba(var(--accent-color-rgb), 0.18);
 }
 
-/* Lưới hợp âm — nằm trong container giữa */
+/* ===== Sidebar mục lục theo nốt gốc ===== */
+.root-sidebar {
+  position: relative;
+  display: none; /* ẩn mặc định, chỉ bật khi with-toc */
+}
+
+.chord-page__container.with-toc .root-sidebar {
+  display: block;
+}
+
+.root-sidebar__inner {
+  position: sticky;
+  top: 72px; /* tránh header */
+  max-height: calc(100vh - 96px);
+  overflow: auto;
+  border: 1px solid var(--border, color-mix(in srgb, var(--text-color) 10%, transparent));
+  border-radius: 12px;
+  padding: 12px;
+  background: var(--card-background);
+  box-shadow: var(--box-shadow);
+}
+
+.root-sidebar__title {
+  font-weight: 700;
+  margin-bottom: 8px;
+  opacity: 0.8;
+}
+
+.root-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.root-link {
+  width: 100%;
+  text-align: left;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--text-color);
+  transition: background 140ms ease, color 140ms ease;
+}
+
+.root-link:hover {
+  background: rgba(0,0,0,0.06);
+}
+
+.root-link.active {
+  background: rgba(var(--accent-color-rgb), 0.14);
+  color: var(--accent-color);
+  font-weight: 700;
+}
+
+/* ===== Khu nội dung chính ===== */
+.chord-main {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Root chips (khi compact/ít kết quả) */
+.root-chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 4px 0 12px;
+}
+
+.root-chips .chip {
+  padding: 6px 10px;
+  border: 1px solid var(--border, color-mix(in srgb, var(--text-color) 12%, transparent));
+  border-radius: 999px;
+  background: var(--card-background);
+  box-shadow: var(--box-shadow-soft, 0 1px 2px rgba(0,0,0,0.04));
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text-color);
+  transition: background 140ms ease, border-color 140ms ease, color 140ms ease;
+}
+
+.root-chips .chip:hover {
+  border-color: var(--accent-color);
+  color: var(--accent-color);
+}
+
+.root-chips .chip.active {
+  background: rgba(var(--accent-color-rgb), 0.14);
+  border-color: rgba(var(--accent-color-rgb), 0.4);
+  color: var(--accent-color);
+  font-weight: 700;
+}
+
+/* ===== Sections theo root ===== */
+.root-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.root-section.with-sep {
+  border-top: 1px dashed var(--border, color-mix(in srgb, var(--text-color) 14%, transparent));
+  padding-top: 12px;
+}
+
+.root-section__heading {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 4px 0 8px;
+}
+
+.root-title {
+  font-size: 20px;
+  margin: 0;
+  color: var(--text-color);
+}
+
+.root-count {
+  font-size: 12px;
+  opacity: 0.6;
+}
+
+/* ===== Lưới hợp âm — nằm trong container giữa ===== */
 .grid {
   display: grid;
   gap: 14px;
@@ -120,7 +255,25 @@
 
 .cell { width: 100%; }
 
+/* Empty */
+.empty-state {
+  padding: 24px;
+  text-align: center;
+  opacity: 0.8;
+}
+
 /* Optional: spacing dưới modal overlay nếu có */
 .chord-page__spacer {
   height: 8px;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 960px) {
+  .chord-page__container {
+    display: flex;
+    flex-direction: column; /* luôn 1 cột trên mobile */
+  }
+  .root-sidebar {
+    display: none !important;
+  }
 }

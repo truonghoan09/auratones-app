@@ -1,0 +1,5518 @@
+[
+  {
+    "symbol": "C",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 3,
+        "frets": [
+          -1,
+          3,
+          5,
+          5,
+          5,
+          3
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 3
+      },
+      {
+        "baseFret": 8,
+        "frets": [
+          8,
+          10,
+          10,
+          9,
+          8,
+          8
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 8
+      }
+    ]
+  },
+  {
+    "symbol": "C11",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 3,
+        "frets": [
+          -1,
+          3,
+          3,
+          3,
+          5,
+          3
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 3
+      }
+    ]
+  },
+  {
+    "symbol": "C13",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 2,
+        "frets": [
+          -1,
+          3,
+          2,
+          3,
+          5,
+          5
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 3
+      },
+      {
+        "baseFret": 8,
+        "frets": [
+          8,
+          10,
+          8,
+          9,
+          10,
+          -1
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 8
+      },
+      {
+        "baseFret": 8,
+        "frets": [
+          8,
+          10,
+          8,
+          9,
+          10,
+          8
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 8
+      }
+    ]
+  },
+  {
+    "symbol": "C7",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 3,
+        "frets": [
+          -1,
+          3,
+          5,
+          3,
+          5,
+          3
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 3
+      },
+      {
+        "baseFret": 8,
+        "frets": [
+          8,
+          10,
+          8,
+          9,
+          8,
+          10
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 8
+      }
+    ]
+  },
+  {
+    "symbol": "C7b9",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 8,
+        "frets": [
+          8,
+          10,
+          8,
+          9,
+          8,
+          9
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 8
+      }
+    ]
+  },
+  {
+    "symbol": "C9",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 2,
+        "frets": [
+          -1,
+          3,
+          2,
+          3,
+          3,
+          -1
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 3
+      }
+    ]
+  },
+  {
+    "symbol": "Cdim",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 3,
+        "frets": [
+          -1,
+          3,
+          4,
+          3,
+          4,
+          3
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 3
+      }
+    ]
+  },
+  {
+    "symbol": "Cm",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 3,
+        "frets": [
+          -1,
+          3,
+          5,
+          5,
+          4,
+          3
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 3
+      },
+      {
+        "baseFret": 8,
+        "frets": [
+          8,
+          10,
+          10,
+          8,
+          8,
+          8
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 8
+      }
+    ]
+  },
+  {
+    "symbol": "Cm13",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 8,
+        "frets": [
+          8,
+          10,
+          8,
+          8,
+          10,
+          -1
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 8
+      },
+      {
+        "baseFret": 8,
+        "frets": [
+          8,
+          10,
+          8,
+          8,
+          10,
+          8
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 8
+      }
+    ]
+  },
+  {
+    "symbol": "Cm7",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 3,
+        "frets": [
+          -1,
+          3,
+          5,
+          3,
+          4,
+          3
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 3
+      },
+      {
+        "baseFret": 8,
+        "frets": [
+          8,
+          10,
+          8,
+          8,
+          8,
+          8
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 8
+      }
+    ]
+  },
+  {
+    "symbol": "Cmaj7",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 3,
+        "frets": [
+          -1,
+          3,
+          5,
+          4,
+          5,
+          3
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 3
+      },
+      {
+        "baseFret": 8,
+        "frets": [
+          8,
+          10,
+          9,
+          9,
+          8,
+          8
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 8
+      }
+    ]
+  },
+  {
+    "symbol": "Cmaj9",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 2,
+        "frets": [
+          -1,
+          3,
+          2,
+          4,
+          3,
+          -1
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 3
+      },
+      {
+        "baseFret": 8,
+        "frets": [
+          8,
+          10,
+          9,
+          9,
+          8,
+          10
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 8
+      }
+    ]
+  },
+  {
+    "symbol": "Csus2",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 2,
+        "frets": [
+          -1,
+          3,
+          5,
+          2,
+          3,
+          3
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 3
+      },
+      {
+        "baseFret": 7,
+        "frets": [
+          8,
+          10,
+          10,
+          7,
+          8,
+          8
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 8
+      }
+    ]
+  },
+  {
+    "symbol": "Csus4",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 8,
+        "frets": [
+          8,
+          10,
+          10,
+          10,
+          8,
+          8
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 8
+      }
+    ]
+  },
+  {
+    "symbol": "Csus4add9",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 8,
+        "frets": [
+          8,
+          10,
+          10,
+          10,
+          8,
+          10
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 8
+      }
+    ]
+  },
+  {
+    "symbol": "C#",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 4,
+        "frets": [
+          -1,
+          4,
+          6,
+          6,
+          6,
+          4
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 4
+      },
+      {
+        "baseFret": 9,
+        "frets": [
+          9,
+          11,
+          11,
+          10,
+          9,
+          9
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 9
+      }
+    ]
+  },
+  {
+    "symbol": "C#11",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 4,
+        "frets": [
+          -1,
+          4,
+          4,
+          4,
+          6,
+          4
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 4
+      }
+    ]
+  },
+  {
+    "symbol": "C#13",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 3,
+        "frets": [
+          -1,
+          4,
+          3,
+          4,
+          6,
+          6
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 4
+      },
+      {
+        "baseFret": 9,
+        "frets": [
+          9,
+          11,
+          9,
+          10,
+          11,
+          -1
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 9
+      },
+      {
+        "baseFret": 9,
+        "frets": [
+          9,
+          11,
+          9,
+          10,
+          11,
+          9
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 9
+      }
+    ]
+  },
+  {
+    "symbol": "C#7",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 4,
+        "frets": [
+          -1,
+          4,
+          6,
+          4,
+          6,
+          4
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 4
+      },
+      {
+        "baseFret": 9,
+        "frets": [
+          9,
+          11,
+          9,
+          10,
+          9,
+          11
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 9
+      }
+    ]
+  },
+  {
+    "symbol": "C#7b9",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 9,
+        "frets": [
+          9,
+          11,
+          9,
+          10,
+          9,
+          10
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 9
+      }
+    ]
+  },
+  {
+    "symbol": "C#9",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 3,
+        "frets": [
+          -1,
+          4,
+          3,
+          4,
+          4,
+          -1
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 4
+      }
+    ]
+  },
+  {
+    "symbol": "C#dim",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 4,
+        "frets": [
+          -1,
+          4,
+          5,
+          4,
+          5,
+          4
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 4
+      }
+    ]
+  },
+  {
+    "symbol": "C#m",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 4,
+        "frets": [
+          -1,
+          4,
+          6,
+          6,
+          5,
+          4
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 4
+      },
+      {
+        "baseFret": 9,
+        "frets": [
+          9,
+          11,
+          11,
+          9,
+          9,
+          9
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 9
+      }
+    ]
+  },
+  {
+    "symbol": "C#m13",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 9,
+        "frets": [
+          9,
+          11,
+          9,
+          9,
+          11,
+          -1
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 9
+      },
+      {
+        "baseFret": 9,
+        "frets": [
+          9,
+          11,
+          9,
+          9,
+          11,
+          9
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 9
+      }
+    ]
+  },
+  {
+    "symbol": "C#m7",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 4,
+        "frets": [
+          -1,
+          4,
+          6,
+          4,
+          5,
+          4
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 4
+      },
+      {
+        "baseFret": 9,
+        "frets": [
+          9,
+          11,
+          9,
+          9,
+          9,
+          9
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 9
+      }
+    ]
+  },
+  {
+    "symbol": "C#maj7",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 4,
+        "frets": [
+          -1,
+          4,
+          6,
+          5,
+          6,
+          4
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 4
+      },
+      {
+        "baseFret": 9,
+        "frets": [
+          9,
+          11,
+          10,
+          10,
+          9,
+          9
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 9
+      }
+    ]
+  },
+  {
+    "symbol": "C#maj9",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 3,
+        "frets": [
+          -1,
+          4,
+          3,
+          5,
+          4,
+          -1
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 4
+      },
+      {
+        "baseFret": 9,
+        "frets": [
+          9,
+          11,
+          10,
+          10,
+          9,
+          11
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 9
+      }
+    ]
+  },
+  {
+    "symbol": "C#sus2",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 3,
+        "frets": [
+          -1,
+          4,
+          6,
+          3,
+          4,
+          4
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 4
+      },
+      {
+        "baseFret": 8,
+        "frets": [
+          9,
+          11,
+          11,
+          8,
+          9,
+          9
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 9
+      }
+    ]
+  },
+  {
+    "symbol": "C#sus4",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 9,
+        "frets": [
+          9,
+          11,
+          11,
+          11,
+          9,
+          9
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 9
+      }
+    ]
+  },
+  {
+    "symbol": "C#sus4add9",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 9,
+        "frets": [
+          9,
+          11,
+          11,
+          11,
+          9,
+          11
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 9
+      }
+    ]
+  },
+  {
+    "symbol": "D",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 5,
+        "frets": [
+          -1,
+          5,
+          7,
+          7,
+          7,
+          5
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 5
+      },
+      {
+        "baseFret": 10,
+        "frets": [
+          10,
+          12,
+          12,
+          11,
+          10,
+          10
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 10
+      }
+    ]
+  },
+  {
+    "symbol": "D11",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 5,
+        "frets": [
+          -1,
+          5,
+          5,
+          5,
+          7,
+          5
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 5
+      }
+    ]
+  },
+  {
+    "symbol": "D13",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 4,
+        "frets": [
+          -1,
+          5,
+          4,
+          5,
+          7,
+          7
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 5
+      },
+      {
+        "baseFret": 10,
+        "frets": [
+          10,
+          12,
+          10,
+          11,
+          12,
+          -1
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 10
+      },
+      {
+        "baseFret": 10,
+        "frets": [
+          10,
+          12,
+          10,
+          11,
+          12,
+          10
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 10
+      }
+    ]
+  },
+  {
+    "symbol": "D7",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 5,
+        "frets": [
+          -1,
+          5,
+          7,
+          5,
+          7,
+          5
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 5
+      },
+      {
+        "baseFret": 10,
+        "frets": [
+          10,
+          12,
+          10,
+          11,
+          10,
+          12
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 10
+      }
+    ]
+  },
+  {
+    "symbol": "D7b9",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 10,
+        "frets": [
+          10,
+          12,
+          10,
+          11,
+          10,
+          11
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 10
+      }
+    ]
+  },
+  {
+    "symbol": "D9",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 4,
+        "frets": [
+          -1,
+          5,
+          4,
+          5,
+          5,
+          -1
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 5
+      }
+    ]
+  },
+  {
+    "symbol": "Ddim",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 5,
+        "frets": [
+          -1,
+          5,
+          6,
+          5,
+          6,
+          5
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 5
+      }
+    ]
+  },
+  {
+    "symbol": "Dm",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 5,
+        "frets": [
+          -1,
+          5,
+          7,
+          7,
+          6,
+          5
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 5
+      },
+      {
+        "baseFret": 10,
+        "frets": [
+          10,
+          12,
+          12,
+          10,
+          10,
+          10
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 10
+      }
+    ]
+  },
+  {
+    "symbol": "Dm13",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 10,
+        "frets": [
+          10,
+          12,
+          10,
+          10,
+          12,
+          -1
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 10
+      },
+      {
+        "baseFret": 10,
+        "frets": [
+          10,
+          12,
+          10,
+          10,
+          12,
+          10
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 10
+      }
+    ]
+  },
+  {
+    "symbol": "Dm7",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 5,
+        "frets": [
+          -1,
+          5,
+          7,
+          5,
+          6,
+          5
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 5
+      },
+      {
+        "baseFret": 10,
+        "frets": [
+          10,
+          12,
+          10,
+          10,
+          10,
+          10
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 10
+      }
+    ]
+  },
+  {
+    "symbol": "Dmaj7",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 5,
+        "frets": [
+          -1,
+          5,
+          7,
+          6,
+          7,
+          5
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 5
+      },
+      {
+        "baseFret": 10,
+        "frets": [
+          10,
+          12,
+          11,
+          11,
+          10,
+          10
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 10
+      }
+    ]
+  },
+  {
+    "symbol": "Dmaj9",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 4,
+        "frets": [
+          -1,
+          5,
+          4,
+          6,
+          5,
+          -1
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 5
+      },
+      {
+        "baseFret": 10,
+        "frets": [
+          10,
+          12,
+          11,
+          11,
+          10,
+          12
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 10
+      }
+    ]
+  },
+  {
+    "symbol": "Dsus2",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 4,
+        "frets": [
+          -1,
+          5,
+          7,
+          4,
+          5,
+          5
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 5
+      },
+      {
+        "baseFret": 9,
+        "frets": [
+          10,
+          12,
+          12,
+          9,
+          10,
+          10
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 10
+      }
+    ]
+  },
+  {
+    "symbol": "Dsus4",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 10,
+        "frets": [
+          10,
+          12,
+          12,
+          12,
+          10,
+          10
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 10
+      }
+    ]
+  },
+  {
+    "symbol": "Dsus4add9",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 10,
+        "frets": [
+          10,
+          12,
+          12,
+          12,
+          10,
+          12
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 10
+      }
+    ]
+  },
+  {
+    "symbol": "D#",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 6,
+        "frets": [
+          -1,
+          6,
+          8,
+          8,
+          8,
+          6
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 6
+      },
+      {
+        "baseFret": 11,
+        "frets": [
+          11,
+          13,
+          13,
+          12,
+          11,
+          11
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 11
+      }
+    ]
+  },
+  {
+    "symbol": "D#11",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 6,
+        "frets": [
+          -1,
+          6,
+          6,
+          6,
+          8,
+          6
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 6
+      }
+    ]
+  },
+  {
+    "symbol": "D#13",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 5,
+        "frets": [
+          -1,
+          6,
+          5,
+          6,
+          8,
+          8
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 6
+      },
+      {
+        "baseFret": 11,
+        "frets": [
+          11,
+          13,
+          11,
+          12,
+          13,
+          -1
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 11
+      },
+      {
+        "baseFret": 11,
+        "frets": [
+          11,
+          13,
+          11,
+          12,
+          13,
+          11
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 11
+      }
+    ]
+  },
+  {
+    "symbol": "D#7",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 6,
+        "frets": [
+          -1,
+          6,
+          8,
+          6,
+          8,
+          6
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 6
+      },
+      {
+        "baseFret": 11,
+        "frets": [
+          11,
+          13,
+          11,
+          12,
+          11,
+          13
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 11
+      }
+    ]
+  },
+  {
+    "symbol": "D#7b9",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 11,
+        "frets": [
+          11,
+          13,
+          11,
+          12,
+          11,
+          12
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 11
+      }
+    ]
+  },
+  {
+    "symbol": "D#9",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 5,
+        "frets": [
+          -1,
+          6,
+          5,
+          6,
+          6,
+          -1
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 6
+      }
+    ]
+  },
+  {
+    "symbol": "D#dim",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 6,
+        "frets": [
+          -1,
+          6,
+          7,
+          6,
+          7,
+          6
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 6
+      }
+    ]
+  },
+  {
+    "symbol": "D#m",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 6,
+        "frets": [
+          -1,
+          6,
+          8,
+          8,
+          7,
+          6
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 6
+      },
+      {
+        "baseFret": 11,
+        "frets": [
+          11,
+          13,
+          13,
+          11,
+          11,
+          11
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 11
+      }
+    ]
+  },
+  {
+    "symbol": "D#m13",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 11,
+        "frets": [
+          11,
+          13,
+          11,
+          11,
+          13,
+          -1
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 11
+      },
+      {
+        "baseFret": 11,
+        "frets": [
+          11,
+          13,
+          11,
+          11,
+          13,
+          11
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 11
+      }
+    ]
+  },
+  {
+    "symbol": "D#m7",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 6,
+        "frets": [
+          -1,
+          6,
+          8,
+          6,
+          7,
+          6
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 6
+      },
+      {
+        "baseFret": 11,
+        "frets": [
+          11,
+          13,
+          11,
+          11,
+          11,
+          11
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 11
+      }
+    ]
+  },
+  {
+    "symbol": "D#maj7",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 6,
+        "frets": [
+          -1,
+          6,
+          8,
+          7,
+          8,
+          6
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 6
+      },
+      {
+        "baseFret": 11,
+        "frets": [
+          11,
+          13,
+          12,
+          12,
+          11,
+          11
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 11
+      }
+    ]
+  },
+  {
+    "symbol": "D#maj9",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 5,
+        "frets": [
+          -1,
+          6,
+          5,
+          7,
+          6,
+          -1
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 6
+      },
+      {
+        "baseFret": 11,
+        "frets": [
+          11,
+          13,
+          12,
+          12,
+          11,
+          13
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 11
+      }
+    ]
+  },
+  {
+    "symbol": "D#sus2",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 5,
+        "frets": [
+          -1,
+          6,
+          8,
+          5,
+          6,
+          6
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 6
+      },
+      {
+        "baseFret": 10,
+        "frets": [
+          11,
+          13,
+          13,
+          10,
+          11,
+          11
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 11
+      }
+    ]
+  },
+  {
+    "symbol": "D#sus4",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 11,
+        "frets": [
+          11,
+          13,
+          13,
+          13,
+          11,
+          11
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 11
+      }
+    ]
+  },
+  {
+    "symbol": "D#sus4add9",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 11,
+        "frets": [
+          11,
+          13,
+          13,
+          13,
+          11,
+          13
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 11
+      }
+    ]
+  },
+  {
+    "symbol": "E",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 7,
+        "frets": [
+          -1,
+          7,
+          9,
+          9,
+          9,
+          7
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 7
+      },
+      {
+        "baseFret": 12,
+        "frets": [
+          12,
+          14,
+          14,
+          13,
+          12,
+          12
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 12
+      }
+    ]
+  },
+  {
+    "symbol": "E11",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 7,
+        "frets": [
+          -1,
+          7,
+          7,
+          7,
+          9,
+          7
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 7
+      }
+    ]
+  },
+  {
+    "symbol": "E13",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 6,
+        "frets": [
+          -1,
+          7,
+          6,
+          7,
+          9,
+          9
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 7
+      },
+      {
+        "baseFret": 12,
+        "frets": [
+          12,
+          14,
+          12,
+          13,
+          14,
+          -1
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 12
+      },
+      {
+        "baseFret": 12,
+        "frets": [
+          12,
+          14,
+          12,
+          13,
+          14,
+          12
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 12
+      }
+    ]
+  },
+  {
+    "symbol": "E7",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 7,
+        "frets": [
+          -1,
+          7,
+          9,
+          7,
+          9,
+          7
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 7
+      },
+      {
+        "baseFret": 12,
+        "frets": [
+          12,
+          14,
+          12,
+          13,
+          12,
+          14
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 12
+      }
+    ]
+  },
+  {
+    "symbol": "E7b9",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 12,
+        "frets": [
+          12,
+          14,
+          12,
+          13,
+          12,
+          13
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 12
+      }
+    ]
+  },
+  {
+    "symbol": "E9",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 6,
+        "frets": [
+          -1,
+          7,
+          6,
+          7,
+          7,
+          -1
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 7
+      }
+    ]
+  },
+  {
+    "symbol": "Edim",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 7,
+        "frets": [
+          -1,
+          7,
+          8,
+          7,
+          8,
+          7
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 7
+      }
+    ]
+  },
+  {
+    "symbol": "Em",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 7,
+        "frets": [
+          -1,
+          7,
+          9,
+          9,
+          8,
+          7
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 7
+      },
+      {
+        "baseFret": 12,
+        "frets": [
+          12,
+          14,
+          14,
+          12,
+          12,
+          12
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 12
+      }
+    ]
+  },
+  {
+    "symbol": "Em13",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 12,
+        "frets": [
+          12,
+          14,
+          12,
+          12,
+          14,
+          -1
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 12
+      },
+      {
+        "baseFret": 12,
+        "frets": [
+          12,
+          14,
+          12,
+          12,
+          14,
+          12
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 12
+      }
+    ]
+  },
+  {
+    "symbol": "Em7",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 7,
+        "frets": [
+          -1,
+          7,
+          9,
+          7,
+          8,
+          7
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 7
+      },
+      {
+        "baseFret": 12,
+        "frets": [
+          12,
+          14,
+          12,
+          12,
+          12,
+          12
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 12
+      }
+    ]
+  },
+  {
+    "symbol": "Emaj7",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 7,
+        "frets": [
+          -1,
+          7,
+          9,
+          8,
+          9,
+          7
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 7
+      },
+      {
+        "baseFret": 12,
+        "frets": [
+          12,
+          14,
+          13,
+          13,
+          12,
+          12
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 12
+      }
+    ]
+  },
+  {
+    "symbol": "Emaj9",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 6,
+        "frets": [
+          -1,
+          7,
+          6,
+          8,
+          7,
+          -1
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 7
+      },
+      {
+        "baseFret": 12,
+        "frets": [
+          12,
+          14,
+          13,
+          13,
+          12,
+          14
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 12
+      }
+    ]
+  },
+  {
+    "symbol": "Esus2",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 6,
+        "frets": [
+          -1,
+          7,
+          9,
+          6,
+          7,
+          7
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 7
+      },
+      {
+        "baseFret": 11,
+        "frets": [
+          12,
+          14,
+          14,
+          11,
+          12,
+          12
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 12
+      }
+    ]
+  },
+  {
+    "symbol": "Esus4",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 12,
+        "frets": [
+          12,
+          14,
+          14,
+          14,
+          12,
+          12
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 12
+      }
+    ]
+  },
+  {
+    "symbol": "Esus4add9",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 12,
+        "frets": [
+          12,
+          14,
+          14,
+          14,
+          12,
+          14
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 12
+      }
+    ]
+  },
+  {
+    "symbol": "F",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 1,
+        "frets": [
+          1,
+          3,
+          3,
+          2,
+          1,
+          1
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 1
+      },
+      {
+        "baseFret": 8,
+        "frets": [
+          -1,
+          8,
+          10,
+          10,
+          10,
+          8
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 8
+      }
+    ]
+  },
+  {
+    "symbol": "F11",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 8,
+        "frets": [
+          -1,
+          8,
+          8,
+          8,
+          10,
+          8
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 8
+      }
+    ]
+  },
+  {
+    "symbol": "F13",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 1,
+        "frets": [
+          1,
+          3,
+          1,
+          2,
+          3,
+          -1
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 1
+      },
+      {
+        "baseFret": 1,
+        "frets": [
+          1,
+          3,
+          1,
+          2,
+          3,
+          1
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 1
+      },
+      {
+        "baseFret": 7,
+        "frets": [
+          -1,
+          8,
+          7,
+          8,
+          10,
+          10
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 8
+      }
+    ]
+  },
+  {
+    "symbol": "F7",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 1,
+        "frets": [
+          1,
+          3,
+          1,
+          2,
+          1,
+          3
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 1
+      },
+      {
+        "baseFret": 8,
+        "frets": [
+          -1,
+          8,
+          10,
+          8,
+          10,
+          8
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 8
+      }
+    ]
+  },
+  {
+    "symbol": "F7b9",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 1,
+        "frets": [
+          1,
+          3,
+          1,
+          2,
+          1,
+          2
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 1
+      }
+    ]
+  },
+  {
+    "symbol": "F9",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 7,
+        "frets": [
+          -1,
+          8,
+          7,
+          8,
+          8,
+          -1
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 8
+      }
+    ]
+  },
+  {
+    "symbol": "Fdim",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 8,
+        "frets": [
+          -1,
+          8,
+          9,
+          8,
+          9,
+          8
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 8
+      }
+    ]
+  },
+  {
+    "symbol": "Fm",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 1,
+        "frets": [
+          1,
+          3,
+          3,
+          1,
+          1,
+          1
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 1
+      },
+      {
+        "baseFret": 8,
+        "frets": [
+          -1,
+          8,
+          10,
+          10,
+          9,
+          8
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 8
+      }
+    ]
+  },
+  {
+    "symbol": "Fm13",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 1,
+        "frets": [
+          1,
+          3,
+          1,
+          1,
+          3,
+          -1
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 1
+      },
+      {
+        "baseFret": 1,
+        "frets": [
+          1,
+          3,
+          1,
+          1,
+          3,
+          1
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 1
+      }
+    ]
+  },
+  {
+    "symbol": "Fm7",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 1,
+        "frets": [
+          1,
+          3,
+          1,
+          1,
+          1,
+          1
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 1
+      },
+      {
+        "baseFret": 8,
+        "frets": [
+          -1,
+          8,
+          10,
+          8,
+          9,
+          8
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 8
+      }
+    ]
+  },
+  {
+    "symbol": "Fmaj7",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 1,
+        "frets": [
+          1,
+          3,
+          2,
+          2,
+          1,
+          1
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 1
+      },
+      {
+        "baseFret": 8,
+        "frets": [
+          -1,
+          8,
+          10,
+          9,
+          10,
+          8
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 8
+      }
+    ]
+  },
+  {
+    "symbol": "Fmaj9",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 1,
+        "frets": [
+          1,
+          3,
+          2,
+          2,
+          1,
+          3
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 1
+      },
+      {
+        "baseFret": 7,
+        "frets": [
+          -1,
+          8,
+          7,
+          9,
+          8,
+          -1
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 8
+      }
+    ]
+  },
+  {
+    "symbol": "Fsus2",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 1,
+        "frets": [
+          1,
+          3,
+          3,
+          0,
+          1,
+          1
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 1
+      },
+      {
+        "baseFret": 7,
+        "frets": [
+          -1,
+          8,
+          10,
+          7,
+          8,
+          8
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 8
+      },
+      {
+        "baseFret": 12,
+        "frets": [
+          13,
+          15,
+          15,
+          12,
+          13,
+          13
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 13
+      }
+    ]
+  },
+  {
+    "symbol": "Fsus4",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 1,
+        "frets": [
+          1,
+          3,
+          3,
+          3,
+          1,
+          1
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 1
+      }
+    ]
+  },
+  {
+    "symbol": "Fsus4add9",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 1,
+        "frets": [
+          1,
+          3,
+          3,
+          3,
+          1,
+          3
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 1
+      }
+    ]
+  },
+  {
+    "symbol": "F#",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 2,
+        "frets": [
+          2,
+          4,
+          4,
+          3,
+          2,
+          2
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 2
+      },
+      {
+        "baseFret": 9,
+        "frets": [
+          -1,
+          9,
+          11,
+          11,
+          11,
+          9
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 9
+      }
+    ]
+  },
+  {
+    "symbol": "F#11",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 9,
+        "frets": [
+          -1,
+          9,
+          9,
+          9,
+          11,
+          9
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 9
+      }
+    ]
+  },
+  {
+    "symbol": "F#13",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 2,
+        "frets": [
+          2,
+          4,
+          2,
+          3,
+          4,
+          -1
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 2
+      },
+      {
+        "baseFret": 2,
+        "frets": [
+          2,
+          4,
+          2,
+          3,
+          4,
+          2
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 2
+      },
+      {
+        "baseFret": 8,
+        "frets": [
+          -1,
+          9,
+          8,
+          9,
+          11,
+          11
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 9
+      }
+    ]
+  },
+  {
+    "symbol": "F#7",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 2,
+        "frets": [
+          2,
+          4,
+          2,
+          3,
+          2,
+          4
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 2
+      },
+      {
+        "baseFret": 9,
+        "frets": [
+          -1,
+          9,
+          11,
+          9,
+          11,
+          9
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 9
+      }
+    ]
+  },
+  {
+    "symbol": "F#7b9",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 2,
+        "frets": [
+          2,
+          4,
+          2,
+          3,
+          2,
+          3
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 2
+      }
+    ]
+  },
+  {
+    "symbol": "F#9",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 8,
+        "frets": [
+          -1,
+          9,
+          8,
+          9,
+          9,
+          -1
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 9
+      }
+    ]
+  },
+  {
+    "symbol": "F#dim",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 9,
+        "frets": [
+          -1,
+          9,
+          10,
+          9,
+          10,
+          9
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 9
+      }
+    ]
+  },
+  {
+    "symbol": "F#m",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 2,
+        "frets": [
+          2,
+          4,
+          4,
+          2,
+          2,
+          2
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 2
+      },
+      {
+        "baseFret": 9,
+        "frets": [
+          -1,
+          9,
+          11,
+          11,
+          10,
+          9
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 9
+      }
+    ]
+  },
+  {
+    "symbol": "F#m13",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 2,
+        "frets": [
+          2,
+          4,
+          2,
+          2,
+          4,
+          -1
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 2
+      },
+      {
+        "baseFret": 2,
+        "frets": [
+          2,
+          4,
+          2,
+          2,
+          4,
+          2
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 2
+      }
+    ]
+  },
+  {
+    "symbol": "F#m7",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 2,
+        "frets": [
+          2,
+          4,
+          2,
+          2,
+          2,
+          2
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 2
+      },
+      {
+        "baseFret": 9,
+        "frets": [
+          -1,
+          9,
+          11,
+          9,
+          10,
+          9
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 9
+      }
+    ]
+  },
+  {
+    "symbol": "F#maj7",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 2,
+        "frets": [
+          2,
+          4,
+          3,
+          3,
+          2,
+          2
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 2
+      },
+      {
+        "baseFret": 9,
+        "frets": [
+          -1,
+          9,
+          11,
+          10,
+          11,
+          9
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 9
+      }
+    ]
+  },
+  {
+    "symbol": "F#maj9",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 2,
+        "frets": [
+          2,
+          4,
+          3,
+          3,
+          2,
+          4
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 2
+      },
+      {
+        "baseFret": 8,
+        "frets": [
+          -1,
+          9,
+          8,
+          10,
+          9,
+          -1
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 9
+      }
+    ]
+  },
+  {
+    "symbol": "F#sus2",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 1,
+        "frets": [
+          2,
+          4,
+          4,
+          1,
+          2,
+          2
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 2
+      },
+      {
+        "baseFret": 8,
+        "frets": [
+          -1,
+          9,
+          11,
+          8,
+          9,
+          9
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 9
+      }
+    ]
+  },
+  {
+    "symbol": "F#sus4",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 2,
+        "frets": [
+          2,
+          4,
+          4,
+          4,
+          2,
+          2
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 2
+      }
+    ]
+  },
+  {
+    "symbol": "F#sus4add9",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 2,
+        "frets": [
+          2,
+          4,
+          4,
+          4,
+          2,
+          4
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 2
+      }
+    ]
+  },
+  {
+    "symbol": "G",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 3,
+        "frets": [
+          3,
+          5,
+          5,
+          4,
+          3,
+          3
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 3
+      },
+      {
+        "baseFret": 10,
+        "frets": [
+          -1,
+          10,
+          12,
+          12,
+          12,
+          10
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 10
+      }
+    ]
+  },
+  {
+    "symbol": "G11",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 10,
+        "frets": [
+          -1,
+          10,
+          10,
+          10,
+          12,
+          10
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 10
+      }
+    ]
+  },
+  {
+    "symbol": "G13",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 3,
+        "frets": [
+          3,
+          5,
+          3,
+          4,
+          5,
+          -1
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 3
+      },
+      {
+        "baseFret": 3,
+        "frets": [
+          3,
+          5,
+          3,
+          4,
+          5,
+          3
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 3
+      },
+      {
+        "baseFret": 9,
+        "frets": [
+          -1,
+          10,
+          9,
+          10,
+          12,
+          12
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 10
+      }
+    ]
+  },
+  {
+    "symbol": "G7",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 3,
+        "frets": [
+          3,
+          5,
+          3,
+          4,
+          3,
+          5
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 3
+      },
+      {
+        "baseFret": 10,
+        "frets": [
+          -1,
+          10,
+          12,
+          10,
+          12,
+          10
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 10
+      }
+    ]
+  },
+  {
+    "symbol": "G7b9",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 3,
+        "frets": [
+          3,
+          5,
+          3,
+          4,
+          3,
+          4
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 3
+      }
+    ]
+  },
+  {
+    "symbol": "G9",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 9,
+        "frets": [
+          -1,
+          10,
+          9,
+          10,
+          10,
+          -1
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 10
+      }
+    ]
+  },
+  {
+    "symbol": "Gdim",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 10,
+        "frets": [
+          -1,
+          10,
+          11,
+          10,
+          11,
+          10
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 10
+      }
+    ]
+  },
+  {
+    "symbol": "Gm",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 3,
+        "frets": [
+          3,
+          5,
+          5,
+          3,
+          3,
+          3
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 3
+      },
+      {
+        "baseFret": 10,
+        "frets": [
+          -1,
+          10,
+          12,
+          12,
+          11,
+          10
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 10
+      }
+    ]
+  },
+  {
+    "symbol": "Gm13",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 3,
+        "frets": [
+          3,
+          5,
+          3,
+          3,
+          5,
+          -1
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 3
+      },
+      {
+        "baseFret": 3,
+        "frets": [
+          3,
+          5,
+          3,
+          3,
+          5,
+          3
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 3
+      }
+    ]
+  },
+  {
+    "symbol": "Gm7",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 3,
+        "frets": [
+          3,
+          5,
+          3,
+          3,
+          3,
+          3
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 3
+      },
+      {
+        "baseFret": 10,
+        "frets": [
+          -1,
+          10,
+          12,
+          10,
+          11,
+          10
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 10
+      }
+    ]
+  },
+  {
+    "symbol": "Gmaj7",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 3,
+        "frets": [
+          3,
+          5,
+          4,
+          4,
+          3,
+          3
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 3
+      },
+      {
+        "baseFret": 10,
+        "frets": [
+          -1,
+          10,
+          12,
+          11,
+          12,
+          10
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 10
+      }
+    ]
+  },
+  {
+    "symbol": "Gmaj9",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 3,
+        "frets": [
+          3,
+          5,
+          4,
+          4,
+          3,
+          5
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 3
+      },
+      {
+        "baseFret": 9,
+        "frets": [
+          -1,
+          10,
+          9,
+          11,
+          10,
+          -1
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 10
+      }
+    ]
+  },
+  {
+    "symbol": "Gsus2",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 2,
+        "frets": [
+          3,
+          5,
+          5,
+          2,
+          3,
+          3
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 3
+      },
+      {
+        "baseFret": 9,
+        "frets": [
+          -1,
+          10,
+          12,
+          9,
+          10,
+          10
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 10
+      }
+    ]
+  },
+  {
+    "symbol": "Gsus4",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 3,
+        "frets": [
+          3,
+          5,
+          5,
+          5,
+          3,
+          3
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 3
+      }
+    ]
+  },
+  {
+    "symbol": "Gsus4add9",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 3,
+        "frets": [
+          3,
+          5,
+          5,
+          5,
+          3,
+          5
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 3
+      }
+    ]
+  },
+  {
+    "symbol": "G#",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 4,
+        "frets": [
+          4,
+          6,
+          6,
+          5,
+          4,
+          4
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 4
+      },
+      {
+        "baseFret": 11,
+        "frets": [
+          -1,
+          11,
+          13,
+          13,
+          13,
+          11
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 11
+      }
+    ]
+  },
+  {
+    "symbol": "G#11",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 11,
+        "frets": [
+          -1,
+          11,
+          11,
+          11,
+          13,
+          11
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 11
+      }
+    ]
+  },
+  {
+    "symbol": "G#13",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 4,
+        "frets": [
+          4,
+          6,
+          4,
+          5,
+          6,
+          -1
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 4
+      },
+      {
+        "baseFret": 4,
+        "frets": [
+          4,
+          6,
+          4,
+          5,
+          6,
+          4
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 4
+      },
+      {
+        "baseFret": 10,
+        "frets": [
+          -1,
+          11,
+          10,
+          11,
+          13,
+          13
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 11
+      }
+    ]
+  },
+  {
+    "symbol": "G#7",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 4,
+        "frets": [
+          4,
+          6,
+          4,
+          5,
+          4,
+          6
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 4
+      },
+      {
+        "baseFret": 11,
+        "frets": [
+          -1,
+          11,
+          13,
+          11,
+          13,
+          11
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 11
+      }
+    ]
+  },
+  {
+    "symbol": "G#7b9",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 4,
+        "frets": [
+          4,
+          6,
+          4,
+          5,
+          4,
+          5
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 4
+      }
+    ]
+  },
+  {
+    "symbol": "G#9",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 10,
+        "frets": [
+          -1,
+          11,
+          10,
+          11,
+          11,
+          -1
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 11
+      }
+    ]
+  },
+  {
+    "symbol": "G#dim",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 11,
+        "frets": [
+          -1,
+          11,
+          12,
+          11,
+          12,
+          11
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 11
+      }
+    ]
+  },
+  {
+    "symbol": "G#m",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 4,
+        "frets": [
+          4,
+          6,
+          6,
+          4,
+          4,
+          4
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 4
+      },
+      {
+        "baseFret": 11,
+        "frets": [
+          -1,
+          11,
+          13,
+          13,
+          12,
+          11
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 11
+      }
+    ]
+  },
+  {
+    "symbol": "G#m13",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 4,
+        "frets": [
+          4,
+          6,
+          4,
+          4,
+          6,
+          -1
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 4
+      },
+      {
+        "baseFret": 4,
+        "frets": [
+          4,
+          6,
+          4,
+          4,
+          6,
+          4
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 4
+      }
+    ]
+  },
+  {
+    "symbol": "G#m7",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 4,
+        "frets": [
+          4,
+          6,
+          4,
+          4,
+          4,
+          4
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 4
+      },
+      {
+        "baseFret": 11,
+        "frets": [
+          -1,
+          11,
+          13,
+          11,
+          12,
+          11
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 11
+      }
+    ]
+  },
+  {
+    "symbol": "G#maj7",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 4,
+        "frets": [
+          4,
+          6,
+          5,
+          5,
+          4,
+          4
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 4
+      },
+      {
+        "baseFret": 11,
+        "frets": [
+          -1,
+          11,
+          13,
+          12,
+          13,
+          11
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 11
+      }
+    ]
+  },
+  {
+    "symbol": "G#maj9",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 4,
+        "frets": [
+          4,
+          6,
+          5,
+          5,
+          4,
+          6
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 4
+      },
+      {
+        "baseFret": 10,
+        "frets": [
+          -1,
+          11,
+          10,
+          12,
+          11,
+          -1
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 11
+      }
+    ]
+  },
+  {
+    "symbol": "G#sus2",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 3,
+        "frets": [
+          4,
+          6,
+          6,
+          3,
+          4,
+          4
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 4
+      },
+      {
+        "baseFret": 10,
+        "frets": [
+          -1,
+          11,
+          13,
+          10,
+          11,
+          11
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 11
+      }
+    ]
+  },
+  {
+    "symbol": "G#sus4",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 4,
+        "frets": [
+          4,
+          6,
+          6,
+          6,
+          4,
+          4
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 4
+      }
+    ]
+  },
+  {
+    "symbol": "G#sus4add9",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 4,
+        "frets": [
+          4,
+          6,
+          6,
+          6,
+          4,
+          6
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 4
+      }
+    ]
+  },
+  {
+    "symbol": "A",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 5,
+        "frets": [
+          5,
+          7,
+          7,
+          6,
+          5,
+          5
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 5
+      },
+      {
+        "baseFret": 12,
+        "frets": [
+          -1,
+          12,
+          14,
+          14,
+          14,
+          12
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 12
+      }
+    ]
+  },
+  {
+    "symbol": "A11",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 12,
+        "frets": [
+          -1,
+          12,
+          12,
+          12,
+          14,
+          12
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 12
+      }
+    ]
+  },
+  {
+    "symbol": "A13",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 5,
+        "frets": [
+          5,
+          7,
+          5,
+          6,
+          7,
+          -1
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 5
+      },
+      {
+        "baseFret": 5,
+        "frets": [
+          5,
+          7,
+          5,
+          6,
+          7,
+          5
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 5
+      },
+      {
+        "baseFret": 11,
+        "frets": [
+          -1,
+          12,
+          11,
+          12,
+          14,
+          14
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 12
+      }
+    ]
+  },
+  {
+    "symbol": "A7",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 5,
+        "frets": [
+          5,
+          7,
+          5,
+          6,
+          5,
+          7
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 5
+      },
+      {
+        "baseFret": 12,
+        "frets": [
+          -1,
+          12,
+          14,
+          12,
+          14,
+          12
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 12
+      }
+    ]
+  },
+  {
+    "symbol": "A7b9",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 5,
+        "frets": [
+          5,
+          7,
+          5,
+          6,
+          5,
+          6
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 5
+      }
+    ]
+  },
+  {
+    "symbol": "A9",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 11,
+        "frets": [
+          -1,
+          12,
+          11,
+          12,
+          12,
+          -1
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 12
+      }
+    ]
+  },
+  {
+    "symbol": "Adim",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 12,
+        "frets": [
+          -1,
+          12,
+          13,
+          12,
+          13,
+          12
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 12
+      }
+    ]
+  },
+  {
+    "symbol": "Am",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 5,
+        "frets": [
+          5,
+          7,
+          7,
+          5,
+          5,
+          5
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 5
+      },
+      {
+        "baseFret": 12,
+        "frets": [
+          -1,
+          12,
+          14,
+          14,
+          13,
+          12
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 12
+      }
+    ]
+  },
+  {
+    "symbol": "Am13",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 5,
+        "frets": [
+          5,
+          7,
+          5,
+          5,
+          7,
+          -1
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 5
+      },
+      {
+        "baseFret": 5,
+        "frets": [
+          5,
+          7,
+          5,
+          5,
+          7,
+          5
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 5
+      }
+    ]
+  },
+  {
+    "symbol": "Am7",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 5,
+        "frets": [
+          5,
+          7,
+          5,
+          5,
+          5,
+          5
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 5
+      },
+      {
+        "baseFret": 12,
+        "frets": [
+          -1,
+          12,
+          14,
+          12,
+          13,
+          12
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 12
+      }
+    ]
+  },
+  {
+    "symbol": "Amaj7",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 5,
+        "frets": [
+          5,
+          7,
+          6,
+          6,
+          5,
+          5
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 5
+      },
+      {
+        "baseFret": 12,
+        "frets": [
+          -1,
+          12,
+          14,
+          13,
+          14,
+          12
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 12
+      }
+    ]
+  },
+  {
+    "symbol": "Amaj9",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 5,
+        "frets": [
+          5,
+          7,
+          6,
+          6,
+          5,
+          7
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 5
+      },
+      {
+        "baseFret": 11,
+        "frets": [
+          -1,
+          12,
+          11,
+          13,
+          12,
+          -1
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 12
+      }
+    ]
+  },
+  {
+    "symbol": "Asus2",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 4,
+        "frets": [
+          5,
+          7,
+          7,
+          4,
+          5,
+          5
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 5
+      },
+      {
+        "baseFret": 11,
+        "frets": [
+          -1,
+          12,
+          14,
+          11,
+          12,
+          12
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 12
+      }
+    ]
+  },
+  {
+    "symbol": "Asus4",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 5,
+        "frets": [
+          5,
+          7,
+          7,
+          7,
+          5,
+          5
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 5
+      }
+    ]
+  },
+  {
+    "symbol": "Asus4add9",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 5,
+        "frets": [
+          5,
+          7,
+          7,
+          7,
+          5,
+          7
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 5
+      }
+    ]
+  },
+  {
+    "symbol": "A#",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 1,
+        "frets": [
+          -1,
+          1,
+          3,
+          3,
+          3,
+          1
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 1
+      },
+      {
+        "baseFret": 6,
+        "frets": [
+          6,
+          8,
+          8,
+          7,
+          6,
+          6
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 6
+      }
+    ]
+  },
+  {
+    "symbol": "A#11",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 1,
+        "frets": [
+          -1,
+          1,
+          1,
+          1,
+          3,
+          1
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 1
+      }
+    ]
+  },
+  {
+    "symbol": "A#13",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 1,
+        "frets": [
+          -1,
+          1,
+          0,
+          1,
+          3,
+          3
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 1
+      },
+      {
+        "baseFret": 6,
+        "frets": [
+          6,
+          8,
+          6,
+          7,
+          8,
+          -1
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 6
+      },
+      {
+        "baseFret": 6,
+        "frets": [
+          6,
+          8,
+          6,
+          7,
+          8,
+          6
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 6
+      }
+    ]
+  },
+  {
+    "symbol": "A#7",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 1,
+        "frets": [
+          -1,
+          1,
+          3,
+          1,
+          3,
+          1
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 1
+      },
+      {
+        "baseFret": 6,
+        "frets": [
+          6,
+          8,
+          6,
+          7,
+          6,
+          8
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 6
+      }
+    ]
+  },
+  {
+    "symbol": "A#7b9",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 6,
+        "frets": [
+          6,
+          8,
+          6,
+          7,
+          6,
+          7
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 6
+      }
+    ]
+  },
+  {
+    "symbol": "A#9",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 1,
+        "frets": [
+          -1,
+          1,
+          0,
+          1,
+          1,
+          -1
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 1
+      },
+      {
+        "baseFret": 12,
+        "frets": [
+          -1,
+          13,
+          12,
+          13,
+          13,
+          -1
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 13
+      }
+    ]
+  },
+  {
+    "symbol": "A#dim",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 1,
+        "frets": [
+          -1,
+          1,
+          2,
+          1,
+          2,
+          1
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 1
+      }
+    ]
+  },
+  {
+    "symbol": "A#m",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 1,
+        "frets": [
+          -1,
+          1,
+          3,
+          3,
+          2,
+          1
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 1
+      },
+      {
+        "baseFret": 6,
+        "frets": [
+          6,
+          8,
+          8,
+          6,
+          6,
+          6
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 6
+      }
+    ]
+  },
+  {
+    "symbol": "A#m13",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 6,
+        "frets": [
+          6,
+          8,
+          6,
+          6,
+          8,
+          -1
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 6
+      },
+      {
+        "baseFret": 6,
+        "frets": [
+          6,
+          8,
+          6,
+          6,
+          8,
+          6
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 6
+      }
+    ]
+  },
+  {
+    "symbol": "A#m7",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 1,
+        "frets": [
+          -1,
+          1,
+          3,
+          1,
+          2,
+          1
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 1
+      },
+      {
+        "baseFret": 6,
+        "frets": [
+          6,
+          8,
+          6,
+          6,
+          6,
+          6
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 6
+      }
+    ]
+  },
+  {
+    "symbol": "A#maj7",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 1,
+        "frets": [
+          -1,
+          1,
+          3,
+          2,
+          3,
+          1
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 1
+      },
+      {
+        "baseFret": 6,
+        "frets": [
+          6,
+          8,
+          7,
+          7,
+          6,
+          6
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 6
+      }
+    ]
+  },
+  {
+    "symbol": "A#maj9",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 1,
+        "frets": [
+          -1,
+          1,
+          0,
+          2,
+          1,
+          -1
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 1
+      },
+      {
+        "baseFret": 6,
+        "frets": [
+          6,
+          8,
+          7,
+          7,
+          6,
+          8
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 6
+      },
+      {
+        "baseFret": 12,
+        "frets": [
+          -1,
+          13,
+          12,
+          14,
+          13,
+          -1
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 13
+      }
+    ]
+  },
+  {
+    "symbol": "A#sus2",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 1,
+        "frets": [
+          -1,
+          1,
+          3,
+          0,
+          1,
+          1
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 1
+      },
+      {
+        "baseFret": 5,
+        "frets": [
+          6,
+          8,
+          8,
+          5,
+          6,
+          6
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 6
+      },
+      {
+        "baseFret": 12,
+        "frets": [
+          -1,
+          13,
+          15,
+          12,
+          13,
+          13
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 13
+      }
+    ]
+  },
+  {
+    "symbol": "A#sus4",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 6,
+        "frets": [
+          6,
+          8,
+          8,
+          8,
+          6,
+          6
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 6
+      }
+    ]
+  },
+  {
+    "symbol": "A#sus4add9",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 6,
+        "frets": [
+          6,
+          8,
+          8,
+          8,
+          6,
+          8
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 6
+      }
+    ]
+  },
+  {
+    "symbol": "B",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 2,
+        "frets": [
+          -1,
+          2,
+          4,
+          4,
+          4,
+          2
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 2
+      },
+      {
+        "baseFret": 7,
+        "frets": [
+          7,
+          9,
+          9,
+          8,
+          7,
+          7
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 7
+      }
+    ]
+  },
+  {
+    "symbol": "B11",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 2,
+        "frets": [
+          -1,
+          2,
+          2,
+          2,
+          4,
+          2
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 2
+      }
+    ]
+  },
+  {
+    "symbol": "B13",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 1,
+        "frets": [
+          -1,
+          2,
+          1,
+          2,
+          4,
+          4
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 2
+      },
+      {
+        "baseFret": 7,
+        "frets": [
+          7,
+          9,
+          7,
+          8,
+          9,
+          -1
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 7
+      },
+      {
+        "baseFret": 7,
+        "frets": [
+          7,
+          9,
+          7,
+          8,
+          9,
+          7
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 7
+      }
+    ]
+  },
+  {
+    "symbol": "B7",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 2,
+        "frets": [
+          -1,
+          2,
+          4,
+          2,
+          4,
+          2
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 2
+      },
+      {
+        "baseFret": 7,
+        "frets": [
+          7,
+          9,
+          7,
+          8,
+          7,
+          9
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 7
+      }
+    ]
+  },
+  {
+    "symbol": "B7b9",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 7,
+        "frets": [
+          7,
+          9,
+          7,
+          8,
+          7,
+          8
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 7
+      }
+    ]
+  },
+  {
+    "symbol": "B9",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 1,
+        "frets": [
+          -1,
+          2,
+          1,
+          2,
+          2,
+          -1
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 2
+      }
+    ]
+  },
+  {
+    "symbol": "Bdim",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 2,
+        "frets": [
+          -1,
+          2,
+          3,
+          2,
+          3,
+          2
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 2
+      }
+    ]
+  },
+  {
+    "symbol": "Bm",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 2,
+        "frets": [
+          -1,
+          2,
+          4,
+          4,
+          3,
+          2
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 2
+      },
+      {
+        "baseFret": 7,
+        "frets": [
+          7,
+          9,
+          9,
+          7,
+          7,
+          7
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 7
+      }
+    ]
+  },
+  {
+    "symbol": "Bm13",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 7,
+        "frets": [
+          7,
+          9,
+          7,
+          7,
+          9,
+          -1
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 7
+      },
+      {
+        "baseFret": 7,
+        "frets": [
+          7,
+          9,
+          7,
+          7,
+          9,
+          7
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 7
+      }
+    ]
+  },
+  {
+    "symbol": "Bm7",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 2,
+        "frets": [
+          -1,
+          2,
+          4,
+          2,
+          3,
+          2
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 2
+      },
+      {
+        "baseFret": 7,
+        "frets": [
+          7,
+          9,
+          7,
+          7,
+          7,
+          7
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 7
+      }
+    ]
+  },
+  {
+    "symbol": "Bmaj7",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 2,
+        "frets": [
+          -1,
+          2,
+          4,
+          3,
+          4,
+          2
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 2
+      },
+      {
+        "baseFret": 7,
+        "frets": [
+          7,
+          9,
+          8,
+          8,
+          7,
+          7
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 7
+      }
+    ]
+  },
+  {
+    "symbol": "Bmaj9",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 1,
+        "frets": [
+          -1,
+          2,
+          1,
+          3,
+          2,
+          -1
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 2
+      },
+      {
+        "baseFret": 7,
+        "frets": [
+          7,
+          9,
+          8,
+          8,
+          7,
+          9
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 7
+      }
+    ]
+  },
+  {
+    "symbol": "Bsus2",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 1,
+        "frets": [
+          -1,
+          2,
+          4,
+          1,
+          2,
+          2
+        ],
+        "gridFrets": 4,
+        "rootString": 2,
+        "rootFret": 2
+      },
+      {
+        "baseFret": 6,
+        "frets": [
+          7,
+          9,
+          9,
+          6,
+          7,
+          7
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 7
+      }
+    ]
+  },
+  {
+    "symbol": "Bsus4",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 7,
+        "frets": [
+          7,
+          9,
+          9,
+          9,
+          7,
+          7
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 7
+      }
+    ]
+  },
+  {
+    "symbol": "Bsus4add9",
+    "aliases": [],
+    "instrument": "guitar",
+    "variants": [
+      {
+        "baseFret": 7,
+        "frets": [
+          7,
+          9,
+          9,
+          9,
+          7,
+          9
+        ],
+        "gridFrets": 4,
+        "rootString": 1,
+        "rootFret": 7
+      }
+    ]
+  }
+]
