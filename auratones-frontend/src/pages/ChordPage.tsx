@@ -13,6 +13,9 @@ import ChordEditorDialog from "../components/chord/ChordEditorDialog";
 
 import { RECIPES, ALL_RECIPE_IDS } from "../data/recipes";
 
+// ⬇️ NEW: dịch vụ gọi backend & merge
+import { fetchChords, mergeChordEntries } from "../services/chords";
+
 // ====== Helper: tạo symbol từ root + short label ======
 function makeSymbol(root: string, short: string) {
   return `${root}${short}`;
@@ -83,8 +86,34 @@ export default function ChordPage() {
   const [editorInstrument, setEditorInstrument] = useState<Instrument>("guitar");
   const [editorSymbol, setEditorSymbol] = useState<string>("");
 
-  // Danh sách hợp âm (mặc định chưa có voicing)
-  const allChords = useMemo(() => buildDefaultChordList(instrument), [instrument]);
+  // NEW: trạng thái tải dữ liệu từ backend
+  const [serverChords, setServerChords] = useState<ChordEntry[] | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  // Lưới mặc định (variants rỗng)
+  const defaultGrid = useMemo(() => buildDefaultChordList(instrument), [instrument]);
+
+  // Gọi API khi đổi instrument
+  useEffect(() => {
+    let alive = true;
+    setLoading(true);
+    setErr(null);
+    setServerChords(null);
+
+    fetchChords(instrument)
+      .then((items) => { if (alive) setServerChords(items); console.log(items) })
+      .catch((e) => { if (alive) setErr(e?.message ?? "Lỗi tải dữ liệu"); })
+      .finally(() => { if (alive) setLoading(false); });
+
+    return () => { alive = false; };
+  }, [instrument]);
+
+  // ======= Merge backend + default =======
+  const allChords = useMemo(() => {
+    const be = serverChords ?? [];
+    return mergeChordEntries(defaultGrid, be);
+  }, [defaultGrid, serverChords]);
 
   // Áp dụng filter & search
   const filtered = useMemo(() => {
@@ -304,6 +333,10 @@ export default function ChordPage() {
                 </button>
               </div>
             </header>
+
+            {/* Trạng thái tải/ lỗi (nhẹ nhàng, không đổi layout) */}
+            {loading && <div className="empty-state">Đang tải hợp âm từ máy chủ…</div>}
+            {err && !loading && <div className="empty-state">Không tải được dữ liệu: {err}</div>}
 
             {/* Chế độ gọn: root chips phía trên grid */}
             {compactNav && visibleRoots.length > 0 && (
