@@ -65,8 +65,16 @@ const Header: React.FC = () => {
     return parts.map((p: string) => p?.[0]?.toUpperCase() ?? "").join("");
   }, [user]);
 
-  const plan = (user?.plan || "free") as "free" | "pro" | "enterprise";
-  const planLabel = plan === "pro" ? "Pro" : plan === "enterprise" ? "Enterprise" : "Free";
+  const plan = (user?.plan || "free") as "free" | "pro" | "enterprise" | "admin";
+
+  const planLabel =
+    plan === "pro"
+      ? "Pro"
+      : plan === "enterprise"
+      ? "Enterprise"
+      : plan === "admin"
+      ? "Admin"
+      : "Free";
 
   const openAuth = useCallback(() => setAuthOpen(true), []);
   const closeAuth = useCallback(() => setAuthOpen(false), []);

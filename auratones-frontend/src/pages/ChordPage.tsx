@@ -1,4 +1,3 @@
-// src/pages/ChordPage.tsx
 import { useMemo, useState, useCallback, useEffect, useRef } from "react";
 import type { ChordEntry, Instrument } from "../types/chord";
 import ChordCard from "../components/chord/ChordCard";
@@ -11,15 +10,8 @@ import { useDialog } from "../contexts/DialogContext";
 import AddChordDialog from "../components/chord/AddChordDialog";
 import ChordEditorDialog from "../components/chord/ChordEditorDialog";
 
-import { RECIPES, ALL_RECIPE_IDS } from "../data/recipes";
-
-// ⬇️ NEW: dịch vụ gọi backend & merge
-import { fetchChords, mergeChordEntries } from "../services/chords";
-
-// ====== Helper: tạo symbol từ root + short label ======
-function makeSymbol(root: string, short: string) {
-  return `${root}${short}`;
-}
+// ⬇️ Dùng dịch vụ gọi backend (không còn merge/default grid)
+import { fetchChords, postChord } from "../services/chords";
 
 // ====== Tập root hiển thị (thứ tự hiển thị ở sidebar) ======
 const ROOTS = [
@@ -40,24 +32,6 @@ function getRootFromSymbol(symbol: string): RootName | null {
   return (ROOTS as readonly string[]).includes(r) ? (r as RootName) : null;
 }
 
-// Sinh data “mặc định chưa có voicing” cho một nhạc cụ
-function buildDefaultChordList(instrument: Instrument): ChordEntry[] {
-  const out: ChordEntry[] = [];
-  for (const root of ROOTS) {
-    for (const rid of ALL_RECIPE_IDS) {
-      const short = RECIPES[rid]?.short ?? "";
-      const symbol = makeSymbol(root, short);
-      out.push({
-        symbol,
-        aliases: [],
-        instrument,
-        variants: [], // ⬅️ mặc định chưa có voicing
-      });
-    }
-  }
-  return out;
-}
-
 // ====== Bộ lọc demo cũ giữ nguyên ======
 const FILTERS = {
   none: [] as string[],
@@ -74,25 +48,20 @@ export default function ChordPage() {
   const [filterKey, setFilterKey] = useState<FilterKey>("none");
   const [openChord, setOpenChord] = useState<ChordEntry | null>(null);
 
-  const { isAuthenticated, isLoading } = useAuthContext();
+  // ✅ lấy isAdmin từ AuthContext (thay vì hardcode)
+  const { isAuthenticated, isLoading, isAdmin } = useAuthContext();
   const [authOpen, setAuthOpen] = useState(false);
   const { addChord, openAddChord, closeAddChord } = useDialog();
-
-  // TODO: thay bằng flag thực từ AuthContext nếu có
-  const isAdmin = false;
 
   // Editor
   const [editorOpen, setEditorOpen] = useState(false);
   const [editorInstrument, setEditorInstrument] = useState<Instrument>("guitar");
   const [editorSymbol, setEditorSymbol] = useState<string>("");
 
-  // NEW: trạng thái tải dữ liệu từ backend
+  // ===== Backend data (CHỈ dùng dữ liệu từ collection) =====
   const [serverChords, setServerChords] = useState<ChordEntry[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
-
-  // Lưới mặc định (variants rỗng)
-  const defaultGrid = useMemo(() => buildDefaultChordList(instrument), [instrument]);
 
   // Gọi API khi đổi instrument
   useEffect(() => {
@@ -102,20 +71,24 @@ export default function ChordPage() {
     setServerChords(null);
 
     fetchChords(instrument)
-      .then((items) => { if (alive) setServerChords(items); console.log(items) })
+      .then((items) => {
+        if (!alive) return;
+        // Bảo toàn type và sắp xếp ổn định theo symbol (để UI consistent)
+        const sorted = Array.isArray(items)
+          ? [...items].sort((a, b) => a.symbol.localeCompare(b.symbol))
+          : [];
+        setServerChords(sorted);
+      })
       .catch((e) => { if (alive) setErr(e?.message ?? "Lỗi tải dữ liệu"); })
       .finally(() => { if (alive) setLoading(false); });
 
     return () => { alive = false; };
   }, [instrument]);
 
-  // ======= Merge backend + default =======
-  const allChords = useMemo(() => {
-    const be = serverChords ?? [];
-    return mergeChordEntries(defaultGrid, be);
-  }, [defaultGrid, serverChords]);
+  // ======= Danh sách HỢP LỆ để render (chỉ từ backend) =======
+  const allChords = useMemo<ChordEntry[]>(() => serverChords ?? [], [serverChords]);
 
-  // Áp dụng filter & search
+  // Áp dụng filter & search (giữ nguyên hành vi)
   const filtered = useMemo(() => {
     let list = allChords;
 
@@ -133,10 +106,11 @@ export default function ChordPage() {
       });
     }
 
+    // Sort by symbol để nhất quán UI
     return [...list].sort((a, b) => a.symbol.localeCompare(b.symbol));
   }, [allChords, query, filterKey]);
 
-  // Gom nhóm theo root để tạo section + sidebar
+  // Gom nhóm theo root để tạo section + sidebar (giữ nguyên cách hiển thị/thu gọn)
   const grouped = useMemo(() => {
     const map = new Map<RootName, ChordEntry[]>();
     for (const r of ROOTS) map.set(r as RootName, []);
@@ -212,28 +186,38 @@ export default function ChordPage() {
 
   // ====== Submit từ Editor ======
   const handleSubmitEditor = useCallback(
-    (payload: {
+    async (payload: {
       instrument: Instrument;
       symbol: string;
       variants: any[]; // ChordShape[]
       visibility: "system" | "private" | "contribute";
     }) => {
-      if (payload.visibility === "system" && !isAdmin) {
-        (window as any).__toast?.("Bạn không có quyền thêm vào hệ thống.", "error");
-        return;
+      try {
+        const res = await postChord({
+          instrument: payload.instrument,
+          symbol: payload.symbol,
+          variants: payload.variants,
+          // ✅ admin luôn gửi system, user luôn contribute
+          visibility: isAdmin ? "system" : "contribute",
+        });
+
+        (window as any).__toast?.(
+          isAdmin ? "Đã gửi hợp âm vào hệ thống." : "Đã gửi bản đóng góp (preview).",
+          "success"
+        );
+        console.log("[postChord][response]", res);
+        setEditorOpen(false);
+
+        // tuỳ bạn: có thể refetch để thấy item mới (nếu backend đã ghi thật)
+        // const fresh = await fetchChords(instrument);
+        // setServerChords(fresh);
+
+      } catch (e: any) {
+        console.error(e);
+        (window as any).__toast?.(e?.message || "Gửi hợp âm thất bại", "error");
       }
-      console.log("[editor-submit]", payload);
-      (window as any).__toast?.(
-        payload.visibility === "system"
-          ? "Đã bổ sung vào hệ thống."
-          : payload.visibility === "private"
-          ? "Đã lưu hợp âm vào kho cá nhân."
-          : "Đã gửi hợp âm để kiểm duyệt. Cảm ơn bạn!",
-        "success"
-      );
-      setEditorOpen(false);
     },
-    [isAdmin]
+    [isAdmin] 
   );
 
   return (

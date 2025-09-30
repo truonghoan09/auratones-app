@@ -2,6 +2,7 @@
 const express = require("express");
 const router = express.Router();
 const { db } = require("../firebase");
+const requireAdmin = require("../middleware/requireAdmin");
 
 /**
  * GET /api/chords?instrument=guitar|ukulele|piano
@@ -50,6 +51,67 @@ router.get("/", async (req, res) => {
     res.status(500).json({ error: e?.message || "internal error" });
   }
 });
+
+// router.post('/', requireAuth, requireAdmin, async (req, res) => {
+//   try {
+//     const { symbol, instrument, aliases = [], variants = [] } = req.body || {};
+
+//     if (!symbol || !instrument) {
+//       return res.status(400).json({ error: 'symbol & instrument are required' });
+//     }
+//     // ràng buộc đơn giản
+//     if (!['guitar', 'ukulele', 'piano'].includes(String(instrument))) {
+//       return res.status(400).json({ error: 'instrument must be guitar|ukulele|piano' });
+//     }
+
+//     const id = normalizeId(instrument, symbol);
+//     const docRef = db.collection('chords').doc(id);
+
+//     // upsert
+//     await docRef.set(
+//       {
+//         symbol: String(symbol),
+//         instrument: String(instrument),
+//         aliases: Array.isArray(aliases) ? aliases : [],
+//         variants: Array.isArray(variants) ? variants : [],
+//         updatedAt: new Date(),
+//       },
+//       { merge: true }
+//     );
+
+//     const saved = await docRef.get();
+//     return res.status(201).json({ item: saved.data() });
+//   } catch (e) {
+//     console.error('[POST /api/chords] error', e);
+//     return res.status(500).json({ error: 'Internal error' });
+//   }
+// });
+
+router.post('/postChord', requireAdmin, (req, res) => {
+  const info = {
+    method: req.method,
+    path: req.originalUrl,
+    from: req.ip,
+    headers: {
+      'content-type': req.get('content-type'),
+      'x-role': req.get('x-role'),
+      'user-agent': req.get('user-agent'),
+    },
+    body: req.body, // chính là payload FE gửi lên
+  };
+
+  console.log('===== [CHORD PREVIEW] =====');
+  console.log(JSON.stringify(info, null, 2));
+  console.log('============================');
+
+  // Trả về echo cho FE xem luôn
+  res.json({
+    ok: true,
+    message: 'Preview received (not saved)',
+    received: req.body,
+  });
+});
+
 
 module.exports = router;
 

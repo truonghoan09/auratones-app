@@ -1,24 +1,47 @@
 // src/services/chords.ts
-import type { ChordEntry, Instrument } from "../types/chord";
+import type { ChordEntry, Instrument, ChordShape } from "../types/chord";
 
-/** Base URL cho backend:
- * .env của bạn đang để: VITE_API_BASE=http://localhost:3001/api
- * nên API_BASE sẽ = "http://localhost:3001/api"
- */
-const API_BASE = (import.meta as any)?.env?.VITE_API_BASE?.replace(/\/+$/, "") || "";
+/** Vite env (cần file .env ở project root & restart dev server) */
+const { VITE_API_BASE, VITE_TOKEN_STORAGE_KEY } = import.meta.env as unknown as {
+  VITE_API_BASE?: string;
+  VITE_TOKEN_STORAGE_KEY?: string;
+};
 
-/** Gọi API lấy danh sách hợp âm theo instrument */
-export async function fetchChords(
-    instrument: Instrument
-): Promise<ChordEntry[]> {
-    const url = `http://localhost:3001/api/chords?instrument=${encodeURIComponent(instrument)}`;
-    console.log("API_BASE =", API_BASE);
+const API_BASE = (VITE_API_BASE || "").replace(/\/+$/, ""); // ví dụ: http://localhost:3001/api
+const TOKEN_KEY = VITE_TOKEN_STORAGE_KEY || "auratones_token";
 
-    console.log("FETCH =", `${API_BASE}/chords?instrument=${instrument}`);
+function getJwt(): string | null {
+  try {
+    return localStorage.getItem(TOKEN_KEY);
+  } catch {
+    return null;
+  }
+}
+
+/** GET: danh sách hợp âm theo instrument */
+export async function fetchChords(instrument: Instrument): Promise<ChordEntry[]> {
+  if (!API_BASE) {
+    // Gợi ý debug nhanh
+    console.warn(
+      "[chords] VITE_API_BASE chưa có. Hãy kiểm tra .env ở project root (cùng cấp index.html) và restart 'npm run dev'."
+    );
+    throw new Error("Missing VITE_API_BASE");
+  }
+
+  const url = `${API_BASE}/chords?instrument=${encodeURIComponent(instrument)}`;
+  // Debug nhẹ
+  // console.log("[fetchChords] GET", url);
+
+  const token = getJwt();
 
   const res = await fetch(url, {
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
+    method: "GET",
+    // Dùng JWT → không cần cookie phiên: tránh rắc rối CORS
+    credentials: "omit",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
   });
 
   if (!res.ok) {
@@ -30,37 +53,40 @@ export async function fetchChords(
   return Array.isArray(data?.items) ? data.items : [];
 }
 
-/** Merge lưới mặc định (variants=[]) với dữ liệu backend */
-export function mergeChordEntries(
-  defaultList: ChordEntry[],
-  backendList: ChordEntry[]
-): ChordEntry[] {
-  const keyOf = (c: ChordEntry) =>
-    `${c.instrument}::${c.symbol}`.toLowerCase();
 
-  const beMap = new Map<string, ChordEntry>();
-  backendList.forEach((c) => beMap.set(keyOf(c), c));
+/** POST: gửi chord mới (JWT trong Authorization; backend tự xác minh & kiểm tra role) */
+export async function postChord(payload: {
+  instrument: Instrument;
+  symbol: string;
+  variants: ChordShape[];
+  visibility: "system" | "contribute" | "private";
+}): Promise<any> {
+  if (!API_BASE) throw new Error("Missing VITE_API_BASE");
 
-  const out: ChordEntry[] = [];
+  // system -> /chords (admin only). Còn lại -> /chords/preview (ai cũng được)
+  const endpoint = payload.visibility === "system" ? "/postChords" : "/contributeChordOrprivate";
+  const url = `${API_BASE}${endpoint}`;
+  const token = getJwt();
 
-  // 1) đi qua default: merge nếu backend có
-  for (const d of defaultList) {
-    const k = keyOf(d);
-    const be = beMap.get(k);
-    if (be) {
-      out.push({
-        ...d,
-        aliases: be.aliases ?? d.aliases,
-        variants: be.variants ?? [],
-      });
-      beMap.delete(k);
-    } else {
-      out.push(d);
-    }
+  const res = await fetch(url, {
+    method: "POST",
+    credentials: "omit",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    let msg = "";
+    try {
+      msg = await res.text();
+    } catch {}
+    if (res.status === 401) throw new Error(msg || "Unauthorized: vui lòng đăng nhập lại.");
+    if (res.status === 403) throw new Error(msg || "Forbidden: bạn không có quyền thực hiện thao tác này.");
+    throw new Error(msg || `Request failed (${res.status}).`);
   }
 
-  // 2) phần dư từ backend: thêm mới
-  for (const rest of beMap.values()) out.push(rest);
-
-  return out;
+  return res.json();
 }

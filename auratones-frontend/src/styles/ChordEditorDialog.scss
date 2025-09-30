@@ -61,8 +61,8 @@
     padding: 6px 10px;
     border-radius: 999px;
     border: 1px solid color-mix(in srgb, var(--accent-color) 40%, transparent);
-    background: rgba(var(--accent-color-rgb), .08);
-    color: var(--accent-color);
+    background: rgba(var(--accent-color-rgb, 59, 122, 209), .08);
+    color: var(--accent-color, #3b7ad1);
     cursor: pointer;
     font-weight: 700;
   }
@@ -181,25 +181,26 @@
     user-select: none;
     cursor: pointer;
     transition: background 120ms ease, color 120ms ease, border-color 120ms ease, transform 60ms ease;
+    font-size: 14px;
 
     &:hover {
-      background: rgba(var(--accent-color-rgb), .09);
-      color: var(--accent-color);
-      border-color: rgba(var(--accent-color-rgb), .35);
+      background: rgba(var(--accent-color-rgb, 59, 122, 209), .09);
+      color: var(--accent-color, #3b7ad1);
+      border-color: rgba(var(--accent-color-rgb, 59, 122, 209), .35);
     }
 
     &.on {
-      background: var(--accent-color);
+      background: var(--accent-color, #3b7ad1);
       color: #fff;
-      border-color: var(--accent-color);
+      border-color: var(--accent-color, #3b7ad1);
       font-weight: 800;
-      box-shadow: 0 6px 16px rgba(var(--accent-color-rgb), .25);
+      box-shadow: 0 6px 16px rgba(var(--accent-color-rgb, 59, 122, 209), .25);
     }
 
     &.barre {
-      background: color-mix(in srgb, var(--accent-color) 80%, #000 0%);
+      background: color-mix(in srgb, var(--accent-color, #3b7ad1) 80%, #000 0%);
       color: #fff;
-      border-color: var(--accent-color);
+      border-color: var(--accent-color, #3b7ad1);
       font-weight: 900;
     }
 
@@ -213,9 +214,9 @@
         border-color: color-mix(in srgb, var(--danger-color) 60%, transparent);
       }
       &.open.active {
-        background: rgba(var(--accent-color-rgb), .10);
-        color: var(--accent-color);
-        border-color: rgba(var(--accent-color-rgb), .45);
+        background: rgba(var(--accent-color-rgb, 59, 122, 209), .10);
+        color: var(--accent-color, #3b7ad1);
+        border-color: rgba(var(--accent-color-rgb, 59, 122, 209), .45);
       }
     }
 
@@ -293,32 +294,60 @@
   justify-content: space-between;
   align-items: center;
   gap: 12px;
+
+  /* đảm bảo text nút luôn hiện rõ trong footer */
+  .btn-primary,
+  .btn-secondary {
+    font-size: 14px;
+    line-height: 1.1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
 }
 .editor-footer-note { opacity: .78; }
 
+/* ==== Buttons ==== */
 .btn-primary {
   padding: 8px 14px;
   border-radius: 999px;
   border: none;
   cursor: pointer;
   font-weight: 700;
-  background: var(--accent-color);
-  color: #fff;
-  box-shadow: 0 6px 18px rgba(var(--accent-color-rgb), 0.28);
+  background: var(--accent-color, #3b7ad1);
+  color: var(--text-color) !important;
+  box-shadow: 0 6px 18px rgba(var(--accent-color-rgb, 59, 122, 209), 0.28);
   transition: transform 120ms ease, box-shadow 120ms ease;
 
   &:hover {
     transform: translateY(-1px);
-    box-shadow: 0 10px 22px rgba(var(--accent-color-rgb), 0.36);
+    box-shadow: 0 10px 22px rgba(var(--accent-color-rgb, 59, 122, 209), 0.36);
+  }
+
+  &:disabled {
+    opacity: .6;
+    pointer-events: none;
+    color: var(--text-color) !important;
   }
 }
+
 .btn-secondary {
   padding: 8px 14px;
   border-radius: 999px;
   border: 1px solid color-mix(in srgb, var(--text-color) 20%, transparent);
-  background: transparent;
-  color: var(--text-color);
+  background: var(--card-background);
+  color: var(--text-color) !important;
   cursor: pointer;
+  transition: background 120ms ease;
+
+  &:hover {
+    background: color-mix(in srgb, var(--card-background) 92%, var(--background-color) 8%);
+  }
+
+  &:disabled {
+    opacity: .6;
+    pointer-events: none;
+  }
 }
 
 /* responsive */

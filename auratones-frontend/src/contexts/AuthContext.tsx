@@ -43,6 +43,9 @@ type AuthContextType = {
   isLoading: boolean;
   user: AuthUser | null;
 
+  /** ✅ mới: derive từ user.role */
+  isAdmin: boolean;
+
   getToken: () => string;
   loginWithToken: (token: string) => Promise<void>;
   logout: () => void;
@@ -98,6 +101,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // token reader ổn định
   const getToken = useCallback(() => getStoredToken(), []);
+
+  // ✅ derive isAdmin từ user.role (an toàn lowercase)
+  const isAdmin = (user?.role?.toLowerCase?.() === 'admin');
 
   // dedupe / throttle cho /auth/me
   const meInFlight = useRef<Promise<void> | null>(null);
@@ -218,6 +224,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isLoading,
       user,
 
+      // ✅ expose isAdmin
+      isAdmin,
+
       getToken,
       loginWithToken,
       logout,
@@ -233,6 +242,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAuthenticated,
       isLoading,
       user,
+      isAdmin,
       getToken,
       loginWithToken,
       logout,
