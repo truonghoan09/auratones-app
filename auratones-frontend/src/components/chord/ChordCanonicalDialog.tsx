@@ -1,8 +1,18 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import "../../styles/ChordCanonicalDialog.scss";
 import Toast from "../Toast";
 import { useToast } from "../../hooks/useToast";
 import type { Instrument } from "../../types/chord";
+
+/** ===== Public draft type để ChordPage lưu/khôi phục ===== */
+export type CanonicalDraft = {
+  rootPc: number;
+  recipeId: string;
+  useSlash: boolean;
+  bassPc?: number;
+  includeVoicing: boolean;
+};
+
 
 /** ===== Types ===== */
 type CanonicalPayload = {
@@ -21,7 +31,7 @@ type SubmitPayloadCanonical = {
     isSlash: boolean;
     recipeCode: string;
     canonicalIdHint: string;
-    includeVoicing: boolean; // ✅ comp cha kiểm tra để mở dialog voicing
+    includeVoicing: boolean; // để component cha kiểm tra và mở dialog voicing
   };
 };
 
@@ -30,6 +40,8 @@ type Props = {
   instrument: Instrument;
   initialSymbol?: string;
   isAdmin?: boolean;
+  /** ✅ thêm prop này để khôi phục state khi quay lại */
+  initialDraft?: CanonicalDraft | null;
   onClose: () => void;
   onSubmit: (payload: SubmitPayloadCanonical) => void; // chỉ gửi canonical + cờ includeVoicing
 };
@@ -70,8 +82,10 @@ const RECIPE_NORMALIZE: Record<string, string> = { major:"maj", minor:"m", dim:"
 const normalizeRecipeId = (id: string) => RECIPE_NORMALIZE[id] ?? id;
 
 const ChordCanonicalDialog: React.FC<Props> = ({
-  isOpen, instrument, initialSymbol = "", isAdmin = false, onClose, onSubmit,
+  isOpen, instrument, initialSymbol = "", isAdmin = false, initialDraft = null, onClose, onSubmit,
 }) => {
+  const hydratedRef = useRef(false);
+
   const { message, type, showToast, hideToast } = useToast();
 
   useEffect(() => {
@@ -86,16 +100,45 @@ const ChordCanonicalDialog: React.FC<Props> = ({
   const [bassPc, setBassPc] = useState<number | undefined>(undefined);
 
   /** ===== options ===== */
-  const [includeVoicing, setIncludeVoicing] = useState(false);
+  const [includeVoicing, setIncludeVoicing] = useState(true);
 
   /** ===== validation flags ===== */
   const [controlsInvalid, setControlsInvalid] = useState(false);
 
+  /** ✅ Hydrate từ initialDraft khi mở (Back từ Voicing) — nếu không có draft thì reset mặc định */
   useEffect(() => {
-    if (!isOpen) return;
-    setRootPc(0); setRecipeId("major"); setUseSlash(false); setBassPc(undefined);
-    setIncludeVoicing(false); setControlsInvalid(false);
-  }, [isOpen]);
+    if (!isOpen) {
+      // reset cờ khi đóng dialog
+      hydratedRef.current = false;
+      return;
+    }
+    console.log('[Canonical] isOpen:', isOpen, 'initialDraft:', initialDraft);
+
+    // Nếu có draft và CHƯA hydrate trong lần mở hiện tại -> set state từ draft
+    if (initialDraft && !hydratedRef.current) {
+      setRootPc(initialDraft.rootPc);
+      setRecipeId(initialDraft.recipeId);
+      setUseSlash(!!initialDraft.useSlash);
+      setBassPc(initialDraft.bassPc);
+      setIncludeVoicing(!!initialDraft.includeVoicing);
+      setControlsInvalid(false);
+      hydratedRef.current = true;
+      console.log('[Canonical] hydrated from draft');
+      return;
+    }
+
+    // Không có draft -> chỉ reset khi mở lần đầu (và chưa hydrate)
+    if (!initialDraft && !hydratedRef.current) {
+      setRootPc(0);
+      setRecipeId("major");
+      setUseSlash(false);
+      setBassPc(undefined);
+      setIncludeVoicing(true);
+      setControlsInvalid(false);
+      hydratedRef.current = true;
+      console.log('[Canonical] reset to defaults');
+    }
+  }, [isOpen, initialDraft]);
 
   const symbolPreview = useMemo(() => {
     const rootLabel = pcToLabel(rootPc, "sharp");
@@ -115,63 +158,16 @@ const ChordCanonicalDialog: React.FC<Props> = ({
     return { ok: errors.length === 0, errors };
   };
 
-  /** ====== helpers: build payload & submit handler ====== */
-  const buildCanonicalPayload = (): SubmitPayloadCanonical | null => {
-    const { ok, errors } = validate();
-    if (!ok) { showToast(errors[0], "error"); return null; }
-
-    const recipeCode = normalizeRecipeId(recipeId);
-    const baseCanonical = `r${rootPc}__${recipeCode}`;
-    const isSlash = !!(useSlash && typeof bassPc === "number");
-    const canonicalIdHint = isSlash ? `${baseCanonical}_b${bassPc}` : baseCanonical;
-
-    const canonical: CanonicalPayload = {
-      pc: rootPc,
-      recipeId,
-      ...(isSlash ? { bassPc } : {}),
-    };
-
-    const symbol = (() => {
-      const rootLabel = pcToLabel(rootPc, "sharp");
-      const suffix = RECIPE_SUFFIX[recipeId] ?? `(${recipeId})`;
-      const base = `${rootLabel}${suffix}`;
-      return isSlash ? `${base}/${pcToLabel(bassPc!, "sharp")}` : base;
-    })();
-
-    const payload: SubmitPayloadCanonical = {
-      instrument,
-      symbol,
-      visibility: isAdmin ? "system" : "contribute",
-      canonical,
-      meta: {
-        intent: (isSlash ? "UPSERT_SLASH_AND_OPTIONAL_VOICING" : "ADD_VOICING_CANONICAL"),
-        isSlash,
-        recipeCode,
-        canonicalIdHint,
-        includeVoicing, // ✅ để comp cha quyết định mở dialog voicing
-      },
-    };
-
-    return payload;
-  };
-
-  const handleSubmit = () => {
-    const payload = buildCanonicalPayload();
-    if (!payload) return;
-    onSubmit(payload); // gửi lên parent
-    onClose();         // đóng modal ngay sau khi submit
-  };
-
   if (!isOpen) return null;
 
   return (
     <>
       <div className="chord-modal">
         <div className="backdrop" onClick={onClose} />
-        {/* ✅ KHÔNG mở rộng dù includeVoicing = true (luôn dùng .compact) */}
+        {/* KHÔNG mở rộng khi includeVoicing = true: luôn .compact */}
         <div className={`panel chord-panel compact ${useSlash ? "has-slash" : ""}`}>
           <header>
-            <div className="title">Soạn hợp âm — Canonical</div>
+            <div className="title">Chọn phân loại hợp âm</div>
             <button className="close" onClick={onClose}>×</button>
           </header>
 
@@ -250,29 +246,22 @@ const ChordCanonicalDialog: React.FC<Props> = ({
                     }}
                     title="Bật/tắt hợp âm đảo bass"
                   >
-                    {/* SVG bootstrap sẽ lấy màu theo currentColor (đã style bằng SCSS) */}
-                    {useSlash ? (
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" className="bi bi-toggle-on" viewBox="0 0 16 16">
-                        <path d="M5 3a5 5 0 0 0 0 10h6a5 5 0 0 0 0-10zm6 9a4 4 0 1 1 0-8 4 4 0 0 1 0 8"/>
-                      </svg>
-                    ) : (
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" className="bi bi-toggle-off" viewBox="0 0 16 16">
-                        <path d="M11 4a4 4 0 0 1 0 8H8a5 5 0 0 0 2-4 5 5 0 0 0-2-4zm-6 8a4 4 0 1 1 0-8 4 4 0 0 1 0 8M0 8a5 5 0 0 0 5 5h6a5 5 0 0 0 0-10H5a5 5 0 0 0-5 5"/>
-                      </svg>
-                    )}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" className="bi bi-toggle-on" viewBox="0 0 16 16">
+                      <path d="M5 3a5 5 0 0 0 0 10h6a5 5 0 0 0 0-10zm6 9a4 4 0 1 1 0-8 4 4 0 0 1 0 8"/>
+                    </svg>
                     <span>Đảo bass</span>
                   </button>
                 </div>
 
-                {/* ✅ vẫn có tuỳ chọn “Gửi kèm voicing”, KHÔNG mở rộng modal */}
-                <div className="ctrl-cell cell-toggle-voicing">
-                  <button
-                    type="button"
-                    className={`toggle ${includeVoicing ? "is-on" : ""}`}
-                    aria-pressed={includeVoicing}
-                    onClick={() => setIncludeVoicing((v) => !v)}
-                    title="Gửi kèm voicing ở bước kế tiếp"
-                  >
+                {/* Toggle “Gửi kèm voicing” (checkbox ẩn + SVG bootstrap để ăn theme) */}
+                {/* <div className="ctrl-cell cell-toggle-voicing">
+                  <label className={`toggle ${includeVoicing ? "is-on" : ""}`} aria-pressed={includeVoicing}>
+                    <input
+                      type="checkbox"
+                      checked={includeVoicing}
+                      onChange={(e) => setIncludeVoicing(e.target.checked)}
+                      style={{ position: "absolute", opacity: 0, pointerEvents: "none" }}
+                    />
                     {includeVoicing ? (
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" className="bi bi-toggle-on" viewBox="0 0 16 16">
                         <path d="M5 3a5 5 0 0 0 0 10h6a5 5 0 0 0 0-10zm6 9a4 4 0 1 1 0-8 4 4 0 0 1 0 8"/>
@@ -283,8 +272,9 @@ const ChordCanonicalDialog: React.FC<Props> = ({
                       </svg>
                     )}
                     <span>Gửi kèm voicing</span>
-                  </button>
-                </div>
+                  </label>
+                </div> */}
+
               </div>
             </div>
           </div>
@@ -292,8 +282,42 @@ const ChordCanonicalDialog: React.FC<Props> = ({
           <footer className="editor-footer">
             <div>
               <button className="btn-secondary" onClick={onClose}>Hủy</button>
-              <button className="btn-primary" disabled={!canSubmit} onClick={handleSubmit}>
-                {isAdmin ? "Bổ sung vào hệ thống" : "Gửi"}
+              <button
+                className="btn-primary"
+                disabled={!canSubmit}
+                onClick={() => {
+                  const { ok, errors } = validate();
+                  if (!ok) { showToast(errors[0], "error"); return; }
+
+                  const recipeCode = normalizeRecipeId(recipeId);
+                  const baseCanonical = `r${rootPc}__${recipeCode}`;
+                  const isSlash = !!(useSlash && typeof bassPc === "number");
+                  const canonicalIdHint = isSlash ? `${baseCanonical}_b${bassPc}` : baseCanonical;
+
+                  const canonical: CanonicalPayload = { pc: rootPc, recipeId, ...(isSlash ? { bassPc } : {}) };
+                  const payload: SubmitPayloadCanonical = {
+                    instrument,
+                    symbol: (() => {
+                      const rootLabel = pcToLabel(rootPc, "sharp");
+                      const suffix = RECIPE_SUFFIX[recipeId] ?? `(${recipeId})`;
+                      const base = `${rootLabel}${suffix}`;
+                      return isSlash ? `${base}/${pcToLabel(bassPc!, "sharp")}` : base;
+                    })(),
+                    visibility: isAdmin ? "system" : "contribute",
+                    canonical,
+                    meta: {
+                      intent: (isSlash ? "UPSERT_SLASH_AND_OPTIONAL_VOICING" : "ADD_VOICING_CANONICAL"),
+                      isSlash,
+                      recipeCode,
+                      canonicalIdHint,
+                      includeVoicing,
+                    },
+                  };
+
+                  onSubmit(payload);
+                }}
+              >
+                Tiếp tục
               </button>
             </div>
           </footer>

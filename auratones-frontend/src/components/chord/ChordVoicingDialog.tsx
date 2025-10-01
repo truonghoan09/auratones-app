@@ -6,16 +6,19 @@ import type { Barre, ChordShape, Instrument } from "../../types/chord";
 
 type Props = {
   isOpen: boolean;
-  instrument: Instrument;
+  instrument: Instrument; // initial instrument từ ChordPage / Canonical
   symbol: string;
   onClose: () => void;
   onSubmit: (payload: { instrument: Instrument; symbol: string; variants: ChordShape[] }) => void;
+  onBack?: () => void;
 };
 
 const STRINGS_MAP: Record<Instrument, number> = { guitar: 6, ukulele: 4, piano: 88 };
 const FRET_MIN = 1;
 const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n));
+const INSTRUMENT_OPTIONS: Instrument[] = ["guitar", "ukulele", "piano"];
 
+/** ===== EditorGrid giữ nguyên ===== */
 const EditorGrid: React.FC<{
   instrument: Instrument;
   baseFret: number;
@@ -122,14 +125,22 @@ const EditorGrid: React.FC<{
   );
 };
 
-const ChordVoicingDialog: React.FC<Props> = ({ isOpen, instrument, symbol, onClose, onSubmit }) => {
+const ChordVoicingDialog: React.FC<Props> = ({ isOpen, instrument, symbol, onClose, onSubmit, onBack }) => {
   const { message, type, showToast, hideToast } = useToast();
-  const nStrings = STRINGS_MAP[instrument];
 
   useEffect(() => {
     (window as any).__toast = (msg: string, t?: 'success'|'error'|'info') => showToast(msg, t);
     return () => { (window as any).__toast = undefined; };
   }, [showToast]);
+
+  // ⬇️ selector nhạc cụ TẠI VOICING
+  const [selectedInstrument, setSelectedInstrument] = useState<Instrument>(instrument);
+  const nStrings = STRINGS_MAP[selectedInstrument];
+
+  useEffect(() => {
+    if (!isOpen) return;
+    setSelectedInstrument(instrument); // reset theo initial khi mở
+  }, [isOpen, instrument]);
 
   const [baseFret, setBaseFret] = useState(1);
   const [frets, setFrets] = useState<number[]>(Array.from({ length: nStrings }, () => 0));
@@ -138,15 +149,15 @@ const ChordVoicingDialog: React.FC<Props> = ({ isOpen, instrument, symbol, onClo
   const [rootString, setRootString] = useState<number | null>(null);
   const [visibleFrets, setVisibleFrets] = useState<4 | 5>(4);
 
+  // reset frets/fingers khi số dây thay đổi theo nhạc cụ
   useEffect(() => {
-    if (!isOpen) return;
-    setBaseFret(1);
     setFrets(Array.from({ length: nStrings }, () => 0));
     setFingers(Array.from({ length: nStrings }, () => 0));
     setBarres([]);
     setRootString(null);
     setVisibleFrets(4);
-  }, [isOpen, nStrings]);
+    setBaseFret(1);
+  }, [nStrings]);
 
   const rootFret = useMemo(() => {
     if (!rootString) return undefined;
@@ -180,9 +191,22 @@ const ChordVoicingDialog: React.FC<Props> = ({ isOpen, instrument, symbol, onClo
           </header>
 
           <div className="voicing-body card">
+            {/* Nhạc cụ */}
+            <div className="voicing-controls">
+              <label className="lbl" htmlFor="voicing-ins">Nhạc cụ</label>
+              <select
+                id="voicing-ins"
+                value={selectedInstrument}
+                onChange={(e) => setSelectedInstrument(e.target.value as Instrument)}
+                aria-label="Instrument"
+              >
+                {INSTRUMENT_OPTIONS.map((ins) => <option key={ins} value={ins}>{ins}</option>)}
+              </select>
+            </div>
+
             {/* Grid editor */}
             <EditorGrid
-              instrument={instrument}
+              instrument={selectedInstrument}
               baseFret={baseFret}
               frets={frets}
               setFrets={setFrets}
@@ -229,7 +253,7 @@ const ChordVoicingDialog: React.FC<Props> = ({ isOpen, instrument, symbol, onClo
                 </button>
               </div>
 
-              {instrument !== "piano" && (
+              {selectedInstrument !== "piano" && (
                 <div className="bf-group">
                   <span className="bf-label">Nốt gốc (dây)</span>
                   <select
@@ -248,9 +272,10 @@ const ChordVoicingDialog: React.FC<Props> = ({ isOpen, instrument, symbol, onClo
           </div>
 
           <footer className="editor-footer">
-            <div className="editor-footer-note">Shift + kéo để barre.</div>
             <div>
+              <button className="btn-secondary" onClick={onBack}>Quay lại</button>
               <button className="btn-secondary" onClick={onClose}>Hủy</button>
+            <div className="editor-footer-note">Shift + kéo để barre.</div>
               <button
                 className="btn-primary"
                 onClick={() => {
@@ -259,7 +284,7 @@ const ChordVoicingDialog: React.FC<Props> = ({ isOpen, instrument, symbol, onClo
                     (window as any).__toast?.("Voicing rỗng: đặt ít nhất 1 nốt hoặc barre.", "error");
                     return;
                   }
-                  onSubmit({ instrument, symbol, variants: [shape] });
+                  onSubmit({ instrument: selectedInstrument, symbol, variants: [shape] });
                 }}
               >
                 Lưu voicing
