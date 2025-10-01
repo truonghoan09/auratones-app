@@ -1,23 +1,51 @@
 /* src/components/Toast.scss */
+
 .toast {
-  padding: 10px 20px;
-  border-radius: 8px;
-  color: white;
-  margin-bottom: 10px;
   position: fixed;
-  bottom: 20px; /* Vị trí dưới cùng bên phải */
-  right: 20px;
-  z-index: 9999;
+  right: 20px;         /* góc phải */
+  bottom: 20px;        /* bên dưới */
+  z-index: 1000;
+
+  max-width: min(86vw, 460px);
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-weight: 700;
+
+  /* nền trung tính theo theme (dùng khi type không match) */
+  background: color-mix(in srgb, var(--background-color) 80%, var(--text-color) 20%);
+  color: var(--text-color);
+  border: 1px solid color-mix(in srgb, var(--text-color) 20%, transparent);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  /* hiệu ứng xuất hiện nhẹ */
+  opacity: 0;
+  transform: translateX(12px);
+  animation: toast-in 220ms ease-out forwards;
 }
 
 .toast.success {
-  background-color: #4CAF50;
+  background: color-mix(in srgb, #1db954 26%, var(--background-color) 74%);
+  border-color: color-mix(in srgb, #1db954 32%, transparent);
+  color: #fff;
 }
 
 .toast.error {
-  background-color: #f44336;
+  background: color-mix(in srgb, #ff4d4f 26%, var(--background-color) 74%);
+  border-color: color-mix(in srgb, #ff4d4f 32%, transparent);
+  color: #fff;
 }
 
 .toast.info {
-  background-color: #2196F3;
+  background: color-mix(in srgb, var(--accent-color) 22%, var(--background-color) 78%);
+  border-color: color-mix(in srgb, var(--accent-color) 32%, transparent);
+  color: #fff;
+}
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateX(12px); }
+  to   { opacity: 1; transform: translateX(0); }
 }

@@ -1,4 +1,3 @@
-// src/components/Toast.tsx
 import { useEffect } from 'react';
 import '../styles/toast.scss';
 
@@ -10,14 +9,16 @@ type ToastProps = {
 
 const Toast = ({ message, type = 'info', onClose }: ToastProps) => {
   useEffect(() => {
+    if (!message) return;
     const timer = setTimeout(() => {
       onClose();
-    }, 3000); // Tự đóng sau 3 giây
+    }, 3000);
     return () => clearTimeout(timer);
-  }, [onClose]);
+  }, [message, onClose]);
 
-const toastClasses = `toast ${type}`;
+  if (!message) return null;
 
+  const toastClasses = `toast ${type}`;
   return <div className={toastClasses}>{message}</div>;
 };
 

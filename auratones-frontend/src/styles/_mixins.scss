@@ -1,4 +1,6 @@
-// src/styles/_mixins.scss
+/* =======================
+   src/styles/_mixins.scss
+   ======================= */
 
 @mixin flex-center {
   display: flex;
@@ -7,7 +9,7 @@
 }
 
 @mixin button-styles {
-  // Thay thế biến SASS bằng biến CSS
+  /* Thay biến SASS bằng biến CSS theme-aware */
   padding: var(--spacing-sm) var(--spacing-md);
   border: none;
   border-radius: var(--border-radius-sm);
@@ -15,8 +17,80 @@
   font-weight: 500;
   cursor: pointer;
   transition: background-color 0.3s ease, color 0.3s ease;
-  
-  &:hover {
-    filter: brightness(1.1);
+
+  &:hover { filter: brightness(1.1); }
+}
+
+/* ===== Focus ring dùng cho input/select/btn (không px) ===== */
+@mixin focus-ring($color-var: --accent-color-rgb, $alpha: 0.18) {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 0.1875rem rgba(var(#{$color-var}), $alpha); /* 3px */
+}
+
+/* ===== Trạng thái invalid chung ===== */
+@mixin control-invalid(
+  $danger-var: --danger-color,
+  $danger-rgb: --danger-color-rgb
+) {
+  border-color: var(#{$danger-var}, #f44336) !important;
+  background-color: color-mix(in srgb, var(#{$danger-var}, #f44336) 6%, transparent);
+
+  &:focus {
+    box-shadow: 0 0 0 0.1875rem color-mix(in srgb, var(#{$danger-var}, #f44336) 30%, transparent);
   }
+}
+
+/* ====== SELECT base (fluid, theme-aware, đẹp sẵn caret) ======
+   Tham số:
+   - $h: chiều cao (mặc định 1.875rem ~ 30px)
+   - $minw: min-inline-size
+   - $pr: padding-right để chừa icon caret
+   - $pl: padding-left
+*/
+@mixin select-base(
+  $h: 1.875rem,
+  $minw: 6.5rem,
+  $pr: 2rem,
+  $pl: 0.75rem
+) {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  inline-size: auto;
+  min-inline-size: $minw;
+  max-inline-size: 100%;
+  block-size: $h;
+  padding: 0 $pr 0 $pl;
+
+  border-radius: 0.5rem; /* 8px */
+  border: 0.0625rem solid color-mix(in srgb, var(--text-color) 20%, transparent);
+  background:
+    var(--card-background)
+    url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='gray'>\
+<path d='M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.94l3.71-3.71a.75.75 0 0 1 1.08 1.04l-4.25 4.25a.75.75 0 0 1-1.06 0L5.21 8.27a.75.75 0 0 1 .02-1.06z'/>\
+</svg>") no-repeat right 0.5rem center;
+  background-size: 1rem auto;
+
+  color: var(--text-color);
+  font: inherit;
+  font-weight: 700;
+  line-height: 1;
+
+  transition: border-color 120ms ease, box-shadow 120ms ease, background-color 120ms ease;
+
+  &:hover {
+    border-color: color-mix(in srgb, var(--text-color) 40%, transparent);
+  }
+  &:focus { @include focus-ring(); }
+  &:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+    background-color: color-mix(in srgb, var(--card-background) 90%, var(--background-color) 10%);
+  }
+
+  /* Ẩn caret mặc định Edge/IE cũ */
+  &::-ms-expand { display: none; }
 }

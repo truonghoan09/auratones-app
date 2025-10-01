@@ -41,7 +41,6 @@
     color: var(--text-color);          /* 🟢 theo theme */
     transition: background 120ms ease, color 120ms ease, opacity 120ms ease;
 
-    /* underline slide-in (dùng currentColor để tương thích theme) */
     &::after {
       content: "";
       position: absolute;
@@ -57,34 +56,25 @@
     }
 
     &:hover {
-      background: rgba(var(--accent-color-rgb), 0.12); /* 🟢 theo theme */
+      background: rgba(var(--accent-color-rgb), 0.12);
       color: var(--accent-color);
     }
-    &:hover::after {
-      transform: scaleX(1);
-    }
+    &:hover::after { transform: scaleX(1); }
 
-    /* focus a11y */
     &:focus-visible {
       outline: 2px solid var(--accent-color);
       outline-offset: 2px;
     }
   }
 
-  /* trạng thái ĐANG CHỌN (được set bằng .active từ Header.tsx hoặc aria-current="page") */
   .nav-link.active,
   .nav-link[aria-current="page"] {
     position: relative;
-    background: rgba(var(--accent-color-rgb), 0.16); /* nền pill highlight */
+    background: rgba(var(--accent-color-rgb), 0.16);
     color: var(--accent-color);
     font-weight: 700;
 
-    /* bỏ underline */
-    &::after {
-      display: none;
-    }
-
-    /* hiệu ứng mượt pill */
+    &::after { display: none; }
     transition: background 200ms ease, color 200ms ease, font-weight 160ms ease;
   }
 }
@@ -101,7 +91,7 @@
   border: none;
   cursor: pointer;
   font-weight: 700;
-  background: var(--accent-color);                 /* 🟢 theo theme */
+  background: var(--accent-color);
   color: #fff;
   box-shadow: 0 6px 18px rgba(var(--accent-color-rgb), 0.28);
   transition: transform 120ms ease, box-shadow 120ms ease;
@@ -121,31 +111,23 @@
   flex-shrink: 0;
   border-radius: 50%;
   overflow: hidden;
-  padding: 0;                // tránh đệm làm hụt ảnh
-  border: 0;                 // ring sẽ dùng box-shadow
+  padding: 0;
+  border: 0;
   background: transparent;
   display: inline-grid; place-items: center;
   cursor: pointer;
   box-shadow: 0 0 0 1px rgb(var(--accent-color-rgb));
 
   img { 
-    width: 100%;
-    height: 100%;
-    display: block;
-    object-fit: cover;       // fill đủ
-    border-radius: inherit;  // tròn theo wrapper
-    transform: translateZ(0); // fix vài case blur nhẹ
+    width: 100%; height: 100%; display: block;
+    object-fit: cover; border-radius: inherit; transform: translateZ(0);
   }
 
-  .avatar-fallback {
-    font-weight: 700; font-size: 0.9rem;
-    color: var(--accent-color);                          /* 🟢 */
-  }
+  .avatar-fallback { font-weight: 700; font-size: 0.9rem; color: var(--accent-color); }
   .avatar-skeleton {
     width: 100%; height: 100%;
     background: linear-gradient(90deg, rgba(0,0,0,0.08), rgba(0,0,0,0.16), rgba(0,0,0,0.08));
-    background-size: 200% 100%;
-    animation: shimmer 1.2s infinite;
+    background-size: 200% 100%; animation: shimmer 1.2s infinite;
   }
 }
 
@@ -153,8 +135,8 @@
   position: absolute;
   right: 0; top: calc(100% + 8px);
   min-width: 280px;
-  background: var(--card-background);          /* 🟢 */
-  color: var(--text-color);                    /* 🟢 */
+  background: var(--card-background);
+  color: var(--text-color);
   border-radius: var(--border-radius-md);
   box-shadow: var(--box-shadow);
   padding: 8px;
@@ -169,9 +151,8 @@
     width: 48px; height: 48px; border-radius: 999px; object-fit: cover;
     &.fallback {
       display: grid; place-items: center;
-      background: rgba(var(--accent-color-rgb), 0.12);   /* 🟢 */
-      color: var(--accent-color);                        /* 🟢 */
-      font-weight: 700;
+      background: rgba(var(--accent-color-rgb), 0.12);
+      color: var(--accent-color); font-weight: 700;
     }
   }
 
@@ -179,20 +160,19 @@
   .dropdown-email { opacity: 0.8; font-size: 0.92rem; }
 }
 
-/* Badge theo theme — tránh hard-code */
+/* Badge theo theme */
 .plan-badge {
   margin-top: 6px;
   display: inline-block;
   padding: 2px 10px;
   border-radius: 999px;
   font-size: 0.75rem; font-weight: 800;
-  background: rgba(var(--accent-color-rgb), 0.12);       /* 🟢 */
-  color: var(--accent-color);                            /* 🟢 */
+  background: rgba(var(--accent-color-rgb), 0.12);
+  color: var(--accent-color);
 }
 
-/* Nếu vẫn muốn khác màu giữa các plan, map nhẹ theo theme */
-.plan-free       { opacity: 0.9; }
-.plan-pro        { background: rgba(0, 0, 0, 0.10); color: var(--text-color); }
+.plan-free { opacity: 0.9; }
+.plan-pro  { background: rgba(0, 0, 0, 0.10); color: var(--text-color); }
 .plan-enterprise { background: rgba(var(--accent-color-rgb), 0.18); color: var(--accent-color); }
 
 .dropdown-sep { margin: 6px 0; height: 1px; background: rgba(0,0,0,0.08); }
@@ -201,11 +181,42 @@
   width: 100%; text-align: left;
   background: transparent; border: none; cursor: pointer;
   padding: 10px 12px; border-radius: 8px;
-  color: var(--text-color); text-decoration: none;
-  display: block;
+  color: var(--text-color); text-decoration: none; display: block;
 
-  &:hover { background: rgba(var(--accent-color-rgb), 0.10); }  /* 🟢 */
-  &.danger { color: var(--danger-color); }                      /* 🟢 */
+  &:hover { background: rgba(var(--accent-color-rgb), 0.10); }
+  &.danger { color: var(--danger-color); }
+}
+
+/* ========= Icon Toggle (bi-toggle-off / bi-toggle-on) ========= */
+/* Chỉ đổi màu icon khi ON; không đổi nền. Hover vẫn dùng rule chung ở .dropdown-item:hover */
+.dropdown-item.icon-toggle {
+  display: flex; align-items: center; gap: 10px;
+  color: var(--text-color);
+}
+
+.icon-toggle__left {
+  display: inline-flex; width: 22px; height: 22px;
+  align-items: center; justify-content: center; flex-shrink: 0;
+  color: color-mix(in srgb, var(--text-color) 80%, transparent);
+  svg { display: block; width: 20px; height: 20px; }
+}
+
+.icon-toggle__label {
+  display: flex; flex-direction: column; line-height: 1.2;
+}
+.icon-toggle__label > .icon-toggle__value {
+  font-size: 12px; opacity: .85; margin-top: 2px;
+}
+
+/* ON: chỉ đổi màu icon, KHÔNG đổi background */
+.dropdown-item.icon-toggle.is-on .icon-toggle__left {
+  color: var(--accent-color);
+}
+
+/* a11y focus cho toggle */
+.dropdown-item.icon-toggle:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
 }
 
 @keyframes shimmer {

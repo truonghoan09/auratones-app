@@ -6,9 +6,15 @@ import { useAuthContext } from "../contexts/AuthContext";
 import LanguageSwitcher from "./LanguageSwitcher";
 import Auth from "./Auth";
 
+// Context quản lý chế độ hiển thị hợp âm (symbol/text)
+import { useDisplayMode } from "../contexts/DisplayModeContext";
+
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
+
+  const { mode, toggle } = useDisplayMode(); // "symbol" | "text"
+  const isSymbol = mode === "symbol";
 
   const { isAuthenticated, user, userAvatar, isLoading, logout } = useAuthContext();
   const location = useLocation();
@@ -66,7 +72,6 @@ const Header: React.FC = () => {
   }, [user]);
 
   const plan = (user?.plan || "free") as "free" | "pro" | "enterprise" | "admin";
-
   const planLabel =
     plan === "pro"
       ? "Pro"
@@ -176,6 +181,39 @@ const Header: React.FC = () => {
                   </div>
 
                   <div className="dropdown-sep" />
+
+                  {/* ==== Toggle hiển thị hợp âm: Symbol/Text với SVG Bootstrap ==== */}
+                  <button
+                    type="button"
+                    className={`dropdown-item icon-toggle${isSymbol ? " is-on" : ""}`}
+                    role="switch"
+                    aria-checked={isSymbol}
+                    onClick={toggle}
+                    title={isSymbol ? "Hiển thị: Symbol (Δ/–/ø/°)" : "Hiển thị: Text (maj/m/dim/aug)"}
+                  >
+                    <span className="icon-toggle__left">
+                      {/* bi-toggle-off / bi-toggle-on dùng currentColor */}
+                      {isSymbol ? (
+                        // ON
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                             viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                          <path fill="currentColor" d="M5 3a5 5 0 0 0 0 10h6a5 5 0 0 0 0-10zm6 9a4 4 0 1 1 0-8 4 4 0 0 1 0 8"/>
+                        </svg>
+                      ) : (
+                        // OFF
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                             viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                          <path fill="currentColor" d="M11 4a4 4 0 0 1 0 8H8a5 5 0 0 0 2-4 5 5 0 0 0-2-4zm-6 8a4 4 0 1 1 0-8 4 4 0 0 1 0 8M0 8a5 5 0 0 0 5 5h6a5 5 0 0 0 0-10H5a5 5 0 0 0-5 5"/>
+                        </svg>
+                      )}
+                    </span>
+                    <span className="icon-toggle__label">
+                      Hiển thị hợp âm
+                      <span className="icon-toggle__value">
+                        {isSymbol ? "Symbol (Δ/–/ø/°)" : "Text (maj/m/dim/aug)"}
+                      </span>
+                    </span>
+                  </button>
 
                   <Link to="/profile" className="dropdown-item" onClick={() => setIsMenuOpen(false)}>Hồ sơ</Link>
                   <Link to="/dashboard" className="dropdown-item" onClick={() => setIsMenuOpen(false)}>Dashboard</Link>

@@ -13,6 +13,7 @@ import { AuthProvider, useAuthContext } from './contexts/AuthContext';
 import { I18nProvider } from './contexts/I18nContext';
 import usePersistRoute from './hooks/usePersistRoute';
 import { DialogProvider } from './contexts/DialogContext';
+import { DisplayModeProvider } from './contexts/DisplayModeContext';
 
 const AppContent = () => {
     usePersistRoute();
@@ -44,15 +45,18 @@ const AppContent = () => {
 function App() {
     return (
         <Router>
-            <I18nProvider>
-                <ThemeProvider>
-                    <AuthProvider>
-                        <DialogProvider>
-                            <AppContent />
-                        </DialogProvider>
-                    </AuthProvider>
-                </ThemeProvider>
-            </I18nProvider>
+            <DisplayModeProvider>
+                <I18nProvider>
+                    <ThemeProvider>
+                        <AuthProvider>
+                            <DialogProvider>
+                                <AppContent />
+                            </DialogProvider>
+                        </AuthProvider>
+                    </ThemeProvider>
+                </I18nProvider>
+            </DisplayModeProvider>
+
         </Router>
     );
 }
