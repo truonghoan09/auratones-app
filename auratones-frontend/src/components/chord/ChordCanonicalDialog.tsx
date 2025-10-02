@@ -4,6 +4,10 @@ import Toast from "../Toast";
 import { useToast } from "../../hooks/useToast";
 import type { Instrument } from "../../types/chord";
 
+// ✅ NEW: dùng wrapper gọi API & type canonical
+import { apiGet } from "../../lib/api";
+import type { CanonicalDoc } from "../../types/chord-canonical";
+
 /** ===== Public draft type để ChordPage lưu/khôi phục ===== */
 export type CanonicalDraft = {
   rootPc: number;
@@ -12,7 +16,6 @@ export type CanonicalDraft = {
   bassPc?: number;
   includeVoicing: boolean;
 };
-
 
 /** ===== Types ===== */
 type CanonicalPayload = {
@@ -54,7 +57,7 @@ function pcToLabel(pc: number, prefer: "sharp"|"flat" = "sharp") {
   return (prefer === "flat" ? FLAT : SHARP)[PC(pc)];
 }
 
-/** ===== Recipe list ===== */
+/** ===== Recipe list (giữ nguyên) ===== */
 const RECIPE_OPTIONS: { id: string; label: string }[] = [
   { id: "major", label: "major" }, { id: "minor", label: "minor" },
   { id: "dim", label: "dim" }, { id: "aug", label: "aug" },
@@ -105,6 +108,34 @@ const ChordCanonicalDialog: React.FC<Props> = ({
   /** ===== validation flags ===== */
   const [controlsInvalid, setControlsInvalid] = useState(false);
 
+  /** ===== NEW: dữ liệu canonical & loading ===== */
+  const [canonicalItems, setCanonicalItems] = useState<CanonicalDoc[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  // Fetch canonical mỗi lần mở dialog
+  useEffect(() => {
+    if (!isOpen) return;
+    setLoading(true);
+    apiGet<{ items: CanonicalDoc[] }>("/chords_canonical?minimal=true")
+      .then(res => setCanonicalItems(Array.isArray(res.items) ? res.items : []))
+      .catch(err => {
+        console.error("[canonical] fetch error:", err);
+        showToast("Không tải được danh sách hợp âm canonical", "error");
+      })
+      .finally(() => setLoading(false));
+  }, [isOpen]);
+
+ // helper nhận diện canonical có đảo bass
+  const isSlashCanonical = (it: CanonicalDoc) =>
+    (it as any).hasSlash === true || /_b\d+$/i.test(String(it.id || ""));
+
+  // ✅ Chỉ lấy canonical KHÔNG đảo bass
+  const allowedRecipeIds = useMemo(() => {
+    const noSlash = (canonicalItems || []).filter(it => !isSlashCanonical(it));
+    return new Set(noSlash.map(it => String(it.recipeId)));
+  }, [canonicalItems]);
+
+
   /** ✅ Hydrate từ initialDraft khi mở (Back từ Voicing) — nếu không có draft thì reset mặc định */
   useEffect(() => {
     if (!isOpen) {
@@ -142,7 +173,7 @@ const ChordCanonicalDialog: React.FC<Props> = ({
 
   const symbolPreview = useMemo(() => {
     const rootLabel = pcToLabel(rootPc, "sharp");
-    const suffix = RECIPE_SUFFIX[recipeId] ?? `(${recipeId})`;
+    const suffix = RECIPE_SUFFIX[recipeId] ?? `(${recipeId})`; // GIỮ NGUYÊN LOGIC CŨ
     const base = `${rootLabel}${suffix}`;
     if (useSlash && typeof bassPc === "number") return `${base}/${pcToLabel(bassPc, "sharp")}`;
     return base;
@@ -154,6 +185,13 @@ const ChordCanonicalDialog: React.FC<Props> = ({
     const errors: string[] = [];
     if (rootPc === null || rootPc === undefined) { errors.push("Vui lòng chọn Nốt gốc."); }
     if (!recipeId) { errors.push("Vui lòng chọn Phân loại hợp âm."); }
+
+    // ✅ CHANGED: kiểm tra bằng id đã normalize
+    const normalized = normalizeRecipeId(recipeId);
+    if (!allowedRecipeIds.has(normalized)) {
+      errors.push("Phân loại hợp âm này chưa có trong canonical list.");
+    }
+
     setControlsInvalid(errors.length > 0);
     return { ok: errors.length === 0, errors };
   };
@@ -167,12 +205,15 @@ const ChordCanonicalDialog: React.FC<Props> = ({
         {/* KHÔNG mở rộng khi includeVoicing = true: luôn .compact */}
         <div className={`panel chord-panel compact ${useSlash ? "has-slash" : ""}`}>
           <header>
-            <div className="title">Chọn phân loại hợp âm</div>
+            <div className="title">
+              Chọn phân loại hợp âm
+              {loading && <span className="ml-8 small muted">Đang tải…</span>}
+            </div>
             <button className="close" onClick={onClose}>×</button>
           </header>
 
           <div className="editor-body editor-split">
-            <div className={`editor-controls card ${controlsInvalid ? "invalid" : ""} ${useSlash ? "has-slash" : ""}`}>
+            <div className={`editor-controls card ${controlsInvalid ? "invalid" : ""} ${useSlash ? "has-slash" : ""}`} aria-busy={loading ? "true" : undefined}>
               {/* HÀNG TRÊN */}
               <div className="ctrl-row-main">
                 <div className="ctrl-cell cell-root">
@@ -187,6 +228,7 @@ const ChordCanonicalDialog: React.FC<Props> = ({
                       if (typeof bassPc === "number" && bassPc === v) setBassPc(undefined);
                     }}
                     aria-label="Root"
+                    disabled={loading}
                   >
                     {SHARP.map((n, pc) => <option key={pc} value={pc}>{n}</option>)}
                   </select>
@@ -200,8 +242,18 @@ const ChordCanonicalDialog: React.FC<Props> = ({
                     value={recipeId}
                     onChange={(e) => setRecipeId(e.target.value)}
                     aria-label="Recipe"
+                    disabled={loading}
                   >
-                    {RECIPE_OPTIONS.map((r) => <option key={r.id} value={r.id}>{r.label}</option>)}
+                    {RECIPE_OPTIONS.map((r) => {
+                      // ✅ CHANGED: enable/disable dựa trên id đã normalize
+                      const normalized = normalizeRecipeId(r.id);
+                      const enabled = allowedRecipeIds.has(normalized);
+                      return (
+                        <option key={r.id} value={r.id} disabled={!enabled}>
+                          {r.label}
+                        </option>
+                      );
+                    })}
                   </select>
                 </div>
 
@@ -219,6 +271,7 @@ const ChordCanonicalDialog: React.FC<Props> = ({
                       }}
                       aria-label="Bass (đảo)"
                       title="Nốt bass cho hợp âm đảo (để -- nếu không dùng)"
+                      disabled={loading}
                     >
                       <option value="">{`--`}</option>
                       {SHARP.map((n, pc) => pc === rootPc ? null : <option key={pc} value={pc}>{n}</option>)}
@@ -232,7 +285,7 @@ const ChordCanonicalDialog: React.FC<Props> = ({
                 </div>
               </div>
 
-              {/* HÀNG DƯỚI: 2 toggle */}
+              {/* HÀNG DƯỚI: giữ nguyên toggle ĐẢO BASS */}
               <div className="ctrl-row-toggles">
                 <div className="ctrl-cell cell-toggle-slash">
                   <button
@@ -245,6 +298,7 @@ const ChordCanonicalDialog: React.FC<Props> = ({
                       if (!next) setBassPc(undefined);
                     }}
                     title="Bật/tắt hợp âm đảo bass"
+                    disabled={loading}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" className="bi bi-toggle-on" viewBox="0 0 16 16">
                       <path d="M5 3a5 5 0 0 0 0 10h6a5 5 0 0 0 0-10zm6 9a4 4 0 1 1 0-8 4 4 0 0 1 0 8"/>
@@ -253,28 +307,7 @@ const ChordCanonicalDialog: React.FC<Props> = ({
                   </button>
                 </div>
 
-                {/* Toggle “Gửi kèm voicing” (checkbox ẩn + SVG bootstrap để ăn theme) */}
-                {/* <div className="ctrl-cell cell-toggle-voicing">
-                  <label className={`toggle ${includeVoicing ? "is-on" : ""}`} aria-pressed={includeVoicing}>
-                    <input
-                      type="checkbox"
-                      checked={includeVoicing}
-                      onChange={(e) => setIncludeVoicing(e.target.checked)}
-                      style={{ position: "absolute", opacity: 0, pointerEvents: "none" }}
-                    />
-                    {includeVoicing ? (
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" className="bi bi-toggle-on" viewBox="0 0 16 16">
-                        <path d="M5 3a5 5 0 0 0 0 10h6a5 5 0 0 0 0-10zm6 9a4 4 0 1 1 0-8 4 4 0 0 1 0 8"/>
-                      </svg>
-                    ) : (
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" className="bi bi-toggle-off" viewBox="0 0 16 16">
-                        <path d="M11 4a4 4 0 0 1 0 8H8a5 5 0 0 0 2-4 5 5 0 0 0-2-4zm-6 8a4 4 0 1 1 0-8 4 4 0 0 1 0 8M0 8a5 5 0 0 0 5 5h6a5 5 0 0 0 0-10H5a5 5 0 0 0-5 5"/>
-                      </svg>
-                    )}
-                    <span>Gửi kèm voicing</span>
-                  </label>
-                </div> */}
-
+                {/* Toggle “Gửi kèm voicing” — phần này bạn đang để comment, mình giữ nguyên */}
               </div>
             </div>
           </div>
@@ -284,7 +317,7 @@ const ChordCanonicalDialog: React.FC<Props> = ({
               <button className="btn-secondary" onClick={onClose}>Hủy</button>
               <button
                 className="btn-primary"
-                disabled={!canSubmit}
+                disabled={!canSubmit || loading}
                 onClick={() => {
                   const { ok, errors } = validate();
                   if (!ok) { showToast(errors[0], "error"); return; }
@@ -299,7 +332,7 @@ const ChordCanonicalDialog: React.FC<Props> = ({
                     instrument,
                     symbol: (() => {
                       const rootLabel = pcToLabel(rootPc, "sharp");
-                      const suffix = RECIPE_SUFFIX[recipeId] ?? `(${recipeId})`;
+                      const suffix = RECIPE_SUFFIX[recipeId] ?? `(${recipeId})`; // GIỮ NGUYÊN
                       const base = `${rootLabel}${suffix}`;
                       return isSlash ? `${base}/${pcToLabel(bassPc!, "sharp")}` : base;
                     })(),

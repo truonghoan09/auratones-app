@@ -22,17 +22,17 @@ const TEXT_PAD_X = 8;
 const TEXT_ASCENT = 10;
 
 /** ==== TUNING ==== */
-const DOT_SCALE = 2.0;         // dot phóng to
+const DOT_SCALE = 2.0;
 const DOT_MAX   = 28;
-const LABEL_K   = 1.2;         // label theo dot
+const LABEL_K   = 1.2;
 
 const OPEN_R_MIN = 6;
 const OPEN_R_MAX = 13;
-const OPEN_R_RATIO = 0.22 * 1.3; // vòng Open +30%
+const OPEN_R_RATIO = 0.22 * 1.3;
 
 // “Sát phím phía thùng” cho mọi ngăn
-const DOT_BIAS_ALL       = 0.48; // 0..0.5 – lớn hơn = sát hơn
-const DOT_MARGIN_RATIO_2 = 0.08; // biên an toàn
+const DOT_BIAS_ALL       = 0.48;
+const DOT_MARGIN_RATIO_2 = 0.08;
 const DOT_MARGIN_MIN_2   = 4;
 
 const THICK_TREBLE = 0.9;
@@ -51,9 +51,9 @@ const STRING_OVERHANG_RATIO = 0.12;
 /** 3 cột bên trái */
 const COL_W_LEFT = 26;  // mute/R
 const COL_W_MID  = 26;  // số dây + open
-const COL_W_NECK = 22;  // khe cổ đàn cho dây thò (chỉ strings được vào vùng này)
+const COL_W_NECK = 22;  // khe cổ đàn cho dây thò
 
-/** Guard giữa NECK và MID (tránh open chạm dây) */
+/** Guard giữa NECK và MID */
 const NECK_GUARD_MIN   = 6;
 const NECK_GUARD_RATIO = 0.6;
 
@@ -91,7 +91,7 @@ export default function ChordDiagram({
     const COL_CX_MID  = LEFT - COL_W_NECK - COL_W_MID / 2;
     const COL_CX_LEFT = LEFT - COL_W_NECK - COL_W_MID - COL_W_LEFT / 2;
 
-    // Số ô cần vẽ theo dữ liệu (span thực tế)
+    // Số ô cần vẽ theo dữ liệu
     const absMaxFret = Math.max(
       baseFret + (shape.gridFrets ?? DEFAULTS.numFretsMin) - 1,
       ...shape.frets.map((f) => (f > 0 ? f : baseFret)),
@@ -99,8 +99,6 @@ export default function ChordDiagram({
     );
     const spanUsed = Math.max(1, absMaxFret - baseFret + 1);
 
-    // Ưu tiên: nếu người dùng chọn 5 ngăn → dùng 5; nếu chọn 4 → tối thiểu 4
-    // Nhưng nếu voicing vượt quá chọn, tự nâng lên (tối đa 5)
     const preferred = clamp(shape.gridFrets ?? DEFAULTS.numFretsMin, 4, 5);
     const needMin = Math.max(preferred, spanUsed);
     const numFrets = clamp(needMin, 4, 5);
@@ -165,11 +163,11 @@ export default function ChordDiagram({
 
     const stringX2 = Math.min(fretXs[fretXs.length - 1] + OVERHANG, width - SAFE_X);
 
-    // CHỈ strings được “chui” vào khe NECK, có guard tránh chạm MID
+    // Clip cho dây
     const neckGuard = Math.max(NECK_GUARD_MIN, Math.round(openR * NECK_GUARD_RATIO));
     const stringsClipX = LEFT - COL_W_NECK + neckGuard;
 
-    // Dot sát phím phía thùng (mọi ngăn)
+    // Dot sát phím phía thùng
     const DOT_BIAS = pressBias ?? DOT_BIAS_ALL;
     const fretCenterX = (fret: number) => {
       const i = fret - baseFret;
@@ -187,97 +185,81 @@ export default function ChordDiagram({
     const dotYBias = (idx: number) => clamp(stringThickness[idx] * 1, 3, 4.6);
     const openYBias = (idx: number) => clamp(stringThickness[idx] * 0.5, 2, 3.6);
 
-    // BBOX
-    let minX = Infinity,
-      maxX = -Infinity,
-      minY = Infinity,
-      maxY = -Infinity;
-    const bx = (x: number) => {
-      if (x < minX) minX = x;
-      if (x > maxX) maxX = x;
-    };
-    const by = (y: number) => {
-      if (y < minY) minY = y;
-      if (y > maxY) maxY = y;
+    // ====== Hiệu chỉnh theo “chặn” ======
+    // hiệu ứng: dây có “chặn” → không còn open; ngăn thể hiện là max(nốt trực tiếp, chặn)
+    const rawFrets = shape.frets.slice(0, N);
+    const barres = (shape.barres ?? []).map((b) => ({
+      fret: b.fret,
+      from: Math.min(b.from, b.to),
+      to: Math.max(b.from, b.to),
+      finger: (b as any).finger as number | undefined,
+    }));
+
+    const highestBarreAtString = (string1: number) => {
+      let maxF = 0;
+      for (const b of barres) {
+        if (string1 >= b.from && string1 <= b.to) maxF = Math.max(maxF, b.fret);
+      }
+      return maxF;
     };
 
-    // strings lane + 3 cột
+    const effectiveFrets = rawFrets.map((f, idx) => {
+      if (f === -1) return -1; // mute
+      const barreF = highestBarreAtString(idx + 1);
+      return Math.max(f, barreF);
+    });
+
+    const isStringOpenEffective = (i: number) => effectiveFrets[i] === 0;
+
+    // ====== BBOX ======
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    const bx = (x: number) => { if (x < minX) minX = x; if (x > maxX) maxX = x; };
+    const by = (y: number) => { if (y < minY) minY = y; if (y > maxY) maxY = y; };
+
+    // strings + 3 cột
     stringYs.forEach((_, i) => {
       const y = yCenter(i);
-      bx(stringsClipX);
-      bx(stringX2);
-      by(y);
-      // mid col (số dây/open)
-      bx(COL_CX_MID - TEXT_PAD_X);
-      bx(COL_CX_MID + TEXT_PAD_X);
-      by(y - TEXT_ASCENT);
-      by(y + TEXT_ASCENT);
-      // left col (mute/R)
-      bx(COL_CX_LEFT - TEXT_PAD_X);
-      bx(COL_CX_LEFT + TEXT_PAD_X);
-      by(y - TEXT_ASCENT);
-      by(y + TEXT_ASCENT);
+      bx(stringsClipX); bx(stringX2); by(y);
+      bx(COL_CX_MID - TEXT_PAD_X); bx(COL_CX_MID + TEXT_PAD_X); by(y - TEXT_ASCENT); by(y + TEXT_ASCENT);
+      bx(COL_CX_LEFT - TEXT_PAD_X); bx(COL_CX_LEFT + TEXT_PAD_X); by(y - TEXT_ASCENT); by(y + TEXT_ASCENT);
     });
 
     // frets
-    fretXs.forEach((x) => {
-      bx(x);
-      by(yTop);
-      by(yBot);
-    });
+    fretXs.forEach((x) => { bx(x); by(yTop); by(yBot); });
 
-    // nut 2 vạch
+    // nut
     if (hasNut) {
-      bx(nut1x);
-      bx(nut1x + NUT_BAR_W);
-      by(yTop);
-      by(yBot);
-      bx(nut2x);
-      bx(nut2x + NUT_BAR_W);
-      by(yTop);
-      by(yBot);
+      bx(nut1x); bx(nut1x + NUT_BAR_W); by(yTop); by(yBot);
+      bx(nut2x); bx(nut2x + NUT_BAR_W); by(yTop); by(yBot);
     }
 
-    // dots + labels (bbox)
-    shape.frets.forEach((fret, i) => {
-      if (fret <= 0) return;
-      const cx = fretCenterX(fret);
+    // dots + labels (bbox) — chỉ cho nốt trực tiếp (không cho dây do “chặn”)
+    rawFrets.forEach((f, i) => {
+      const eff = effectiveFrets[i];
+      if (f <= 0 || eff !== f) return; // chỉ vẽ dot nếu là nốt trực tiếp và khớp eff
+      const cx = fretCenterX(f);
       if (cx == null) return;
       const cy = yCenter(i) - dotYBias(i);
-      bx(cx - dotR);
-      bx(cx + dotR);
-      by(cy - dotR);
-      by(cy + dotR);
+      bx(cx - DOT_MAX); bx(cx + DOT_MAX);
+      by(cy - DOT_MAX); by(cy + DOT_MAX);
 
       const labelPadX = Math.max(TEXT_PAD_X, Math.round(labelFont * 0.35));
       const labelAscent = Math.round(labelFont * 0.6);
-      bx(cx - labelPadX);
-      bx(cx + labelPadX);
-      by(cy - labelAscent);
-      by(cy + labelAscent);
+      bx(cx - labelPadX); bx(cx + labelPadX);
+      by(cy - labelAscent); by(cy + labelAscent);
     });
 
     // barre rects
     const barreRects: Array<{
-      x: number;
-      y: number;
-      w: number;
-      h: number;
-      rx: number;
-      cx: number;
-      cy: number;
-      finger?: number;
-      fret: number;
-      from: number;
-      to: number;
+      x: number; y: number; w: number; h: number; rx: number;
+      cx: number; cy: number; finger?: number;
+      fret: number; from: number; to: number;
     }> = [];
-    if (shape.barres) {
+    if (barres.length) {
       const yOf = (s1b: number) => yCenter(s1b - 1);
-      shape.barres.forEach((b: any) => {
-        const s1 = Math.min(b.from, b.to);
-        const s2 = Math.max(b.from, b.to);
-        const y1 = yOf(s1),
-          y2 = yOf(s2);
+      barres.forEach((b) => {
+        const s1 = b.from, s2 = b.to;
+        const y1 = yOf(s1), y2 = yOf(s2);
         const cx = fretCenterX(b.fret);
         if (cx == null) return;
 
@@ -294,37 +276,29 @@ export default function ChordDiagram({
           rx: wBarre / 2,
           cx,
           cy: (yTopBarre + yBotBarre) / 2,
-          finger: b.finger ?? (shape as any).barreFinger,
+          finger: b.finger,
           fret: b.fret,
           from: s1,
           to: s2,
         });
 
-        bx(cx - wBarre / 2);
-        bx(cx + wBarre / 2);
-        by(yTopBarre);
-        by(yBotBarre);
+        bx(cx - wBarre / 2); bx(cx + wBarre / 2);
+        by(yTopBarre); by(yBotBarre);
       });
     }
 
     // fret numbers
     fretXs.slice(0, numFrets).forEach((x1, i) => {
       const x2 = fretXs[i + 1];
-      const x = (x1 + x2) / 2,
-        y = innerTop - 26;
-      bx(x - TEXT_PAD_X);
-      bx(x + TEXT_PAD_X);
-      by(y - TEXT_ASCENT);
-      by(y + TEXT_ASCENT);
+      const x = (x1 + x2) / 2, y = innerTop - 26;
+      bx(x - TEXT_PAD_X); bx(x + TEXT_PAD_X);
+      by(y - TEXT_ASCENT); by(y + TEXT_ASCENT);
     });
 
     if (showName && shape.name) {
-      const x = width / 2,
-        y = height - 6;
-      bx(x - 60);
-      bx(x + 60);
-      by(y - 16);
-      by(y + 8);
+      const x = width / 2, y = height - 6;
+      bx(x - 60); bx(x + 60);
+      by(y - 16); by(y + 8);
     }
 
     // ViewBox khít
@@ -338,92 +312,47 @@ export default function ChordDiagram({
     const stringIndexFont = Math.round(Math.max(12, Math.min(20, cellH * 0.4)));
     const fretNumberFont = Math.round(Math.max(14, Math.min(22, cellH * 0.44)));
 
-    const isRootOpen = () =>
-      !!shape.rootString && shape.frets[shape.rootString - 1] === 0;
+    // root effective (mất trạng thái open nếu bị chặn)
+    const isRootOpenEffective = () =>
+      !!shape.rootString && effectiveFrets[shape.rootString - 1] === 0;
 
     return {
-      baseFret,
-      N,
-      innerTop,
-      fretXs,
-      numFrets,
-      hasNut,
-      nut1x,
-      nut2x,
-      stringX1,
-      stringX2,
-      yCenter,
-      yTop,
-      yBot,
-      COL_CX_LEFT,
-      COL_CX_MID,
-      COL_CX_NECK,
-      stringsClipX,
-      dotR,
-      labelFont,
-      openR,
-      dotYBias,
-      openYBias,
-      fretCenterX,
-      isRootOpen,
+      baseFret, N, innerTop, fretXs, numFrets, hasNut, nut1x, nut2x,
+      stringX1, stringX2, yCenter, yTop, yBot,
+      COL_CX_LEFT, COL_CX_MID, COL_CX_NECK, stringsClipX,
+      dotR, labelFont, openR, dotYBias, openYBias, fretCenterX,
       barreRects,
-      stringIndexFont,
-      fretNumberFont,
+      effectiveFrets, rawFrets,
+      stringIndexFont, fretNumberFont,
+      isRootOpenEffective,
       bbox: { x: vbX, y: vbY, w: vbW, h: vbH },
     };
   }, [shape, numStrings, pressBias, showName]);
 
   const {
-    baseFret,
-    innerTop,
-    fretXs,
-    numFrets,
-    hasNut,
-    nut1x,
-    nut2x,
-    stringX1,
-    stringX2,
-    yCenter,
-    yTop,
-    yBot,
-    COL_CX_LEFT,
-    COL_CX_MID,
-    stringsClipX,
-    dotR,
-    labelFont,
-    openR,
-    dotYBias,
-    openYBias,
-    fretCenterX,
-    isRootOpen,
-    barreRects,
-    stringIndexFont,
-    fretNumberFont,
-    bbox,
+    baseFret, innerTop, fretXs, numFrets, hasNut, nut1x, nut2x,
+    stringX1, stringX2, yCenter, yTop, yBot,
+    COL_CX_LEFT, COL_CX_MID, stringsClipX,
+    dotR, labelFont, openR, dotYBias, openYBias, fretCenterX,
+    barreRects, effectiveFrets, rawFrets,
+    stringIndexFont, fretNumberFont, isRootOpenEffective, bbox,
   } = data;
 
-  // Helper: check barre exists on a string at a specific fret
   const hasBarreAt = (stringIndex1: number, fret: number) =>
     barreRects.some((r) => r.fret === fret && stringIndex1 >= r.from && stringIndex1 <= r.to);
 
   return (
-    <svg
-      className="chord-svg"
-      viewBox={`${bbox.x} ${bbox.y} ${bbox.w} ${bbox.h}`}
-      preserveAspectRatio="xMidYMid meet"
-    >
+    <svg className="chord-svg" viewBox={`${bbox.x} ${bbox.y} ${bbox.w} ${bbox.h}`} preserveAspectRatio="xMidYMid meet">
       <defs>
-        {/* chỉ strings được phép đi vào cột NECK */}
         <clipPath id={clipId}>
           <rect x={stringsClipX} y={yTop - 20} width={VB_W - stringsClipX} height={yBot - yTop + 40} />
         </clipPath>
       </defs>
 
-      {/* 1) PHÍM (background) */}
+      {/* 1) FRETS */}
       {fretXs.map((x, i) => (
         <line key={`fret-${i}`} x1={x} x2={x} y1={yTop} y2={yBot} className="fret-line" />
       ))}
-      {/* Nut = 2 vạch fill */}
       {hasNut && (
         <>
           <rect x={nut1x} y={yTop} width={NUT_BAR_W} height={yBot - yTop} className="nut-bar" />
@@ -431,26 +360,22 @@ export default function ChordDiagram({
         </>
       )}
 
-      {/* 2) DÂY */}
+      {/* 2) STRINGS */}
       <g clipPath={`url(#${clipId})`}>
-        {Array.from({ length: shape.frets.length }).map((_, i) => (
-          <line
-            key={`string-${i}`}
-            x1={stringX1}
-            x2={stringX2}
-            y1={yCenter(i)}
-            y2={yCenter(i)}
-            className="string-line"
-          />
+        {Array.from({ length: rawFrets.length }).map((_, i) => (
+          <line key={`string-${i}`} x1={stringX1} x2={stringX2} y1={yCenter(i)} y2={yCenter(i)} className="string-line" />
         ))}
       </g>
 
-      {/* 3) DOTS */}
-      {shape.frets.map((fret, i) => {
-        if (fret <= 0) return null;
+      {/* 3) DOTS (chỉ nốt trực tiếp, không vẽ cho dây do “chặn”) */}
+      {rawFrets.map((fret, i) => {
+        const eff = effectiveFrets[i];
+        if (fret <= 0 || eff !== fret) return null; // chỉ khi nốt trực tiếp là ngăn cao nhất
         const cx = fretCenterX(fret);
         if (cx == null) return null;
         const cy = yCenter(i) - dotYBias(i);
+
+        const showFinger = (shape.fingers?.[i] ?? 0) > 0 ? shape.fingers![i] : 0;
         const isRootThisDot =
           shape.rootString === i + 1 &&
           ((shape.rootFret && shape.rootFret === fret) || (!shape.rootFret && fret > 0));
@@ -458,9 +383,9 @@ export default function ChordDiagram({
         return (
           <g key={`dot-${i}`}>
             <circle cx={cx} cy={cy} r={dotR} className="dot" />
-            {!!shape.fingers?.[i] && (
+            {!!showFinger && (
               <text x={cx} y={cy} className="dot-label" style={{ fontSize: labelFont }}>
-                {shape.fingers[i]}
+                {showFinger}
               </text>
             )}
             {isRootThisDot && (
@@ -472,7 +397,7 @@ export default function ChordDiagram({
         );
       })}
 
-      {/* 4) BARRE */}
+      {/* 4) BARRES + finger number tại barre */}
       {barreRects.map((r, i) => (
         <g key={`barre-${i}`}>
           <rect x={r.x} y={r.y} width={r.w} height={r.h} rx={r.rx} className="barre" />
@@ -484,7 +409,7 @@ export default function ChordDiagram({
         </g>
       ))}
 
-      {/* 4b) Root marker trên barre (nếu rootString nằm trong barre và rootFret trùng fret barre) */}
+      {/* 4b) Root marker nếu root nằm trong barre */}
       {shape.rootString &&
         shape.rootFret &&
         hasBarreAt(shape.rootString, shape.rootFret) && (() => {
@@ -499,11 +424,11 @@ export default function ChordDiagram({
         })()}
 
       {/* 5) CỘT TRÁI: MID (số/Open) + LEFT (mute/R) */}
-      {shape.frets.map((f, i) => {
+      {rawFrets.map((f, i) => {
         const y = yCenter(i);
         const yOpen = y - openYBias(i);
         const stringNo = i + 1;
-        const rootOpenHere = isRootOpen() && shape.rootString === stringNo;
+        const eff = effectiveFrets[i];
 
         return (
           <g key={`leftcol-${i}`}>
@@ -511,12 +436,16 @@ export default function ChordDiagram({
             <text x={COL_CX_MID} y={y} className="string-index" style={{ fontSize: stringIndexFont }}>
               {stringNo}
             </text>
-            {/* MID: open circle */}
-            {f === 0 && <circle cx={COL_CX_MID} cy={yOpen} r={openR} className="open-marker" />}
+            {/* MID: open circle — chỉ khi hiệu dụng là 0 (không bị chặn/ngón) */}
+            {eff === 0 && <circle cx={COL_CX_MID} cy={yOpen} r={openR} className="open-marker" />}
 
-            {/* LEFT: mute/R */}
+            {/* LEFT: mute */}
             {f === -1 && <text x={COL_CX_LEFT} y={y} className="mute-marker">×</text>}
-            {rootOpenHere && <text x={COL_CX_LEFT} y={y} className="root-left">R</text>}
+
+            {/* Root “R” ở cột trái nếu root đang open hiệu dụng */}
+            {shape.rootString === stringNo && eff === 0 && isRootOpenEffective() && (
+              <text x={COL_CX_LEFT} y={y} className="root-left">R</text>
+            )}
           </g>
         );
       })}

@@ -2,8 +2,8 @@
 
 /* ========== BIẾN SIZE ========== */
 :root {
-  --modal-min: 48rem;
-  --modal-min-compact: 40rem;
+  --modal-min: 0;
+  --modal-min-compact: 0;
 
   --cell-min: 6.25rem;
 
@@ -17,32 +17,53 @@
 }
 
 /* ========== OVERLAY / MODAL CENTER ========== */
-.chord-modal { position: fixed; inset: 0; display: grid; place-items: center; padding: 2vh 2vw; z-index: 9999; }
+.chord-modal {
+  position: fixed;       /* bật lại để modal overlay đúng */
+  display: grid;         /* bật lại để place-items hoạt động */
+  place-items: center;
+}
+
 .chord-modal .backdrop { position: absolute; inset: 0; }
 
 /* ========== PANEL / LAYOUT ========== */
 .panel.chord-panel {
-  inline-size: clamp(var(--modal-min), 88vw, 120rem);
-  block-size: auto;
-  max-block-size: 90vh;
-  display: grid;
-  grid-template-rows: auto auto auto; /* header | controls | footer */
-  gap: 0.75rem;
-  padding: 1rem;
+  display: inline-grid !important;     /* không chiếm full width như block */
+  /* ↓↓↓ ép cặp physical & logical để đè mọi rule width:100% ở .panel gốc ↓↓↓ */
+  inline-size: max-content !important;
+  width: max-content !important;
+  max-inline-size: 92vw;
+  max-width: 92vw;
 
-  &.compact { inline-size: clamp(var(--modal-min-compact), 92vw, 120rem); }
+  block-size: max-content !important;
+  height: max-content !important;
+  max-block-size: 90vh;
+  max-height: 90vh;
+
+  align-content: start;                 /* tránh stretch theo trục dọc */
 }
 
-.card { padding: 0.625rem; background: var(--card-background); border-radius: 0.75rem; border: 0.0625rem solid color-mix(in srgb, var(--text-color) 10%, transparent); }
+.card {
+  padding: 0.625rem;
+  background: var(--card-background);
+  border-radius: 0.75rem;
+  border: 0.0625rem solid color-mix(in srgb, var(--text-color) 10%, transparent);
+}
 
-.editor-body { min-block-size: 0; overflow: hidden; justify-content: center; }
-.editor-split { display: grid; grid-template-areas: "controls"; grid-template-rows: auto; min-block-size: 0; }
+.editor-body.editor-split{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: fit-content;
+  width: fit-content;
+}
 
-.editor-controls { .lbl { font-weight: 700; } }
+.editor-controls {
+  .lbl { font-weight: 700; }
+}
 
 /* HÀNG TRÊN */
 .ctrl-row-main {
-  width: 100%;
+  width: auto !important;  /* ngừng ép full width */
   display: grid;
   align-items: center;
   column-gap: 0.75rem;
@@ -146,3 +167,80 @@
 .panel.chord-panel.compact .cell-recipe select { min-inline-size: max-content; }
 .panel.chord-panel.compact .cell-preview { justify-self: stretch; text-align: center; }
 .panel.chord-panel.compact .cell-preview .preview-code { display: block; inline-size: 100%; max-inline-size: none; }
+
+/* === Loading badge in header title === */
+.panel.chord-panel header .title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  /* util nhỏ nếu chưa có */
+  .ml-8 { margin-left: 0.5rem; }
+
+  .small.muted {
+    /* badge */
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.18rem 0.6rem;
+    border-radius: 999rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    color: color-mix(in srgb, var(--text-color) 86%, transparent);
+    background: color-mix(in srgb, var(--card-background) 86%, var(--background-color) 14%);
+    border: 0.0625rem solid color-mix(in srgb, var(--text-color) 12%, transparent);
+
+    /* spinner */
+    &::before {
+      content: "";
+      inline-size: 0.85rem;
+      block-size: 0.85rem;
+      border-radius: 50%;
+      border: 0.14rem solid color-mix(in srgb, var(--text-color) 38%, transparent);
+      border-top-color: var(--accent-color, #3b7ad1);
+      animation: chord-spin 0.8s linear infinite;
+    }
+  }
+}
+
+/* spinner keyframes */
+@keyframes chord-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* === Subtle loading state for disabled controls (optional, không đổi layout) === */
+.editor-controls select:disabled,
+.editor-footer .btn-primary:disabled,
+.editor-footer .btn-secondary:disabled {
+  opacity: 0.65;
+  filter: saturate(80%);
+  cursor: not-allowed;
+}
+
+/* Khi loading, làm mờ nhẹ toàn bộ card nhưng vẫn tương tác được với các khu vực không disabled */
+.editor-controls.card[aria-busy="true"] {
+  position: relative;
+}
+
+.editor-controls.card[aria-busy="true"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--card-background) 60%, var(--text-color) 4%) 50%,
+    transparent 100%
+  );
+  opacity: 0.35;
+  pointer-events: none;
+  animation: chord-sheen 1.2s ease-in-out infinite;
+  mix-blend-mode: normal;
+  border-radius: 0.75rem;
+}
+
+@keyframes chord-sheen {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
