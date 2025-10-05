@@ -9,7 +9,7 @@ import Auth from "../components/Auth";
 import ChordCanonicalDialog, { type CanonicalDraft } from "../components/chord/ChordCanonicalDialog";
 import ChordVoicingDialog from "../components/chord/ChordVoicingDialog";
 
-import { fetchChords, postChord } from "../services/chords";
+import { fetchChords, postChord, postChordVoicing, deleteChordVoicing } from "../services/chords";
 
 const ROOTS = ["C","C#","Db","D","D#","Eb","E","F","F#","Gb","G","G#","Ab","A","A#","Bb","B"] as const;
 type RootName = (typeof ROOTS)[number];
@@ -29,6 +29,9 @@ const FILTERS = {
 } as const;
 type FilterKey = keyof typeof FILTERS;
 
+// ===== Thêm type payload cho nút Edit/Delete (mới) =====
+type EditDeletePayload = { chord: ChordEntry; variantIndex: number };
+
 export default function ChordPage() {
 
   const [instrument, setInstrument] = useState<Instrument>("guitar");
@@ -46,6 +49,20 @@ export default function ChordPage() {
 
   const pendingBackRef = useRef(false);
 
+  // ---- Refetch helper (dùng lại ở nhiều chỗ) ----
+  const refreshChords = useCallback(async () => {
+    setLoading(true);
+    setErr(null);
+    try {
+      const items = await fetchChords(instrument);
+      const sorted = Array.isArray(items) ? [...items].sort((a, b) => a.symbol.localeCompare(b.symbol)) : [];
+      setServerChords(sorted);
+    } catch (e: any) {
+      setErr(e?.message ?? "Lỗi tải dữ liệu");
+    } finally {
+      setLoading(false);
+    }
+  }, [instrument]);
 
   useEffect(() => {
     let alive = true;
@@ -129,14 +146,13 @@ export default function ChordPage() {
   const [canonicalOpen, setCanonicalOpen] = useState(false);
   const [canonicalInstrument, setCanonicalInstrument] = useState<Instrument>("guitar");
   const [canonicalSymbol, setCanonicalSymbol] = useState<string>("");
-  const [canonicalDraft, setCanonicalDraft] = useState<CanonicalDraft | null>(null); // lưu state để “quay lại”
+  const [canonicalDraft, setCanonicalDraft] = useState<CanonicalDraft | null>(null);
 
   // ===== Voicing dialog state =====
   const [voicingOpen, setVoicingOpen] = useState(false);
   const [voicingInstrument, setVoicingInstrument] = useState<Instrument>("guitar");
   const [voicingSymbol, setVoicingSymbol] = useState<string>("");
 
-  // ===== Submit từ Canonical =====
   const handleSubmitCanonical = useCallback(async (payload: {
     instrument: Instrument;
     symbol: string;
@@ -146,7 +162,6 @@ export default function ChordPage() {
   }) => {
     const includeVoicing = !!payload.meta?.includeVoicing;
 
-    // Lưu draft để quay lại sau (nếu user vào Voicing rồi bấm quay lại)
     setCanonicalInstrument(payload.instrument);
     setCanonicalSymbol(payload.symbol);
     setCanonicalDraft({
@@ -160,14 +175,12 @@ export default function ChordPage() {
     setCanonicalOpen(false);
 
     if (includeVoicing) {
-      // Mở voicing (trắng mỗi lần mở)
       setVoicingInstrument(payload.instrument);
       setVoicingSymbol(payload.symbol);
       setVoicingOpen(true);
       return;
     }
 
-    // Không kèm voicing → gửi thẳng
     try {
       await postChord({
         instrument: payload.instrument,
@@ -176,7 +189,6 @@ export default function ChordPage() {
         visibility: isAdmin ? "system" : "contribute",
       });
       (window as any).__toast?.(isAdmin ? "Đã gửi hợp âm vào hệ thống." : "Đã gửi bản đóng góp (preview).", "success");
-      // Hoàn tất flow → clear draft
       setCanonicalDraft(null);
       setCanonicalOpen(false);
     } catch (e: any) {
@@ -185,63 +197,138 @@ export default function ChordPage() {
     }
   }, [isAdmin]);
 
-  // Hủy Canonical → xóa draft
   const handleCloseCanonical = useCallback(() => {
     setCanonicalOpen(false);
-    setCanonicalDraft(null); // chỉ khi HỦY mới xóa dữ liệu
+    setCanonicalDraft(null);
   }, []);
 
-  // Back từ Voicing → quay lại Canonical với draft
   const handleBackFromVoicing = () => {
     pendingBackRef.current = true;
-    console.log('canonicalDraft: ',canonicalDraft);
+    console.log("canonicalDraft: ", canonicalDraft);
     setVoicingOpen(false);
   };
 
   useEffect(() => {
     if (!voicingOpen && pendingBackRef.current) {
       pendingBackRef.current = false;
-      // mở lại canonical SAU KHI voicing đã đóng xong
       setCanonicalOpen(true);
     }
   }, [voicingOpen]);
 
   useEffect(() => {
     if (!voicingOpen) {
-      console.log('[ChordPage] voicing closed. canonicalDraft =', canonicalDraft);
+      console.log("[ChordPage] voicing closed. canonicalDraft =", canonicalDraft);
     }
   }, [voicingOpen, canonicalDraft]);
 
-  // Submit Voicing → gửi variants
   const handleSubmitVoicing = useCallback(async (payload: {
     instrument: Instrument;
     symbol: string;
     variants: any[];
   }) => {
-    try {
-      await postChord({
+    const bundleForInspect = {
+      fromVoicingDialog: payload,
+      canonicalDraftSnapshot: canonicalDraft ?? null,
+      combinedForSubmitPreview: {
         instrument: payload.instrument,
         symbol: payload.symbol,
+        canonical: canonicalDraft
+          ? {
+              rootPc: canonicalDraft.rootPc,
+              recipeId: canonicalDraft.recipeId,
+              bassPc: canonicalDraft.bassPc,
+              useSlash: canonicalDraft.useSlash,
+            }
+          : null,
         variants: payload.variants,
-        visibility: isAdmin ? "system" : "contribute",
-      });
-      (window as any).__toast?.(isAdmin ? "Đã gửi hợp âm vào hệ thống." : "Đã gửi bản đóng góp (preview).", "success");
-      setVoicingOpen(false);
-      setCanonicalDraft(null); // hoàn tất thì clear draft
-    } catch (e: any) {
-      console.error(e);
-      (window as any).__toast?.(e?.message || "Gửi hợp âm thất bại", "error");
-    }
-  }, [isAdmin]);
+      },
+    };
 
-  // ===== mở Canonical trực tiếp khi bấm “Thêm hợp âm” =====
+    console.log("[ChordPage] 🔎 Submit Voicing JSON:\n", JSON.stringify(bundleForInspect, null, 2));
+
+    try {
+      await postChordVoicing(bundleForInspect);
+      (window as any).__toast?.("Đã lưu voicing vào hệ thống.", "success");
+      setVoicingOpen(false);
+      setCanonicalDraft(null);
+      await refreshChords();
+    } catch (e: any) {
+      if (e?.duplicate) {
+        const ok = window.confirm(e?.data?.message || "Voicing trùng. Bạn có muốn vẫn lưu?");
+        if (!ok) {
+          (window as any).__toast?.("Đã hủy lưu vì trùng voicing.", "info");
+          return;
+        }
+        try {
+          await postChordVoicing(bundleForInspect, { confirm: true });
+          (window as any).__toast?.("Đã lưu voicing (đã xác nhận ghi đè/trùng).", "success");
+          setVoicingOpen(false);
+          setCanonicalDraft(null);
+          await refreshChords();
+        } catch (ee: any) {
+          console.error(ee);
+          (window as any).__toast?.(ee?.message || "Ghi voicing thất bại", "error");
+        }
+      } else {
+        console.error(e);
+        (window as any).__toast?.(e?.message || "Ghi voicing thất bại", "error");
+      }
+    }
+  }, [canonicalDraft, refreshChords]);
+
   const handleOpenCanonicalDirect = useCallback(() => {
     if (!isAuthenticated) { setAuthOpen(true); return; }
     setCanonicalInstrument(instrument);
-    setCanonicalSymbol("");     // hoặc điền gợi ý nếu bạn muốn
-    setCanonicalDraft(null);    // bắt đầu trắng
+    setCanonicalSymbol("");
+    setCanonicalDraft(null);
     setCanonicalOpen(true);
   }, [isAuthenticated, instrument]);
+
+  // ======= Handler EDIT (tạm để sau) =======
+  const handleEditVoicing = useCallback((payload: EditDeletePayload) => {
+    console.log("đang bấm edit", payload);
+  }, []);
+
+  // ======= Handler DELETE (gọi API) =======
+  const handleDeleteVoicing = useCallback(async (payload: EditDeletePayload) => {
+  try {
+    if (!payload?.chord) return;
+    const { chord, variantIndex } = payload;
+
+    // Xác nhận xoá
+    const ok = window.confirm(
+      `Xoá voicing #${variantIndex + 1} của "${chord.symbol}" (${chord.instrument})?`
+    );
+    if (!ok) return;
+
+    // Gọi API xoá theo index (BE cũng hỗ trợ match theo variant nếu cần)
+    await deleteChordVoicing({
+      instrument: chord.instrument,
+      symbol: chord.symbol,
+      byIndex: variantIndex,
+    });
+
+    (window as any).__toast?.("Đã xoá voicing.", "success");
+
+    // Cập nhật UI:
+    // 1) Nếu modal đang mở trên chord này, cập nhật ngay mảng variants trong state openChord
+    setOpenChord((prev) => {
+      if (!prev) return prev;
+      if (prev.instrument !== chord.instrument || prev.symbol !== chord.symbol) return prev;
+      const nextVariants = [...(prev.variants || [])].filter((_, i) => i !== variantIndex);
+      const next = { ...prev, variants: nextVariants };
+      // Nếu không còn variant nào -> đóng modal
+      if (nextVariants.length === 0) return null;
+      return next;
+    });
+
+    // 2) Refresh list để đồng bộ toàn trang
+    await refreshChords();
+  } catch (e: any) {
+    console.error(e);
+    (window as any).__toast?.(e?.message || "Xoá voicing thất bại.", "error");
+  }
+}, [refreshChords, setOpenChord]);
 
   return (
     <>
@@ -347,12 +434,17 @@ export default function ChordPage() {
             )}
 
             <div className="chord-page__spacer" />
-            <ChordModal chord={openChord} onClose={() => setOpenChord(null)} />
+            <ChordModal
+              chord={openChord}
+              onClose={() => setOpenChord(null)}
+              isAdmin={isAdmin}
+              onEditVoicing={handleEditVoicing}
+              onDeleteVoicing={handleDeleteVoicing}
+            />
           </section>
         </div>
       </div>
 
-      {/* Auth modal */}
       {authOpen && (
         <Auth
           isModal
@@ -363,20 +455,18 @@ export default function ChordPage() {
         />
       )}
 
-      {/* Canonical (mở ngay khi bấm “Thêm hợp âm”), có khả năng khôi phục state khi quay lại */}
       {canonicalOpen && (
         <ChordCanonicalDialog
           isOpen
           instrument={canonicalInstrument}
           initialSymbol={canonicalSymbol}
           isAdmin={isAdmin}
-          initialDraft={canonicalDraft}              // khôi phục nếu có
-          onClose={handleCloseCanonical}             // Hủy → clear draft
-          onSubmit={handleSubmitCanonical}           // lưu + quyết định next
+          initialDraft={canonicalDraft}
+          onClose={handleCloseCanonical}
+          onSubmit={handleSubmitCanonical}
         />
       )}
 
-      {/* Voicing (luôn blank mỗi lần mở) */}
       {voicingOpen && (
         <ChordVoicingDialog
           isOpen

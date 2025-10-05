@@ -32,3 +32,77 @@
   padding: 6px 10px; border-radius: 8px; border: 1px solid #ddd; background: #fff; cursor: pointer;
 }
 .chord-modal footer button:disabled { opacity: .4; cursor: default; }
+
+
+/* ========== Admin Action Buttons ========== */
+.chord-modal header .admin-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto; /* đẩy sát nút đóng về bên phải vẫn giữ bố cục hiện tại */
+  margin-right: 8px;
+}
+
+.chord-modal header .icon-btn {
+  --btn-bg: rgba(0,0,0,0.04);
+  --btn-border: rgba(0,0,0,0.08);
+  --btn-fg: var(--text-color, #212121);
+  --btn-hover-bg: rgba(var(--accent-color-rgb, 59,122,209), 0.10);
+  --btn-hover-border: rgba(var(--accent-color-rgb, 59,122,209), 0.25);
+  --btn-hover-fg: var(--accent-color, #3b7ad1);
+
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--btn-border);
+  background: var(--btn-bg);
+  color: var(--btn-fg);
+  cursor: pointer;
+  line-height: 1;
+  font-weight: 600;
+  box-shadow: var(--box-shadow, 0 4px 12px rgba(0,0,0,0.08));
+  transition: background .18s ease, color .18s ease, border-color .18s ease, transform .06s ease;
+}
+
+.chord-modal header .icon-btn:hover,
+.chord-modal header .icon-btn:focus-visible {
+  background: var(--btn-hover-bg);
+  border-color: var(--btn-hover-border);
+  color: var(--btn-hover-fg);
+  outline: none;
+}
+
+.chord-modal header .icon-btn:active {
+  transform: translateY(1px);
+}
+
+.chord-modal header .icon-btn:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+  filter: grayscale(0.2);
+}
+
+/* Icon kích thước & canh */
+.chord-modal header .icon-btn svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+
+/* Nhãn ẩn trên mobile nhỏ nếu muốn – ở đây vẫn hiển thị vì panel rộng */
+.chord-modal header .icon-btn .lbl {
+  font-size: 13px;
+}
+
+/* Biến thể danger cho nút Delete */
+.chord-modal header .icon-btn.danger {
+  --btn-bg: rgba(211,47,47,0.06); /* #d32f2f */
+  --btn-border: rgba(211,47,47,0.18);
+  --btn-fg: #b71c1c;
+
+  --btn-hover-bg: rgba(211,47,47,0.14);
+  --btn-hover-border: rgba(211,47,47,0.35);
+  --btn-hover-fg: #d32f2f;
+}

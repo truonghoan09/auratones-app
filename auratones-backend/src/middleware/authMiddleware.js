@@ -21,9 +21,9 @@ module.exports = function authMiddleware(req, res, next) {
     }
   }
 
-  if (!token && req.query && typeof req.query.token === 'string') {
-    token = req.query.token; // ⚠️ chỉ nên dùng khi debug
-  }
+  if (!token && process.env.NODE_ENV !== 'production' && req.query && typeof req.query.token === 'string') {
+    token = req.query.token; // chỉ cho phép ở dev
+``}
 
   if (!token) {
     return res.status(401).json({ message: 'No token provided' });

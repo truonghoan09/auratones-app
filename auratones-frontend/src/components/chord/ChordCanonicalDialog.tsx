@@ -84,6 +84,11 @@ const RECIPE_SUFFIX: Record<string, string> = {
 const RECIPE_NORMALIZE: Record<string, string> = { major:"maj", minor:"m", dim:"dim", aug:"aug" };
 const normalizeRecipeId = (id: string) => RECIPE_NORMALIZE[id] ?? id;
 
+/** 🔧 Map label -> id để hoà giải dữ liệu DB lưu label (vd: "m(add9)") */
+const OPTION_ID_BY_LABEL: Record<string, string> = Object.fromEntries(
+  RECIPE_OPTIONS.map(o => [o.label, o.id])
+);
+
 const ChordCanonicalDialog: React.FC<Props> = ({
   isOpen, instrument, initialSymbol = "", isAdmin = false, initialDraft = null, onClose, onSubmit,
 }) => {
@@ -125,27 +130,31 @@ const ChordCanonicalDialog: React.FC<Props> = ({
       .finally(() => setLoading(false));
   }, [isOpen]);
 
- // helper nhận diện canonical có đảo bass
+  // helper nhận diện canonical có đảo bass
   const isSlashCanonical = (it: CanonicalDoc) =>
     (it as any).hasSlash === true || /_b\d+$/i.test(String(it.id || ""));
 
   // ✅ Chỉ lấy canonical KHÔNG đảo bass
   const allowedRecipeIds = useMemo(() => {
     const noSlash = (canonicalItems || []).filter(it => !isSlashCanonical(it));
-    return new Set(noSlash.map(it => String(it.recipeId)));
-  }, [canonicalItems]);
 
+    const ids = new Set<string>();
+    for (const it of noSlash) {
+      const raw = String((it as any).recipeId ?? "");
+      // Nếu DB trả label (vd "m(add9)") thì đổi về id ("m_add9"); nếu đã là id thì giữ nguyên
+      const asId = OPTION_ID_BY_LABEL[raw] ?? raw;
+      ids.add(normalizeRecipeId(asId));
+    }
+    return ids;
+  }, [canonicalItems]);
 
   /** ✅ Hydrate từ initialDraft khi mở (Back từ Voicing) — nếu không có draft thì reset mặc định */
   useEffect(() => {
     if (!isOpen) {
-      // reset cờ khi đóng dialog
       hydratedRef.current = false;
       return;
     }
-    console.log('[Canonical] isOpen:', isOpen, 'initialDraft:', initialDraft);
 
-    // Nếu có draft và CHƯA hydrate trong lần mở hiện tại -> set state từ draft
     if (initialDraft && !hydratedRef.current) {
       setRootPc(initialDraft.rootPc);
       setRecipeId(initialDraft.recipeId);
@@ -154,11 +163,9 @@ const ChordCanonicalDialog: React.FC<Props> = ({
       setIncludeVoicing(!!initialDraft.includeVoicing);
       setControlsInvalid(false);
       hydratedRef.current = true;
-      console.log('[Canonical] hydrated from draft');
       return;
     }
 
-    // Không có draft -> chỉ reset khi mở lần đầu (và chưa hydrate)
     if (!initialDraft && !hydratedRef.current) {
       setRootPc(0);
       setRecipeId("major");
@@ -167,13 +174,12 @@ const ChordCanonicalDialog: React.FC<Props> = ({
       setIncludeVoicing(true);
       setControlsInvalid(false);
       hydratedRef.current = true;
-      console.log('[Canonical] reset to defaults');
     }
   }, [isOpen, initialDraft]);
 
   const symbolPreview = useMemo(() => {
     const rootLabel = pcToLabel(rootPc, "sharp");
-    const suffix = RECIPE_SUFFIX[recipeId] ?? `(${recipeId})`; // GIỮ NGUYÊN LOGIC CŨ
+    const suffix = RECIPE_SUFFIX[recipeId] ?? `(${recipeId})`;
     const base = `${rootLabel}${suffix}`;
     if (useSlash && typeof bassPc === "number") return `${base}/${pcToLabel(bassPc, "sharp")}`;
     return base;
@@ -186,7 +192,6 @@ const ChordCanonicalDialog: React.FC<Props> = ({
     if (rootPc === null || rootPc === undefined) { errors.push("Vui lòng chọn Nốt gốc."); }
     if (!recipeId) { errors.push("Vui lòng chọn Phân loại hợp âm."); }
 
-    // ✅ CHANGED: kiểm tra bằng id đã normalize
     const normalized = normalizeRecipeId(recipeId);
     if (!allowedRecipeIds.has(normalized)) {
       errors.push("Phân loại hợp âm này chưa có trong canonical list.");
@@ -202,115 +207,126 @@ const ChordCanonicalDialog: React.FC<Props> = ({
     <>
       <div className="chord-modal">
         <div className="backdrop" onClick={onClose} />
-        {/* KHÔNG mở rộng khi includeVoicing = true: luôn .compact */}
-        <div className={`panel chord-panel compact ${useSlash ? "has-slash" : ""}`}>
+        <div className={`panel compact chord-modal-panel ${useSlash ? "has-slash" : ""}`}>
           <header>
-            <div className="title">
-              Chọn phân loại hợp âm
-              {loading && <span className="ml-8 small muted">Đang tải…</span>}
-            </div>
+            <div className="title">Chọn phân loại hợp âm</div>
             <button className="close" onClick={onClose}>×</button>
           </header>
 
-          <div className="editor-body editor-split">
-            <div className={`editor-controls card ${controlsInvalid ? "invalid" : ""} ${useSlash ? "has-slash" : ""}`} aria-busy={loading ? "true" : undefined}>
-              {/* HÀNG TRÊN */}
-              <div className="ctrl-row-main">
-                <div className="ctrl-cell cell-root">
-                  <label className="lbl" htmlFor="root-select">Nốt gốc</label>
-                  <select
-                    id="root-select"
-                    className={!Number.isInteger(rootPc) ? "select-invalid" : ""}
-                    value={rootPc}
-                    onChange={(e) => {
-                      const v = Number(e.target.value);
-                      setRootPc(v);
-                      if (typeof bassPc === "number" && bassPc === v) setBassPc(undefined);
-                    }}
-                    aria-label="Root"
-                    disabled={loading}
-                  >
-                    {SHARP.map((n, pc) => <option key={pc} value={pc}>{n}</option>)}
-                  </select>
-                </div>
-
-                <div className="ctrl-cell cell-recipe">
-                  <label className="lbl" htmlFor="recipe-select">Phân loại</label>
-                  <select
-                    id="recipe-select"
-                    className={!recipeId ? "select-invalid" : ""}
-                    value={recipeId}
-                    onChange={(e) => setRecipeId(e.target.value)}
-                    aria-label="Recipe"
-                    disabled={loading}
-                  >
-                    {RECIPE_OPTIONS.map((r) => {
-                      // ✅ CHANGED: enable/disable dựa trên id đã normalize
-                      const normalized = normalizeRecipeId(r.id);
-                      const enabled = allowedRecipeIds.has(normalized);
-                      return (
-                        <option key={r.id} value={r.id} disabled={!enabled}>
-                          {r.label}
-                        </option>
-                      );
-                    })}
-                  </select>
-                </div>
-
-                {useSlash && (
-                  <div className="ctrl-cell cell-bass">
-                    <label className="lbl" htmlFor="bass-select">Nốt bass</label>
+          {/* ===== Body + Loading Overlay ===== */}
+          <section className="modal-body" aria-busy={loading ? "true" : undefined}>
+            <div className="editor-body editor-split">
+              <div
+                className={`editor-controls card ${controlsInvalid ? "invalid" : ""} ${useSlash ? "has-slash" : ""}`}
+              >
+                {/* HÀNG TRÊN */}
+                <div className="ctrl-row-main">
+                  <div className="ctrl-cell cell-root">
+                    <label className="lbl" htmlFor="root-select">Nốt gốc</label>
                     <select
-                      id="bass-select"
-                      value={typeof bassPc === "number" ? bassPc : ""}
+                      id="root-select"
+                      className={!Number.isInteger(rootPc) ? "select-invalid" : ""}
+                      value={rootPc}
                       onChange={(e) => {
-                        const val = e.target.value;
-                        if (val === "") return setBassPc(undefined);
-                        const num = Number(val);
-                        setBassPc(Number.isNaN(num) ? undefined : num);
+                        const v = Number(e.target.value);
+                        setRootPc(v);
+                        if (typeof bassPc === "number" && bassPc === v) setBassPc(undefined);
                       }}
-                      aria-label="Bass (đảo)"
-                      title="Nốt bass cho hợp âm đảo (để -- nếu không dùng)"
+                      aria-label="Root"
                       disabled={loading}
                     >
-                      <option value="">{`--`}</option>
-                      {SHARP.map((n, pc) => pc === rootPc ? null : <option key={pc} value={pc}>{n}</option>)}
+                      {SHARP.map((n, pc) => <option key={pc} value={pc}>{n}</option>)}
                     </select>
                   </div>
-                )}
 
-                <div className="ctrl-cell cell-preview">
-                  <label className="lbl">Tên hợp âm</label>
-                  <code className="preview-code">{symbolPreview}</code>
+                  <div className="ctrl-cell cell-recipe">
+                    <label className="lbl" htmlFor="recipe-select">Phân loại</label>
+                    <select
+                      id="recipe-select"
+                      className={!recipeId ? "select-invalid" : ""}
+                      value={recipeId}
+                      onChange={(e) => setRecipeId(e.target.value)}
+                      aria-label="Recipe"
+                      disabled={loading}
+                    >
+                      {RECIPE_OPTIONS.map((r) => {
+                        const normalized = normalizeRecipeId(r.id);
+                        const enabled = allowedRecipeIds.has(normalized);
+                        return (
+                          <option key={r.id} value={r.id} disabled={!enabled}>
+                            {r.label}
+                          </option>
+                        );
+                      })}
+                    </select>
+                  </div>
+
+                  {useSlash && (
+                    <div className="ctrl-cell cell-bass">
+                      <label className="lbl" htmlFor="bass-select">Nốt bass</label>
+                      <select
+                        id="bass-select"
+                        value={typeof bassPc === "number" ? bassPc : ""}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val === "") return setBassPc(undefined);
+                          const num = Number(val);
+                          setBassPc(Number.isNaN(num) ? undefined : num);
+                        }}
+                        aria-label="Bass (đảo)"
+                        title="Nốt bass cho hợp âm đảo (để -- nếu không dùng)"
+                        disabled={loading}
+                      >
+                        <option value="">{`--`}</option>
+                        {SHARP.map((n, pc) => pc === rootPc ? null : <option key={pc} value={pc}>{n}</option>)}
+                      </select>
+                    </div>
+                  )}
+
+                  <div className="ctrl-cell cell-preview">
+                    <label className="lbl">Tên hợp âm</label>
+                    <code className="preview-code">{symbolPreview}</code>
+                  </div>
                 </div>
-              </div>
 
-              {/* HÀNG DƯỚI: giữ nguyên toggle ĐẢO BASS */}
-              <div className="ctrl-row-toggles">
-                <div className="ctrl-cell cell-toggle-slash">
-                  <button
-                    type="button"
-                    className={`toggle ${useSlash ? "is-on" : ""}`}
-                    aria-pressed={useSlash}
-                    onClick={() => {
-                      const next = !useSlash;
-                      setUseSlash(next);
-                      if (!next) setBassPc(undefined);
-                    }}
-                    title="Bật/tắt hợp âm đảo bass"
-                    disabled={loading}
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" className="bi bi-toggle-on" viewBox="0 0 16 16">
-                      <path d="M5 3a5 5 0 0 0 0 10h6a5 5 0 0 0 0-10zm6 9a4 4 0 1 1 0-8 4 4 0 0 1 0 8"/>
-                    </svg>
-                    <span>Đảo bass</span>
-                  </button>
+                {/* HÀNG DƯỚI: toggle ĐẢO BASS */}
+                <div className="ctrl-row-toggles">
+                  <div className="ctrl-cell cell-toggle-slash">
+                    <button
+                      type="button"
+                      className={`toggle ${useSlash ? "is-on" : ""}`}
+                      aria-pressed={useSlash}
+                      onClick={() => {
+                        const next = !useSlash;
+                        setUseSlash(next);
+                        if (!next) setBassPc(undefined);
+                      }}
+                      title="Bật/tắt hợp âm đảo bass"
+                      disabled={loading}
+                    >
+                      {useSlash ? (
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" className="bi bi-toggle-on" viewBox="0 0 16 16">
+                          <path d="M5 3a5 5 0 0 0 0 10h6a5 5 0 0 0 0-10zm6 9a4 4 0 1 1 0-8 4 4 0 0 1 0 8"/>
+                        </svg>
+                      ) : (
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-toggle-off" viewBox="0 0 16 16">
+                          <path d="M11 4a4 4 0 0 1 0 8H8a5 5 0 0 0 2-4 5 5 0 0 0-2-4zm-6 8a4 4 0 1 1 0-8 4 4 0 0 1 0 8M0 8a5 5 0 0 0 5 5h6a5 5 0 0 0 0-10H5a5 5 0 0 0-5 5"/>
+                        </svg>
+                      )}
+                      <span>Đảo bass</span>
+                    </button>
+                  </div>
                 </div>
-
-                {/* Toggle “Gửi kèm voicing” — phần này bạn đang để comment, mình giữ nguyên */}
               </div>
             </div>
-          </div>
+
+            {/* Overlay loading che toàn bộ body, khóa tương tác */}
+            {loading && (
+              <div className="modal-loading" role="status" aria-live="polite" aria-label="Đang tải…">
+                <div className="spinner" />
+              </div>
+            )}
+          </section>
 
           <footer className="editor-footer">
             <div>
@@ -332,7 +348,7 @@ const ChordCanonicalDialog: React.FC<Props> = ({
                     instrument,
                     symbol: (() => {
                       const rootLabel = pcToLabel(rootPc, "sharp");
-                      const suffix = RECIPE_SUFFIX[recipeId] ?? `(${recipeId})`; // GIỮ NGUYÊN
+                      const suffix = RECIPE_SUFFIX[recipeId] ?? `(${recipeId})`;
                       const base = `${rootLabel}${suffix}`;
                       return isSlash ? `${base}/${pcToLabel(bassPc!, "sharp")}` : base;
                     })(),

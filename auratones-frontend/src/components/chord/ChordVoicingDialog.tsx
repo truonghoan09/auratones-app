@@ -19,17 +19,16 @@ const FRET_MIN = 1;
 const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n));
 const INSTRUMENT_OPTIONS: Instrument[] = ["guitar", "ukulele", "piano"];
 
+/** Helper: set of rows (0-based) cần cảnh báo chọn ngón */
+type DangerSet = Set<number>;
 
 const FitBox: React.FC<{ origin?: "tl" | "br"; className?: string; children: React.ReactNode }> = ({
   className,
   children,
 }) => {
-  
   return (
     <div className={`fitbox ${className ?? ""}`}>
-      <div className="fitbox-inner">
-        {children}
-      </div>
+      <div className="fitbox-inner">{children}</div>
     </div>
   );
 };
@@ -45,7 +44,20 @@ const EditorGrid: React.FC<{
   fingers: (0 | 1 | 2 | 3 | 4)[];
   setFingers: React.Dispatch<React.SetStateAction<(0 | 1 | 2 | 3 | 4)[]>>;
   visibleFrets: 4 | 5;
-}> = ({ instrument, baseFret, frets, setFrets, barres, setBarres, fingers, setFingers, visibleFrets }) => {
+  /** hàng nào đang thiếu chọn ngón -> viền danger cho select */
+  dangerRows?: DangerSet;
+}> = ({
+  instrument,
+  baseFret,
+  frets,
+  setFrets,
+  barres,
+  setBarres,
+  fingers,
+  setFingers,
+  visibleFrets,
+  dangerRows,
+}) => {
   const nStrings = STRINGS_MAP[instrument];
   if (instrument === "piano") {
     return (
@@ -115,7 +127,7 @@ const EditorGrid: React.FC<{
   const setMute = (row: number) =>
     setFrets((prev) => {
       const n = prev.slice();
-      n[row] = (n[row] === -1) ? 0 : -1;
+      n[row] = n[row] === -1 ? 0 : -1;
       return n;
     });
 
@@ -167,10 +179,15 @@ const EditorGrid: React.FC<{
         const eff = effectiveFretForString(r); // hiển thị theo luật chặn/ngón cao hơn
         const cur = frets[r] ?? 0; // raw
         const isOpenAllowed = eff === 0; // có chặn phủ thì không còn open
+        const isDanger = dangerRows?.has(r);
 
         return (
           <div className="row" key={r}>
-            <button className={`cell side ${cur === -1 ? "active mute" : ""}`} onClick={() => setMute(r)} title="Mute (×)">
+            <button
+              className={`cell side ${cur === -1 ? "active mute" : ""}`}
+              onClick={() => setMute(r)}
+              title="Mute (×)"
+            >
               ×
             </button>
 
@@ -184,7 +201,9 @@ const EditorGrid: React.FC<{
               return (
                 <button
                   key={c}
-                  className={`cell ${isOn ? "on" : ""} ${cellHasBarre ? "barre" : ""} ${showDirectFingerNum ? "has-finger" : ""}`}
+                  className={`cell ${isOn ? "on" : ""} ${cellHasBarre ? "barre" : ""} ${
+                    showDirectFingerNum ? "has-finger" : ""
+                  }`}
                   onClick={() => selectAt(r, fret)}
                   onMouseDown={(e) => onCellMouseDown(r, fret, e)}
                   onMouseUp={() => onMouseUp(r)}
@@ -196,14 +215,10 @@ const EditorGrid: React.FC<{
                       : "Chọn ô này"
                   }
                 >
-                  {/* Ưu tiên hiển thị:
-                      - Nếu là ô “chặn”: hiện SỐ NGÓN của chặn (nếu có)
-                      - Nếu là nốt trực tiếp & có số ngón: hiện SỐ
-                      - Nếu là nốt trực tiếp & chưa có số: hiện ●
-                      - Còn lại: rỗng
-                  */}
                   {cellHasBarre
-                    ? (showBarreFingerNum ? String(showBarreFingerNum) : "")
+                    ? showBarreFingerNum
+                      ? String(showBarreFingerNum)
+                      : ""
                     : isOn
                     ? showDirectFingerNum
                       ? String(showDirectFingerNum)
@@ -222,7 +237,10 @@ const EditorGrid: React.FC<{
               0
             </button>
 
-            <div className="cell finger-cell" title="Chọn ngón tay cho nốt trên dây này">
+            <div
+              className={`cell finger-cell ${isDanger ? "danger" : ""}`}
+              title="Chọn ngón tay cho nốt trên dây này"
+            >
               <select
                 value={fingers[r]}
                 onChange={(e) => {
@@ -274,6 +292,9 @@ const ChordVoicingDialog: React.FC<Props> = ({ isOpen, instrument, symbol, onClo
   const [rootString, setRootString] = useState<number | null>(null);
   const [visibleFrets, setVisibleFrets] = useState<4 | 5>(4);
 
+  // hàng cần viền danger cho select
+  const [dangerRows, setDangerRows] = useState<DangerSet>(new Set());
+
   useEffect(() => {
     setFrets(Array.from({ length: nStrings }, () => 0));
     setFingers(Array.from({ length: nStrings }, () => 0));
@@ -281,6 +302,7 @@ const ChordVoicingDialog: React.FC<Props> = ({ isOpen, instrument, symbol, onClo
     setRootString(null);
     setVisibleFrets(4);
     setBaseFret(1);
+    setDangerRows(new Set());
   }, [nStrings]);
 
   const rootFret = useMemo(() => {
@@ -330,7 +352,29 @@ const ChordVoicingDialog: React.FC<Props> = ({ isOpen, instrument, symbol, onClo
     setRootString(null);
     setVisibleFrets(4);
     setBaseFret(1);
+    setDangerRows(new Set());
   };
+
+  /** ====== Validation: thiếu ngón cho nốt đơn (cur > 0) ====== */
+  const computeDangerRows = useCallback((): DangerSet => {
+    const rows = new Set<number>();
+    for (let r = 0; r < nStrings; r++) {
+      const cur = frets[r] ?? 0; // chỉ xét nốt trực tiếp
+      if (cur > 0 && (fingers[r] ?? 0) === 0) rows.add(r);
+    }
+    return rows;
+  }, [frets, fingers, nStrings]);
+
+  // Tự bỏ cảnh báo khi người dùng chọn/đổi ngón hoặc đổi nốt
+  useEffect(() => {
+    const rows = computeDangerRows();
+    setDangerRows(rows);
+  }, [computeDangerRows]);
+
+  // Kiểm tra “chặn” có finger hợp lệ (1..4)
+  const hasValidBarres = useMemo(() => {
+    return barres.every((b) => b.finger && b.finger >= 1 && b.finger <= 4);
+  }, [barres]);
 
   if (!isOpen) return null;
 
@@ -347,7 +391,7 @@ const ChordVoicingDialog: React.FC<Props> = ({ isOpen, instrument, symbol, onClo
           </header>
 
           <div className="voicing-body card voicing-layout">
-            {/* LEFT (EditorGrid) + auto-scale */}
+            {/* LEFT (EditorGrid) + Barre list (mới) + auto-scale */}
             <section className="left-pane" aria-label="Vùng nhập voicing">
               <FitBox origin="tl" className="fitbox-editor">
                 <EditorGrid
@@ -360,84 +404,11 @@ const ChordVoicingDialog: React.FC<Props> = ({ isOpen, instrument, symbol, onClo
                   fingers={fingers}
                   setFingers={setFingers}
                   visibleFrets={visibleFrets}
+                  dangerRows={dangerRows}
                 />
               </FitBox>
-            </section>
 
-            {/* RIGHT: controls + chặn + preview (auto-scale) */}
-            <aside className="right-pane">
-              <div className="controls-pane" aria-label="Tùy chọn nhạc cụ & tham số hiển thị">
-                <div className="voicing-controls">
-                  <label className="lbl" htmlFor="voicing-ins">
-                    Nhạc cụ
-                  </label>
-                  <select
-                    id="voicing-ins"
-                    value={selectedInstrument}
-                    onChange={(e) => setSelectedInstrument(e.target.value as Instrument)}
-                    aria-label="Instrument"
-                  >
-                    {INSTRUMENT_OPTIONS.map((ins) => (
-                      <option key={ins} value={ins}>
-                        {ins.charAt(0).toUpperCase() + ins.slice(1)}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="bf-group bf-stepper basefret-group">
-                  <span className="bf-label">Base fret</span>
-                  <button className="bf-btn" onClick={() => setBaseFret((f) => clamp(f - 1, FRET_MIN, 24))}>
-                    −
-                  </button>
-                  <input
-                    className="bf-value num"
-                    value={baseFret}
-                    onChange={(e) =>
-                      setBaseFret(e.target.value === "" ? 1 : clamp(parseInt(e.target.value, 10) || 1, 1, 24))
-                    }
-                    onBlur={(e) => {
-                      if (e.target.value === "") setBaseFret(1);
-                    }}
-                  />
-                  <button className="bf-btn" onClick={() => setBaseFret((f) => clamp(f + 1, FRET_MIN, 24))}>
-                    +
-                  </button>
-                  <button className="bf-ghost" onClick={resetVoicing}>
-                    Reset
-                  </button>
-                </div>
-
-                <div className="bf-group bf-stepper">
-                  <span className="bf-label">Số ngăn</span>
-                  <button className="bf-btn" onClick={() => setVisibleFrets((v) => (v <= 4 ? 4 : ((v - 1) as 4 | 5)))}>
-                    −
-                  </button>
-                  <input className="bf-value num" value={visibleFrets} readOnly />
-                  <button className="bf-btn" onClick={() => setVisibleFrets((v) => (v >= 5 ? 5 : ((v + 1) as 4 | 5)))}>
-                    +
-                  </button>
-                </div>
-
-                {selectedInstrument !== "piano" && (
-                  <div className="bf-group">
-                    <span className="bf-label">Nốt gốc (dây)</span>
-                    <select
-                      className="bf-value select"
-                      value={rootString ?? ""}
-                      onChange={(e) => setRootString(e.target.value ? Number(e.target.value) : null)}
-                    >
-                      <option value="">(none)</option>
-                      {Array.from({ length: nStrings }, (_, i) => (
-                        <option key={i + 1} value={i + 1}>
-                          Dây {i + 1}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-              </div>
-
+              {/* == Barre list chuyển sang bên trái, ngay dưới editor == */}
               {barres.length > 0 && (
                 <div className="barre-list" role="region" aria-label="Các chặn">
                   {barres.map((b, i) => (
@@ -483,6 +454,87 @@ const ChordVoicingDialog: React.FC<Props> = ({ isOpen, instrument, symbol, onClo
                   ))}
                 </div>
               )}
+            </section>
+
+            {/* RIGHT: controls + preview (auto-scale) */}
+            <aside className="right-pane">
+              <div className="controls-pane" aria-label="Tùy chọn nhạc cụ & tham số hiển thị">
+                <div className="voicing-controls">
+                  <label className="lbl" htmlFor="voicing-ins">
+                    Nhạc cụ
+                  </label>
+                  <select
+                    id="voicing-ins"
+                    value={selectedInstrument}
+                    onChange={(e) => setSelectedInstrument(e.target.value as Instrument)}
+                    aria-label="Instrument"
+                  >
+                    {INSTRUMENT_OPTIONS.map((ins) => (
+                      <option key={ins} value={ins}>
+                        {ins.charAt(0).toUpperCase() + ins.slice(1)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="bf-group bf-stepper basefret-group">
+                  <span className="bf-label">Base fret</span>
+                  <button className="bf-btn" onClick={() => setBaseFret((f) => clamp(f - 1, FRET_MIN, 24))}>
+                    −
+                  </button>
+                  <input
+                    className="bf-value num"
+                    value={baseFret}
+                    onChange={(e) =>
+                      setBaseFret(e.target.value === "" ? 1 : clamp(parseInt(e.target.value, 10) || 1, 1, 24))
+                    }
+                    onBlur={(e) => {
+                      if (e.target.value === "") setBaseFret(1);
+                    }}
+                  />
+                  <button className="bf-btn" onClick={() => setBaseFret((f) => clamp(f + 1, FRET_MIN, 24))}>
+                    +
+                  </button>
+                  <button className="bf-ghost" onClick={resetVoicing}>
+                    Reset
+                  </button>
+                </div>
+
+                <div className="bf-group bf-stepper">
+                  <span className="bf-label">Số ngăn</span>
+                  <button
+                    className="bf-btn"
+                    onClick={() => setVisibleFrets((v) => (v <= 4 ? 4 : ((v - 1) as 4 | 5)))}
+                  >
+                    −
+                  </button>
+                  <input className="bf-value num" value={visibleFrets} readOnly />
+                  <button
+                    className="bf-btn"
+                    onClick={() => setVisibleFrets((v) => (v >= 5 ? 5 : ((v + 1) as 4 | 5)))}
+                  >
+                    +
+                  </button>
+                </div>
+
+                {selectedInstrument !== "piano" && (
+                  <div className="bf-group">
+                    <span className="bf-label">Nốt gốc (dây)</span>
+                    <select
+                      className="bf-value select"
+                      value={rootString ?? ""}
+                      onChange={(e) => setRootString(e.target.value ? Number(e.target.value) : null)}
+                    >
+                      <option value="">(none)</option>
+                      {Array.from({ length: nStrings }, (_, i) => (
+                        <option key={i + 1} value={i + 1}>
+                          Dây {i + 1}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+              </div>
 
               {/* Preview + auto-scale */}
               <div className="preview-pane" aria-label="Xem nhanh chord">
@@ -517,6 +569,23 @@ const ChordVoicingDialog: React.FC<Props> = ({ isOpen, instrument, symbol, onClo
                     (window as any).__toast?.("Voicing rỗng: đặt ít nhất 1 nốt hoặc chặn.", "error");
                     return;
                   }
+
+                  // Kiểm tra thiếu ngón
+                  const rows = computeDangerRows();
+                  if (rows.size > 0) {
+                    setDangerRows(rows);
+                    (window as any).__toast?.(
+                      "Thiếu thông tin: Có dây đã chọn ngăn nhưng chưa chọn NGÓN. Vui lòng bổ sung.",
+                      "error"
+                    );
+                    return;
+                  }
+
+                  if (!hasValidBarres) {
+                    (window as any).__toast?.("Thiếu thông tin: Chặn phải có NGÓN (1–4).", "error");
+                    return;
+                  }
+
                   onSubmit({ instrument: selectedInstrument, symbol, variants: [shape] });
                 }}
               >
