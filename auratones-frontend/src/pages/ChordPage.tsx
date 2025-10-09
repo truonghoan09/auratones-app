@@ -8,9 +8,17 @@ import Header from "../components/Header";
 import { useAuthContext } from "../contexts/AuthContext";
 import Auth from "../components/Auth";
 import DeleteVoicingScopeDialog from "../components/chord/DeleteVoicingScopeDialog";
-import { type CanonicalDraft } from "../components/chord/ChordCanonicalDialog";
+
 
 import { fetchChords, postChord, postChordVoicing, deleteChordVoicing } from "../services/chords";
+
+type CanonicalDraft = {
+  rootPc: number;
+  recipeId: string;
+  useSlash: boolean;
+  bassPc?: number;
+  includeVoicing?: boolean;
+};
 
 const ROOTS = ["C","C#","Db","D","D#","Eb","E","F","F#","Gb","G","G#","Ab","A","A#","Bb","B"] as const;
 type RootName = (typeof ROOTS)[number];
@@ -334,7 +342,6 @@ export default function ChordPage() {
       (window as any).__toast?.(e?.message || "Xoá voicing thất bại.", "error");
     }
   }, [delScopeChord, delScopeIndex, isAdmin, refreshChords]);
-  
   return (
     <>
       <Header />

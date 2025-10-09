@@ -4,8 +4,6 @@ const API_BASE =
 const TOKEN_KEY =
   (import.meta.env.VITE_TOKEN_STORAGE_KEY as string) || 'auratones_token';
 
-type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
-
 function buildHeaders(extra?: HeadersInit): HeadersInit {
   // luôn là Record<string, string> để TS không phàn nàn
   const base: Record<string, string> = { 'Content-Type': 'application/json' };

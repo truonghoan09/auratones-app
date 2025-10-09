@@ -209,7 +209,6 @@ export default function ChordDiagram({
       return Math.max(f, barreF);
     });
 
-    const isStringOpenEffective = (i: number) => effectiveFrets[i] === 0;
 
     // ====== BBOX ======
     let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
