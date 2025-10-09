@@ -301,6 +301,17 @@ export default function ChordPage() {
     setDelScopeOpen(true);
   }, []);
 
+  void canonicalOpen;
+  void canonicalInstrument;
+  void canonicalSymbol;
+  void voicingInstrument;
+  void voicingSymbol;
+
+  void handleSubmitCanonical;
+  void handleCloseCanonical;
+  void handleBackFromVoicing;
+  void handleSubmitVoicing;
+
   const handleConfirmDeleteScope = useCallback(async (scope: "single" | "shape+fingers") => {
     try {
       const chord = delScopeChord!;
