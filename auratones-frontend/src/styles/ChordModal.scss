@@ -22,7 +22,35 @@
 }
 .chord-modal .dragging { transition: none !important; }
 .chord-modal .dragging .carousel { translate: calc(-100% * var(--index, 0)) var(--offset, 0px); }
-.chord-modal .slide { display: grid; place-items: center; padding: 10px; }
+.chord-modal {
+  --diagram-scale: 0.95; // 95%
+
+  .slide {
+    display: grid;
+    place-items: center;
+    padding: 10px;
+    position: relative; // cho chắc nếu cần overlay tooltip
+
+    /* Scale phần con trực tiếp (ChordDiagram/PianoDiagram) */
+    > * {
+      transform: scale(var(--diagram-scale));
+      transform-origin: top center; // để thu nhỏ hướng lên trên, giảm nguy cơ bị cắt ở đáy
+      will-change: transform;
+    }
+
+    /* Với SVG (ChordDiagram thường render SVG), bật overflow để không cắt nhãn */
+    svg {
+      overflow: visible;           // tránh cắt chữ "R" ở rìa
+      transform-box: fill-box;     // giúp transform-origin hoạt động ổn định trên SVG
+    }
+  }
+
+  /* Nếu viewer/panel có rule overflow ẩn quá “gắt”, nới lỏng lớp gần diagram */
+  .viewer {
+    /* không chạm vào .carousel để tránh hỏng hiệu ứng trượt */
+    overflow: visible;
+  }
+}
 
 .chord-modal footer {
   display: flex; gap: 12px; align-items: center; justify-content: center; padding: 10px;

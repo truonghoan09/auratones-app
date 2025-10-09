@@ -29,7 +29,7 @@ const FILTERS = {
 } as const;
 type FilterKey = keyof typeof FILTERS;
 
-// ===== Thêm type payload cho nút Edit/Delete (mới) =====
+// ===== type payload cho nút Edit/Delete =====
 type EditDeletePayload = { chord: ChordEntry; variantIndex: number };
 
 export default function ChordPage() {
@@ -49,7 +49,7 @@ export default function ChordPage() {
 
   const pendingBackRef = useRef(false);
 
-  // ---- Refetch helper (dùng lại ở nhiều chỗ) ----
+  // ---- Refetch helper ----
   const refreshChords = useCallback(async () => {
     setLoading(true);
     setErr(null);
@@ -284,51 +284,54 @@ export default function ChordPage() {
     setCanonicalOpen(true);
   }, [isAuthenticated, instrument]);
 
-  // ======= Handler EDIT (tạm để sau) =======
+  // ======= Handler EDIT =======
   const handleEditVoicing = useCallback((payload: EditDeletePayload) => {
     console.log("đang bấm edit", payload);
   }, []);
 
-  // ======= Handler DELETE (gọi API) =======
+  // ======= Handler DELETE (gọi API đúng schema: { instrument, symbol, variant }) =======
   const handleDeleteVoicing = useCallback(async (payload: EditDeletePayload) => {
-  try {
-    if (!payload?.chord) return;
-    const { chord, variantIndex } = payload;
+    try {
+      if (!payload?.chord) return;
+      const { chord, variantIndex } = payload;
+      const variant = chord?.variants?.[variantIndex];
 
-    // Xác nhận xoá
-    const ok = window.confirm(
-      `Xoá voicing #${variantIndex + 1} của "${chord.symbol}" (${chord.instrument})?`
-    );
-    if (!ok) return;
+      if (!variant) {
+        (window as any).__toast?.("Không tìm thấy voicing cần xoá.", "error");
+        return;
+      }
 
-    // Gọi API xoá theo index (BE cũng hỗ trợ match theo variant nếu cần)
-    await deleteChordVoicing({
-      instrument: chord.instrument,
-      symbol: chord.symbol,
-      byIndex: variantIndex,
-    });
+      const ok = window.confirm(
+        `Xoá voicing #${variantIndex + 1} của "${chord.symbol}" (${chord.instrument})?`
+      );
+      if (!ok) return;
 
-    (window as any).__toast?.("Đã xoá voicing.", "success");
+      // GỌI API XOÁ: backend yêu cầu variant đầy đủ
+      await deleteChordVoicing({
+        instrument: chord.instrument,
+        symbol: chord.symbol,
+        variant,
+      });
 
-    // Cập nhật UI:
-    // 1) Nếu modal đang mở trên chord này, cập nhật ngay mảng variants trong state openChord
-    setOpenChord((prev) => {
-      if (!prev) return prev;
-      if (prev.instrument !== chord.instrument || prev.symbol !== chord.symbol) return prev;
-      const nextVariants = [...(prev.variants || [])].filter((_, i) => i !== variantIndex);
-      const next = { ...prev, variants: nextVariants };
-      // Nếu không còn variant nào -> đóng modal
-      if (nextVariants.length === 0) return null;
-      return next;
-    });
+      (window as any).__toast?.("Đã xoá voicing.", "success");
 
-    // 2) Refresh list để đồng bộ toàn trang
-    await refreshChords();
-  } catch (e: any) {
-    console.error(e);
-    (window as any).__toast?.(e?.message || "Xoá voicing thất bại.", "error");
-  }
-}, [refreshChords, setOpenChord]);
+      // Cập nhật UI: cập nhật modal hiện tại nếu đang mở cùng chord
+      setOpenChord((prev) => {
+        if (!prev) return prev;
+        if (prev.instrument !== chord.instrument || prev.symbol !== chord.symbol) return prev;
+        const nextVariants = [...(prev.variants || [])].filter((_, i) => i !== variantIndex);
+        const next = { ...prev, variants: nextVariants };
+        if (nextVariants.length === 0) return null; // hết voicing -> đóng modal
+        return next;
+      });
+
+      // refresh list toàn trang
+      await refreshChords();
+    } catch (e: any) {
+      console.error(e);
+      (window as any).__toast?.(e?.message || "Xoá voicing thất bại.", "error");
+    }
+  }, [refreshChords, setOpenChord]);
 
   return (
     <>
