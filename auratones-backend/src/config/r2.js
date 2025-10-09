@@ -9,10 +9,10 @@ function reqEnv(name) {
   return v.trim();
 }
 
-const R2_ENDPOINT = reqEnv('R2_AUTH_ENDPOINT');  // endpoint copy từ Cloudflare
-const R2_KEY_ID   = reqEnv('R2_AUTH_KEY_ID');    // Access Key ID
-const R2_SECRET   = reqEnv('R2_AUTH_SECRET');    // Secret Access Key
-const R2_BUCKET   = reqEnv('R2_BUCKET_NAME');    // tên bucket
+const R2_ENDPOINT = reqEnv('R2_ENDPOINT');  // endpoint copy từ Cloudflare
+const R2_KEY_ID   = reqEnv('R2_ACCESS_KEY_ID');    // Access Key ID
+const R2_SECRET   = reqEnv('R2_SECRET_ACCESS_KEY');    // Secret Access Key
+const R2_BUCKET   = reqEnv('R2_BUCKET');    // tên bucket
 const PUBLIC_BASE = (process.env.R2_PUBLIC_BASE_URL || '').replace(/\/+$/, '');
 
 const R2Client = new S3Client({
