@@ -1,4 +1,4 @@
-// routes/chords.js
+// server/routes/chords.js
 const express = require("express");
 const router = express.Router();
 const { db } = require("../firebase");
@@ -30,7 +30,13 @@ router.get("/", async (req, res) => {
     for (const doc of snap.docs) {
       const data = doc.data() || {};
       const norm = normalizeDocToChordEntry(data, instrument);
-      if (norm) items.push(norm);
+      if (norm) {
+        // KHÔNG còn attach defaultSort; FE sẽ tự sắp theo baseFret
+        if (data.likesCountByFp && typeof data.likesCountByFp === "object") {
+          norm.likesCountByFp = data.likesCountByFp;
+        }
+        items.push(norm);
+      }
     }
 
     res.json({ instrument, items });
@@ -44,6 +50,7 @@ router.get("/", async (req, res) => {
  * POST /api/chords/postChord
  * - Clone enharmonic counterpart nếu có (C#xxx <-> Dbxxx)
  * - Cả hai doc dùng chung canonical (recipeId…)
+ * - Merge variants; KHÔNG còn ensure defaultSort
  */
 router.post("/postChord", auth, requireAdmin, async (req, res) => {
   try {
@@ -144,14 +151,8 @@ router.post("/postChord", auth, requireAdmin, async (req, res) => {
     }
     await Promise.all(writes);
 
-    /* ===================== AUTOGEN MOVABLE TWO-WAY =====================
-       - String instruments (guitar/ukulele)
-       - Movable: không có open-string thật (0 không được barre phủ)
-       - Dịch lên/xuống để “ngăn thấp nhất hiệu dụng” ∈ [1..11]
-       - Transpose cập nhật: frets, barres.fret, rootFret, baseFret, gridFrets, name
-    ==================================================================== */
+    /* ===================== AUTOGEN MOVABLE TWO-WAY ===================== */
     let autogenSummary = { generatedSymbols: [], totalGeneratedVariants: 0 };
-
     if (incoming.instrument !== "piano") {
       const movableVariants = (incoming.variants || [])
         .map(sanitizeStringInstrumentVariant)
@@ -192,7 +193,6 @@ router.post("/postChord", auth, requireAdmin, async (req, res) => {
           for (const dstSymbol of Object.keys(perSymbol)) {
             const dstId = normalizeId(incoming.instrument, dstSymbol);
             const dstDocRef = col.doc(dstId);
-            // eslint-disable-next-line no-await-in-loop
             const dstSnap = await dstDocRef.get();
             const dstData = dstSnap.exists ? (dstSnap.data() || {}) : {};
             const dstPrev = Array.isArray(dstData.variants) ? dstData.variants : [];
@@ -267,22 +267,34 @@ router.post("/postChord", auth, requireAdmin, async (req, res) => {
 
 /**
  * DELETE /api/chords/voicing
- * Body: { instrument, symbol, variant, cascade?: boolean }
- * - Chỉ admin
- * - Xoá đồng bộ doc chính + doc enharmonic (nếu có)
- * - DÙNG FINGERPRINT NỚI LỎNG để khớp chính xác hơn với dữ liệu frontend gửi lên
- * - Nếu cascade=true (mặc định true), xoá TẤT CẢ voicing có cùng shapeSignatureInvariant (bất biến theo transpose)
+ * Body: {
+ *   instrument, symbol, variant,
+ *   scope?: "single" | "shape+fingers" (mặc định "single"),
+ *   visibility?: "system" | "private" (mặc định "system")
+ * }
+ * - Chỉ admin được xoá trên "system"; user thường chỉ xoá "private"
+ * - Dùng FINGERPRINT NỚI LỎNG để khớp trong doc hiện tại
+ * - scope="shape+fingers": xoá các voicing có cùng shape invariant + cùng fingers pattern
  */
-router.delete("/voicing", auth, requireAdmin, async (req, res) => {
+router.delete("/voicing", auth, async (req, res) => {
   try {
     const { instrument, symbol, variant } = req.body || {};
-    const cascade = req.body?.cascade !== false; // mặc định true
+    const scope = (req.body?.scope || "single");
+    const visibility = (req.body?.visibility || "system");
 
     if (!["guitar", "ukulele", "piano"].includes(String(instrument))) {
       return res.status(400).json({ error: "instrument must be guitar|ukulele|piano" });
     }
     if (!symbol || !variant || typeof variant !== "object") {
       return res.status(400).json({ error: "symbol & variant are required" });
+    }
+
+    // quyền: nếu visibility=system → cần admin
+    if (visibility === "system") {
+      const user = req.user || {};
+      if (!user?.role || user.role !== "admin") {
+        return res.status(403).json({ error: "Forbidden: chỉ admin được xoá ở kho hệ thống." });
+      }
     }
 
     const id = normalizeId(instrument, symbol);
@@ -294,52 +306,18 @@ router.delete("/voicing", auth, requireAdmin, async (req, res) => {
     const data = snap.data() || {};
     const prev = Array.isArray(data.variants) ? data.variants : [];
 
-    // 🔧 Dùng relaxed fingerprint cho xoá trực tiếp ở doc hiện tại
+    // 🔧 Dùng relaxed fingerprint cho xoá trực tiếp
     const targetSan = sanitizeStringInstrumentVariant(variant);
     const targetFP = variantFingerprintRelaxed(targetSan);
-    const nextVariants = prev.filter((v) => variantFingerprintRelaxed(v) !== targetFP);
 
+    let nextVariants = prev.filter((v) => variantFingerprintRelaxed(v) !== targetFP);
     let removedHere = prev.length - nextVariants.length;
-    if (removedHere === 0) {
-      // không thấy trong doc này (có thể khác baseFret/grid/name) → vẫn tiếp tục cascade nếu bật
-    } else {
-      await col.doc(id).set(
-        {
-          variants: nextVariants,
-          updatedAt: new Date(),
-        },
-        { merge: true }
-      );
-    }
 
-    // Xoá đồng bộ ở doc enharmonic của symbol (nếu có)
-    let removedInEnh = 0;
-    const altSymbol = getEnharmonicSymbol(symbol);
-    if (altSymbol) {
-      const altId = normalizeId(instrument, altSymbol);
-      const altSnap = await col.doc(altId).get();
-      if (altSnap.exists) {
-        const altData = altSnap.data() || {};
-        const altPrev = Array.isArray(altData.variants) ? altData.variants : [];
-        const altNext = altPrev.filter((v) => variantFingerprintRelaxed(v) !== targetFP);
-        removedInEnh = altPrev.length - altNext.length;
-        if (removedInEnh > 0) {
-          await col.doc(altId).set(
-            {
-              variants: altNext,
-              updatedAt: new Date(),
-            },
-            { merge: true }
-          );
-        }
-      }
-    }
-
-    // ======== CASCADE THEO SHAPE INVARIANT (bất biến theo transpose) ========
+    // scope "shape+fingers": xoá thêm các biến thể cùng shape invariant + cùng fingers pattern
     let cascadeStats = { affectedDocs: 0, removedVariants: 0 };
-
-    if (cascade && instrument !== "piano") {
+    if (scope === "shape+fingers" && instrument !== "piano") {
       const targetSig = shapeSignatureInvariant(targetSan);
+      const targetFingers = fingersPattern(targetSan);
 
       // quét toàn bộ doc của instrument này
       let snapAll = await col.where("instrument", "==", instrument).get();
@@ -363,7 +341,8 @@ router.delete("/voicing", auth, requireAdmin, async (req, res) => {
         let removed = 0;
         for (const v of variants) {
           const sig = shapeSignatureInvariant(v);
-          if (sig === targetSig) {
+          const fpFingers = fingersPattern(v);
+          if (sig === targetSig && fpFingers === targetFingers) {
             removed += 1;
           } else {
             kept.push(v);
@@ -371,33 +350,173 @@ router.delete("/voicing", auth, requireAdmin, async (req, res) => {
         }
 
         if (removed > 0) {
-          cascadeStats.affectedDocs += 1;
-          cascadeStats.removedVariants += removed;
           batchWrites.push(
             col.doc(doc.id).set(
               { variants: kept, updatedAt: new Date() },
               { merge: true }
             )
           );
+          cascadeStats.affectedDocs += 1;
+          cascadeStats.removedVariants += removed;
         }
       }
 
       if (batchWrites.length > 0) {
         await Promise.all(batchWrites);
       }
+    } else {
+      // chỉ xoá tại doc hiện tại
+      if (removedHere > 0) {
+        await col.doc(id).set(
+          { variants: nextVariants, updatedAt: new Date() },
+          { merge: true }
+        );
+      }
+    }
+
+    // Xoá đồng bộ ở doc enharmonic (nếu có) cùng FP
+    let removedInEnh = 0;
+    const altSymbol = getEnharmonicSymbol(symbol);
+    if (altSymbol) {
+      const altId = normalizeId(instrument, altSymbol);
+      const altSnap = await col.doc(altId).get();
+      if (altSnap.exists) {
+        const altData = altSnap.data() || {};
+        const altPrev = Array.isArray(altData.variants) ? altData.variants : [];
+
+        const altNext = altPrev.filter((v) => variantFingerprintRelaxed(v) !== targetFP);
+        removedInEnh = altPrev.length - altNext.length;
+
+        if (removedInEnh > 0) {
+          await col.doc(altId).set(
+            { variants: altNext, updatedAt: new Date() },
+            { merge: true }
+          );
+        }
+      }
     }
 
     return res.json({
       ok: true,
-      message: cascade
-        ? "Đã xoá voicing (và cascade theo shape)."
-        : "Đã xoá voicing.",
+      message:
+        scope === "shape+fingers"
+          ? "Đã xoá voicing (bao gồm các bản cùng form + fingers)."
+          : (removedHere > 0 ? "Đã xoá voicing." : "Không tìm thấy voicing cần xoá."),
       removedHere,
       removedInEnh,
-      ...(cascade ? { cascade: cascadeStats } : {}),
+      ...(scope === "shape+fingers" ? { cascade: cascadeStats } : {}),
     });
   } catch (e) {
     console.error("[DELETE /api/chords/voicing] error:", e);
+    return res.status(500).json({ error: e?.message || "internal error" });
+  }
+});
+
+/* ====================== LIKE APIs (chung routes/chords) ====================== */
+
+/**
+ * GET /api/chords/voicing/likes?instrument=&symbol=
+ * -> { countsByFp: Record<fp, number>, userLikesFpToTs: Record<fp, millis> }
+ */
+router.get("/voicing/likes", auth, async (req, res) => {
+  try {
+    const instrument = String(req.query.instrument || "").toLowerCase();
+    const symbol = String(req.query.symbol || "").trim();
+    if (!["guitar", "ukulele", "piano"].includes(instrument) || !symbol) {
+      return res.status(400).json({ error: "invalid instrument or symbol" });
+    }
+    const id = normalizeId(instrument, symbol);
+    const col = db.collection("chords_system");
+    const snap = await col.doc(id).get();
+    if (!snap.exists) return res.status(404).json({ error: "Not found" });
+    const data = snap.data() || {};
+    const countsByFp = typeof data.likesCountByFp === "object" && data.likesCountByFp ? data.likesCountByFp : {};
+
+    const user = req.user || {};
+    const uid = user?.uid;
+    let userLikesFpToTs = {};
+    if (uid) {
+      const userLikesCol = db.collection("users").doc(uid).collection("likes");
+      const likesSnap = await userLikesCol.where("chordKey", "==", id).get();
+      userLikesFpToTs = {};
+      likesSnap.forEach((d) => {
+        const dd = d.data() || {};
+        if (dd.fp) userLikesFpToTs[dd.fp] = dd.likedAt?.toMillis?.() || dd.likedAt || 0;
+      });
+    }
+
+    return res.json({ countsByFp, userLikesFpToTs });
+  } catch (e) {
+    console.error("[GET /voicing/likes] error:", e);
+    return res.status(500).json({ error: e?.message || "internal error" });
+  }
+});
+
+/**
+ * POST /api/chords/voicing/like
+ * Body: { instrument, symbol, variant }
+ * Toggle like/unlike cho user hiện tại; cập nhật likesCountByFp trong doc
+ */
+router.post("/voicing/like", auth, async (req, res) => {
+  try {
+    const { instrument, symbol, variant } = req.body || {};
+    if (!["guitar", "ukulele", "piano"].includes(String(instrument))) {
+      return res.status(400).json({ error: "instrument must be guitar|ukulele|piano" });
+    }
+    if (!symbol || !variant || typeof variant !== "object") {
+      return res.status(400).json({ error: "symbol & variant are required" });
+    }
+    const user = req.user || {};
+    const uid = user?.uid;
+    if (!uid) return res.status(401).json({ error: "Unauthorized" });
+
+    const id = normalizeId(instrument, symbol);
+    const col = db.collection("chords_system");
+    const snap = await col.doc(id).get();
+    if (!snap.exists) return res.status(404).json({ error: "Not found" });
+
+    const vSan = sanitizeStringInstrumentVariant(variant);
+    const fp = variantFingerprintRelaxed(vSan);
+
+    const userLikesRef = db.collection("users").doc(uid).collection("likes");
+    const likeDocId = `${id}__${fp}`;
+    const likeRef = userLikesRef.doc(likeDocId);
+    const chordRef = col.doc(id);
+
+    let liked = false;
+    let likedAtMs = 0;
+    let count = 0;
+
+    await db.runTransaction(async (tx) => {
+      const chordDoc = await tx.get(chordRef);
+      const d = chordDoc.data() || {};
+      const countsByFp = typeof d.likesCountByFp === "object" && d.likesCountByFp ? d.likesCountByFp : {};
+      let prev = Number(countsByFp[fp] || 0);
+
+      const likeDoc = await tx.get(likeRef);
+      if (likeDoc.exists) {
+        // unlike
+        tx.delete(likeRef);
+        prev = Math.max(0, prev - 1);
+        liked = false;
+        likedAtMs = 0;
+      } else {
+        // like
+        const now = new Date();
+        tx.set(likeRef, { chordKey: id, instrument, symbol, fp, likedAt: now }, { merge: true });
+        prev = prev + 1;
+        liked = true;
+        likedAtMs = now.getTime();
+      }
+
+      countsByFp[fp] = prev;
+      count = prev;
+      tx.set(chordRef, { likesCountByFp: countsByFp, updatedAt: new Date() }, { merge: true });
+    });
+
+    return res.json({ liked, likedAt: likedAtMs, count });
+  } catch (e) {
+    console.error("[POST /voicing/like] error:", e);
     return res.status(500).json({ error: e?.message || "internal error" });
   }
 });
@@ -645,13 +764,11 @@ function getEnharmonicSymbol(symbol) {
 
 /* ======== AUTOGEN & TRANSPOSE HELPERS ======== */
 
-// Ánh xạ pitch-class để tính offset semitone
 const NOTE_TO_PC = {
   C: 0, "C#": 1, Db: 1, D: 2, "D#": 3, Eb: 3, E: 4,
   F: 5, "F#": 6, Gb: 6, G: 7, "G#": 8, Ab: 8, A: 9, "A#": 10, Bb: 10, B: 11
 };
 
-// Parse symbol thành {root, tail}
 function parseSymbol(symbol) {
   const m = /^([A-Ga-g](?:#|b)?)(.*)$/i.exec(String(symbol || "").trim());
   if (!m) return null;
@@ -661,7 +778,6 @@ function parseSymbol(symbol) {
   return { root, tail };
 }
 
-// 11 root còn lại (ưu tiên #; flat clone qua enharmonic)
 function buildAllTargetSymbols(fromRoot, tail) {
   const rootsPrefSharp = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
   return rootsPrefSharp.filter((r) => r !== fromRoot).map((r) => ({ root: r, symbol: `${r}${tail}` }));
@@ -674,7 +790,6 @@ function semitoneOffset(fromRoot, toRoot) {
   return (b - a + 12) % 12;
 }
 
-/** Barre cover check cho 1 dây (1-based) */
 function barreFretForString(variant, stringIdx1Based) {
   const barres = Array.isArray(variant?.barres) ? variant.barres : [];
   let f = null;
@@ -689,22 +804,20 @@ function barreFretForString(variant, stringIdx1Based) {
       f = Math.min(f == null ? fret : f, fret);
     }
   }
-  return f; // null nếu không có barre phủ
+  return f;
 }
 
-/** 0 có phải “open-string thật” (không có barre phủ) hay không */
 function hasRealOpenString(variant) {
   const frets = Array.isArray(variant?.frets) ? variant.frets : [];
   for (let i = 0; i < frets.length; i++) {
     if (frets[i] === 0) {
       const coveredAt = barreFretForString(variant, i + 1);
-      if (!isNumber(coveredAt)) return true; // 0 mà không được barre phủ
+      if (!isNumber(coveredAt)) return true;
     }
   }
   return false;
 }
 
-/** Movable nếu KHÔNG có open-string thật & có ít nhất một điểm bấm/barre */
 function isMovableVariant(variant) {
   const frets = Array.isArray(variant?.frets) ? variant.frets : [];
   if (frets.length === 0) return false;
@@ -715,7 +828,6 @@ function isMovableVariant(variant) {
   return anyPressed;
 }
 
-/** Transpose: frets (>0), barres.fret, rootFret (>0) */
 function transposeVariantSemitone(variant, offset) {
   const v = sanitizeStringInstrumentVariant(variant);
   const srcFrets = Array.isArray(v.frets) ? v.frets : [];
@@ -741,7 +853,6 @@ function transposeVariantSemitone(variant, offset) {
   };
 }
 
-/** “ngăn thấp nhất hiệu dụng” = min(ngăn dương nhỏ nhất, min(barre.fret) nếu có 0 được barre phủ) */
 function effectiveLowestFret(variant) {
   const frets = Array.isArray(variant?.frets) ? variant.frets : [];
   const positives = frets.filter((f) => isNumber(f) && f > 0);
@@ -764,7 +875,6 @@ function effectiveLowestFret(variant) {
   return min;
 }
 
-/** Fret “đang dùng” trên từng dây để tính grid (0 được barre phủ → dùng barre.fret) */
 function usedFretValues(variant) {
   const frets = Array.isArray(variant?.frets) ? variant.frets : [];
   const out = [];
@@ -783,7 +893,6 @@ function usedFretValues(variant) {
   return out;
 }
 
-/** Tính gridFrets >= 4 để bao phủ vùng bấm */
 function computeGridFrets(variant) {
   const base = asInt(variant?.baseFret, 1);
   const used = usedFretValues(variant);
@@ -793,19 +902,11 @@ function computeGridFrets(variant) {
   return Math.max(4, span);
 }
 
-/** Chuẩn tên theo ngăn (tạm): "<Symbol>@<baseFret>" */
 function formatVariantName(symbol, baseFret) {
   const bf = isNumber(baseFret) ? baseFret : 1;
   return `${symbol}@${bf}`;
 }
 
-function lowestPositiveFret(frets) {
-  const pos = (Array.isArray(frets) ? frets : []).filter((f) => isNumber(f) && f > 0);
-  if (pos.length === 0) return Infinity;
-  return Math.min(...pos);
-}
-
-/** Chọn offset tốt nhất sao cho effectiveLowestFret ∈ [1..11] */
 function chooseOffsetBidirectional(fromRoot, toRoot, sampleVariants) {
   const up = semitoneOffset(fromRoot, toRoot);
   const down = up - 12;
@@ -836,16 +937,7 @@ function chooseOffsetBidirectional(fromRoot, toRoot, sampleVariants) {
   return valid[0];
 }
 
-/* ======== SHAPE SIGNATURE INVARIANT (cho cascade delete) ========
-   - Bất biến theo transpose:
-     • Lấy anchor = effectiveLowestFret(v) (nếu Infinity → 0)
-     • Với từng dây:
-       - fret > 0  → push (fret - anchor)
-       - fret == 0 & có barre phủ → push (barre.fret - anchor)
-       - còn lại (x hoặc open thật) → push -1
-     • Barres: push các đoạn {fret - anchor, from, to}
-     • Bỏ qua baseFret/gridFrets/fingers/name
-*/
+/* ======== SHAPE SIGNATURE INVARIANT (cho cascade delete) ======== */
 function shapeSignatureInvariant(v0) {
   const v = sanitizeStringInstrumentVariant(v0);
   const frets = Array.isArray(v.frets) ? v.frets : [];
@@ -877,8 +969,15 @@ function shapeSignatureInvariant(v0) {
         .sort((a, b) => (a.fret - b.fret) || (a.from - b.from) || (a.to - b.to))
     : [];
 
-  // rootString pattern (nếu có) cũng tạo khác biệt
   const rootString = isNumber(v.rootString) ? v.rootString : null;
 
   return JSON.stringify({ relFrets, relBarres, rootString });
+}
+
+/** pattern ngón tay (nới lỏng, 0-array -> rỗng) để so khớp "shape+fingers" */
+function fingersPattern(v0) {
+  const v = sanitizeStringInstrumentVariant(v0);
+  const fgs = Array.isArray(v.fingers) ? v.fingers.map((n) => asInt(n, 0)) : [];
+  const norm = fgs.length > 0 && fgs.every((n) => n === 0) ? [] : fgs;
+  return JSON.stringify(norm);
 }

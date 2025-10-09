@@ -1,136 +1,167 @@
-/* src/styles/ChordModal.scss */
+@use "./variables" as *;
+
 .chord-modal {
   position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center;
 }
 .chord-modal .backdrop { position: absolute; inset: 0; background: rgba(0,0,0,.5); }
 .chord-modal .panel {
-  position: relative; width: min(92vw, 760px); background: #fff; border-radius: 14px;
+  position: relative; width: min(92vw, 820px); background: var(--card-background, #fff); border-radius: 14px;
   box-shadow: 0 24px 60px rgba(0,0,0,.3); overflow: hidden;
 }
-.chord-modal header {
+
+/* ===== Header ===== */
+.cm-header {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 10px 14px; border-bottom: 1px solid #eee; background: #fafafa;
-}
-.chord-modal .title { font-weight: 800; font-size: 20px; }
-.chord-modal .close { appearance:none; border:0; background:transparent; font-size: 26px; cursor:pointer; }
-
-.chord-modal .viewer { position: relative; overflow: hidden; height: min(80vh, 620px); }
-.chord-modal .carousel {
-  position: absolute; inset: 0; display: grid; grid-auto-flow: column; grid-auto-columns: 100%;
-  translate: calc(-100% * var(--index, 0));
-  transition: translate .35s ease;
-}
-.chord-modal .dragging { transition: none !important; }
-.chord-modal .dragging .carousel { translate: calc(-100% * var(--index, 0)) var(--offset, 0px); }
-.chord-modal {
-  --diagram-scale: 0.95; // 95%
-
-  .slide {
-    display: grid;
-    place-items: center;
-    padding: 10px;
-    position: relative; // cho chắc nếu cần overlay tooltip
-
-    /* Scale phần con trực tiếp (ChordDiagram/PianoDiagram) */
-    > * {
-      transform: scale(var(--diagram-scale));
-      transform-origin: top center; // để thu nhỏ hướng lên trên, giảm nguy cơ bị cắt ở đáy
-      will-change: transform;
-    }
-
-    /* Với SVG (ChordDiagram thường render SVG), bật overflow để không cắt nhãn */
-    svg {
-      overflow: visible;           // tránh cắt chữ "R" ở rìa
-      transform-box: fill-box;     // giúp transform-origin hoạt động ổn định trên SVG
-    }
-  }
-
-  /* Nếu viewer/panel có rule overflow ẩn quá “gắt”, nới lỏng lớp gần diagram */
-  .viewer {
-    /* không chạm vào .carousel để tránh hỏng hiệu ứng trượt */
-    overflow: visible;
-  }
+  padding: 10px 14px; border-bottom: 1px solid rgba(0,0,0,.06); background: rgba(0,0,0,.02);
 }
 
-.chord-modal footer {
-  display: flex; gap: 12px; align-items: center; justify-content: center; padding: 10px;
-  border-top: 1px solid #eee; background: #fafafa;
+.title-wrap {
+  display: flex; align-items: center; gap: 10px; min-width: 0;
 }
-.chord-modal footer button {
-  padding: 6px 10px; border-radius: 8px; border: 1px solid #ddd; background: #fff; cursor: pointer;
-}
-.chord-modal footer button:disabled { opacity: .4; cursor: default; }
-
-
-/* ========== Admin Action Buttons ========== */
-.chord-modal header .admin-actions {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  margin-left: auto; /* đẩy sát nút đóng về bên phải vẫn giữ bố cục hiện tại */
-  margin-right: 8px;
+.cm-header .title {
+  font-weight: 800; font-size: 20px; color: var(--text-color, #212121);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
-.chord-modal header .icon-btn {
+/* Heart Chip (cạnh tiêu đề) */
+.like-chip {
+  --ring: rgba(var(--accent-color-rgb, 59,122,209), .25);
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 10px; border-radius: 999px;
+  background: #fff; border: 1px solid rgba(0,0,0,.08);
+  color: var(--text-color, #212121);
+  box-shadow: var(--box-shadow, 0 4px 12px rgba(0,0,0,.08));
+  cursor: pointer; line-height: 1; transition: transform .08s ease, box-shadow .12s ease, background .12s ease;
+}
+.like-chip:hover { transform: translateY(-1px); box-shadow: 0 8px 18px rgba(0,0,0,.12); }
+.like-chip:disabled { opacity: .6; cursor: not-allowed; }
+
+.like-chip .icon {
+  width: 18px; height: 18px; display: grid; place-items: center;
+}
+.like-chip .icon svg { width: 18px; height: 18px; display: block; color: #e11d48; }
+.like-chip .count { font-weight: 700; font-size: 13px; min-width: 1.5ch; text-align: right; }
+
+.like-chip.liked {
+  background: #fff; border-color: rgba(var(--accent-color-rgb, 59,122,209), .35);
+  box-shadow: 0 6px 20px rgba(var(--accent-color-rgb, 59,122,209), .25);
+}
+.like-chip.liked .icon .filled {
+  animation: heartPulse .6s ease;
+}
+@keyframes heartPulse {
+  0% { transform: scale(0.9); filter: drop-shadow(0 0 0 rgba(0,0,0,0)); }
+  50% { transform: scale(1.08); filter: drop-shadow(0 4px 8px rgba(0,0,0,.15)); }
+  100% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(0,0,0,0)); }
+}
+
+/* Header-right cluster */
+.header-right {
+  display: flex; align-items: center; gap: 10px; margin-left: 8px;
+}
+
+/* Sort priority pills */
+.sort-group {
+  display: inline-flex; background: rgba(0,0,0,.04); border: 1px solid rgba(0,0,0,.08);
+  padding: 3px; border-radius: 999px;
+}
+.sort-group .sort-pill {
+  appearance: none; border: 0; background: transparent; color: var(--text-color, #212121);
+  font-weight: 700; font-size: 12px; padding: 6px 10px; border-radius: 999px; cursor: pointer;
+  transition: background .14s ease, color .14s ease;
+}
+.sort-group .sort-pill.active {
+  background: rgba(var(--accent-color-rgb, 59,122,209), .15);
+  color: var(--accent-color, #3b7ad1);
+}
+
+/* Mine (private ordering) */
+.mine-wrap { display: inline-flex; align-items: center; gap: 6px; }
+.mine-toggle {
+  position: relative; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; user-select: none;
+  background: rgba(0,0,0,.04); border: 1px solid rgba(0,0,0,.08); border-radius: 999px; padding: 3px 8px;
+}
+.mine-toggle input { display: none; }
+.mine-toggle .knob {
+  width: 18px; height: 18px; border-radius: 999px; background: #bbb; transition: background .15s ease;
+}
+.mine-toggle .lbl { font-size: 12px; font-weight: 700; color: var(--text-color, #212121); }
+.mine-toggle.on .knob { background: var(--accent-color, #3b7ad1); }
+
+.mine-dir { display: inline-flex; gap: 4px; margin-left: 2px; }
+.mine-dir .dir-btn {
+  appearance: none; border: 1px solid rgba(0,0,0,.08); background: #fff; color: var(--text-color, #212121);
+  width: 28px; height: 26px; border-radius: 8px; font-weight: 800; cursor: pointer;
+  transition: background .12s ease, color .12s ease, border-color .12s ease, transform .06s ease;
+}
+.mine-dir .dir-btn:hover { transform: translateY(-1px); }
+.mine-dir .dir-btn.active {
+  background: rgba(var(--accent-color-rgb, 59,122,209), .15);
+  border-color: rgba(var(--accent-color-rgb, 59,122,209), .35);
+  color: var(--accent-color, #3b7ad1);
+}
+.mine-dir.disabled { opacity: .5; pointer-events: none; }
+
+/* Admin action buttons (giữ nguyên style trước) */
+.cm-header .icon-btn {
   --btn-bg: rgba(0,0,0,0.04);
   --btn-border: rgba(0,0,0,0.08);
   --btn-fg: var(--text-color, #212121);
   --btn-hover-bg: rgba(var(--accent-color-rgb, 59,122,209), 0.10);
   --btn-hover-border: rgba(var(--accent-color-rgb, 59,122,209), 0.25);
   --btn-hover-fg: var(--accent-color, #3b7ad1);
-
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 10px;
-  border-radius: 10px;
-  border: 1px solid var(--btn-border);
-  background: var(--btn-bg);
-  color: var(--btn-fg);
-  cursor: pointer;
-  line-height: 1;
-  font-weight: 600;
-  box-shadow: var(--box-shadow, 0 4px 12px rgba(0,0,0,0.08));
+  display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 10px;
+  border: 1px solid var(--btn-border); background: var(--btn-bg); color: var(--btn-fg); cursor: pointer;
+  line-height: 1; font-weight: 600; box-shadow: var(--box-shadow, 0 4px 12px rgba(0,0,0,0.08));
   transition: background .18s ease, color .18s ease, border-color .18s ease, transform .06s ease;
 }
-
-.chord-modal header .icon-btn:hover,
-.chord-modal header .icon-btn:focus-visible {
-  background: var(--btn-hover-bg);
-  border-color: var(--btn-hover-border);
-  color: var(--btn-hover-fg);
-  outline: none;
-}
-
-.chord-modal header .icon-btn:active {
-  transform: translateY(1px);
-}
-
-.chord-modal header .icon-btn:disabled {
-  opacity: .5;
-  cursor: not-allowed;
-  filter: grayscale(0.2);
-}
-
-/* Icon kích thước & canh */
-.chord-modal header .icon-btn svg {
-  width: 16px;
-  height: 16px;
-  display: block;
-}
-
-/* Nhãn ẩn trên mobile nhỏ nếu muốn – ở đây vẫn hiển thị vì panel rộng */
-.chord-modal header .icon-btn .lbl {
-  font-size: 13px;
-}
-
-/* Biến thể danger cho nút Delete */
-.chord-modal header .icon-btn.danger {
-  --btn-bg: rgba(211,47,47,0.06); /* #d32f2f */
+.cm-header .icon-btn:hover,
+.cm-header .icon-btn:focus-visible { background: var(--btn-hover-bg); border-color: var(--btn-hover-border); color: var(--btn-hover-fg); outline: none; }
+.cm-header .icon-btn:active { transform: translateY(1px); }
+.cm-header .icon-btn:disabled { opacity: .5; cursor: not-allowed; filter: grayscale(0.2); }
+.cm-header .icon-btn.danger {
+  --btn-bg: rgba(211,47,47,0.06);
   --btn-border: rgba(211,47,47,0.18);
   --btn-fg: #b71c1c;
-
   --btn-hover-bg: rgba(211,47,47,0.14);
   --btn-hover-border: rgba(211,47,47,0.35);
   --btn-hover-fg: #d32f2f;
 }
+
+.cm-header .admin-actions { display: inline-flex; align-items: center; gap: 8px; margin-left: 6px; }
+.cm-header .reorder-wrap { display: inline-flex; align-items: center; gap: 6px; }
+.cm-header .reorder-row { display: inline-flex; align-items: center; gap: 6px; }
+
+.cm-header .close {
+  margin-left: 8px;
+  appearance: none; border: 0; background: transparent; font-size: 26px; line-height: 1; cursor: pointer;
+}
+
+/* ===== Viewer / Carousel ===== */
+.chord-modal .viewer { position: relative; overflow: hidden; height: min(80vh, 620px); background: var(--card-background, #fff); }
+.chord-modal .carousel {
+  position: absolute; inset: 0; display: grid; grid-auto-flow: column; grid-auto-columns: 100%;
+  translate: calc(-100% * var(--index, 0)); transition: translate .35s ease;
+}
+.chord-modal .dragging { transition: none !important; }
+.chord-modal .dragging .carousel { translate: calc(-100% * var(--index, 0)) var(--offset, 0px); }
+
+.chord-modal {
+  --diagram-scale: 0.95;
+  .slide {
+    display: grid; place-items: center; padding: 10px; position: relative;
+    > * { transform: scale(var(--diagram-scale)); transform-origin: top center; will-change: transform; }
+    svg { overflow: visible; transform-box: fill-box; }
+  }
+  .viewer { overflow: visible; }
+}
+
+/* ===== Footer ===== */
+.chord-modal footer {
+  display: flex; gap: 12px; align-items: center; justify-content: center; padding: 10px;
+  border-top: 1px solid rgba(0,0,0,.06); background: rgba(0,0,0,.02);
+}
+.chord-modal footer button {
+  padding: 6px 10px; border-radius: 8px; border: 1px solid #ddd; background: #fff; cursor: pointer;
+}
+.chord-modal footer button:disabled { opacity: .4; cursor: default; }
