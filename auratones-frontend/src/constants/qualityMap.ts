@@ -1,6 +1,6 @@
 // src/constants/qualityMap.ts
 export const QUALITY_MAP = {
-  maj:   { text: "maj",   symbol: "Δ" },
+  maj:   { text: "",   symbol: "" },
   m:     { text: "m",     symbol: "–" },
   dim:   { text: "dim",   symbol: "°" },
   aug:   { text: "aug",   symbol: "+" },
