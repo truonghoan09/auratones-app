@@ -8,17 +8,24 @@ const routes = require('./routes'); // hoặc './routes/index'
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-const allowed = (process.env.CORS_ORIGIN || "http://localhost:5173").split(",");
+const allowed = (process.env.CORS_ORIGIN || "http://localhost:5173")
+  .split(",")
+  .map(s => s.trim().replace(/\/+$/, "")); // bỏ dấu / cuối
+
 const corsOpts = {
   origin: (origin, cb) => {
-    if (!origin || allowed.includes(origin)) return cb(null, true);
-    return cb(new Error("Not allowed by CORS"));
+    if (!origin) return cb(null, true); // healthcheck, curl, server-side
+    const o = origin.replace(/\/+$/, "");
+    return allowed.includes(o) ? cb(null, true) : cb(new Error("Not allowed by CORS"));
   },
   credentials: true,
+  methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'],
+  allowedHeaders: ['Content-Type','Authorization'], // thêm nếu FE gửi các header này
 };
 
 // ❌ Đừng gọi app.options("*", ...) trên Express v5
 app.use(cors(corsOpts));      // 1 lần duy nhất, KHÔNG thêm app.use(cors()) trần nữa
+app.options('*', cors(corsOpts));
 app.use(cookieParser());
 app.use(express.json());
 
