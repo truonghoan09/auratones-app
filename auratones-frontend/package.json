@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "build": "vite build",
-    "type-check": "tsc -b"
+    "type-check": "tsc -b",
+    "dev": "vite"
   },
   "dependencies": {
     "firebase": "^12.2.1",

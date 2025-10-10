@@ -14,13 +14,16 @@ const allowed = (process.env.CORS_ORIGIN || "http://localhost:5173")
 
 const corsOpts = {
   origin: (origin, cb) => {
-    if (!origin) return cb(null, true); // healthcheck, curl, server-side
-    const o = origin.replace(/\/+$/, "");
-    return allowed.includes(o) ? cb(null, true) : cb(new Error("Not allowed by CORS"));
+    const allowlist = allowed; // array
+    const o = origin ? origin.replace(/\/+$/, "") : origin;
+    console.log('[CORS] origin =', o, 'allowed =', allowlist);
+    if (!origin) return cb(null, true); // curl/healthcheck/server-to-server
+    return allowlist.includes(o) ? cb(null, true) : cb(new Error("Not allowed by CORS"));
   },
   credentials: true,
   methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'],
-  allowedHeaders: ['Content-Type','Authorization'], // thêm nếu FE gửi các header này
+  // 👉 Khuyên bỏ dòng allowedHeaders để cors tự reflect headers FE yêu cầu
+  // allowedHeaders: ['Content-Type','Authorization'],
 };
 
 // ❌ Đừng gọi app.options("*", ...) trên Express v5
