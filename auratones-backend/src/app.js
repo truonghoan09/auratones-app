@@ -25,7 +25,6 @@ const corsOpts = {
 
 // ❌ Đừng gọi app.options("*", ...) trên Express v5
 app.use(cors(corsOpts));      // 1 lần duy nhất, KHÔNG thêm app.use(cors()) trần nữa
-app.options('*', cors(corsOpts));
 app.use(cookieParser());
 app.use(express.json());
 
