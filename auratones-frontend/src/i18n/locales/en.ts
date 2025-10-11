@@ -1,5 +1,30 @@
-// src/i18n/locales/en.ts
 const en = {
+  header: {
+    nav: {
+      chords: 'Chord Library',
+      songs: 'Song Library',
+      practice: 'Practice App',
+      courses: 'Courses',
+      theory: 'Music theory',
+    },
+    account: 'Account',
+    login_cta: 'Sign in / Sign up',
+    profile: 'Profile',
+    dashboard: 'Dashboard',
+    admin: 'Admin Page',
+    signout: 'Sign out',
+    plan_badge_title: 'Plan: {plan}',
+    plan: { free: 'Free', pro: 'Pro', enterprise: 'Enterprise', admin: 'Admin' },
+    user_fallback: 'User',
+    chord_display: {
+      label: 'Chord display',
+      symbol: 'Symbol (Δ/–/ø/°)',
+      text: 'Text (maj/m/dim/aug)',
+      title_on: 'Display: Symbol (Δ/–/ø/°)',
+      title_off: 'Display: Text (maj/m/dim/aug)',
+    },
+  },
+
   home: {
     hero: {
       eyebrow: 'AURATONES • MUSIC LEARNING',
@@ -70,4 +95,5 @@ const en = {
     },
   },
 };
+
 export default en;

@@ -1,5 +1,30 @@
-// src/i18n/locales/vi.ts
 const vi = {
+  header: {
+    nav: {
+      chords: 'Kho hợp âm',
+      songs: 'Kho bài hát',
+      practice: 'Ứng dụng học bài',
+      courses: 'Khóa học',
+      theory: 'Lý thuyết âm nhạc',
+    },
+    account: 'Tài khoản',
+    login_cta: 'Đăng nhập / Đăng ký',
+    profile: 'Hồ sơ',
+    dashboard: 'Dashboard',
+    admin: 'Trang Admin',
+    signout: 'Đăng xuất',
+    plan_badge_title: 'Gói: {plan}',
+    plan: { free: 'Free', pro: 'Pro', enterprise: 'Enterprise', admin: 'Admin' },
+    user_fallback: 'Người dùng',
+    chord_display: {
+      label: 'Hiển thị hợp âm',
+      symbol: 'Ký tự (Δ/–/ø/°)',
+      text: 'Chữ (maj/m/dim/aug)',
+      title_on: 'Hiển thị: Ký tự (Δ/–/ø/°)',
+      title_off: 'Hiển thị: Chữ (maj/m/dim/aug)',
+    },
+  },
+
   home: {
     hero: {
       eyebrow: 'AURATONES • HỌC NHẠC',
@@ -71,4 +96,5 @@ const vi = {
     },
   },
 };
+
 export default vi;
