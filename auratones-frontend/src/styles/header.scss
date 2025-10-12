@@ -104,11 +104,9 @@
   border: none !important;
   padding: 0 !important;
   gap: 0 !important;
-  pointer-events: none; /* tránh bắt click trên vỏ chip */
+  pointer-events: none;
 }
-.chip.chip-theme > * {
-  pointer-events: auto; /* cho phép click vào ThemeSwitcher bên trong */
-}
+.chip.chip-theme > * { pointer-events: auto; }
 
 /* ===== CTA ===== */
 .btn-primary {
@@ -125,6 +123,20 @@
   box-shadow: 0 6px 18px rgba(var(--accent-color-rgb), .28);
   transition: transform 120ms ease, box-shadow 120ms ease;
   &:hover { transform: translateY(-1px); box-shadow: 0 10px 22px rgba(var(--accent-color-rgb), .36); }
+}
+
+/* --- Fixed width cho login để tránh layout shift (desktop header) --- */
+.header-right .auth-buttons .btn-primary.login-btn {
+  width: 128px;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* --- Fixed width cho language switch (desktop header) --- */
+.header-right .auth-buttons .chip.chip-lang {
+  width: 88px;            /* đủ chứa 🌐 + EN/VI */
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 /* ===== Avatar + dropdown ===== */

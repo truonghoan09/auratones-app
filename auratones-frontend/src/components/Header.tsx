@@ -257,7 +257,7 @@ const Header: React.FC = () => {
                 <span className="chip-label">{langLabel}</span>
               </button>
               <button
-                className="btn-primary"
+                className="btn-primary login-btn"
                 onClick={openAuth}
                 disabled={isLoading}
                 aria-busy={isLoading}
