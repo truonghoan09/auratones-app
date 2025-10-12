@@ -4,45 +4,60 @@ import ThemeSwitcher from "./ThemeSwitcher";
 import "../styles/header.scss";
 import { useAuthContext } from "../contexts/AuthContext";
 import Auth from "./Auth";
-
-// Context quản lý chế độ hiển thị hợp âm (symbol/text)
 import { useDisplayMode } from "../contexts/DisplayModeContext";
 import { useI18n } from "../contexts/I18nContext";
 
 const Header: React.FC = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);   // user dropdown (desktop)
-  const [authOpen, setAuthOpen] = useState(false);
+  /* UI state */
+  const [isMenuOpen, setIsMenuOpen] = useState(false);   // desktop user dropdown
+  const [authOpen, setAuthOpen] = useState(false);       // auth modal
   const [mobileOpen, setMobileOpen] = useState(false);   // mobile drawer
 
+  /* App contexts */
   const { t, lang, setLang } = useI18n();
-  const { mode, toggle } = useDisplayMode(); // "symbol" | "text"
+  const { mode, toggle } = useDisplayMode();
   const isSymbol = mode === "symbol";
 
   const { isAuthenticated, user, userAvatar, isLoading, logout } = useAuthContext();
   const location = useLocation();
   const userProfileRef = useRef<HTMLDivElement>(null);
 
-  // Desktop user dropdown toggle
+  /* Handlers */
   const handleToggleMenu = useCallback(() => {
-    if (!isLoading) setIsMenuOpen((v) => !v);
+    if (!isLoading) setIsMenuOpen(v => !v);
   }, [isLoading]);
 
-  // Mobile drawer controls
-  const toggleMobile = useCallback(() => setMobileOpen((v) => !v), []);
-  const closeMobile = useCallback(() => setMobileOpen(false), []);
+  const toggleMobile = useCallback(() => setMobileOpen(v => !v), []);
+  const closeMobile  = useCallback(() => setMobileOpen(false), []);
 
-  // đóng dropdown khi click ra ngoài (desktop dropdown)
+  const openAuth  = useCallback(() => setAuthOpen(true), []);
+  const closeAuth = useCallback(() => setAuthOpen(false), []);
+
+  const handleLogout = useCallback(async () => {
+    await logout();
+    setIsMenuOpen(false);
+  }, [logout]);
+
+  const toggleLang = useCallback(() => {
+    const next = lang === "vi" ? "en" : "vi";
+    setLang?.(next);
+  }, [lang, setLang]);
+
+  const langLabel = (lang || "vi").toUpperCase();
+  const langAria  = lang === "vi" ? "Switch language to English" : "Chuyển ngôn ngữ sang Tiếng Việt";
+
+  /* Close desktop dropdown on outside click */
   useEffect(() => {
-    const handleOutsideClick = (event: MouseEvent) => {
-      if (userProfileRef.current && !userProfileRef.current.contains(event.target as Node)) {
+    const onOutside = (e: MouseEvent) => {
+      if (userProfileRef.current && !userProfileRef.current.contains(e.target as Node)) {
         setIsMenuOpen(false);
       }
     };
-    if (isMenuOpen) document.addEventListener("mousedown", handleOutsideClick);
-    return () => document.removeEventListener("mousedown", handleOutsideClick);
+    if (isMenuOpen) document.addEventListener("mousedown", onOutside);
+    return () => document.removeEventListener("mousedown", onOutside);
   }, [isMenuOpen]);
 
-  // ESC đóng dropdown & mobile nav
+  /* Esc closes dropdown and mobile drawer */
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -54,16 +69,16 @@ const Header: React.FC = () => {
     return () => window.removeEventListener("keydown", onKey);
   }, [isMenuOpen, mobileOpen]);
 
-  // Đóng mobile nav khi đổi route
+  /* Auto-close mobile drawer on route change */
   useEffect(() => {
     if (mobileOpen) setMobileOpen(false);
-    // eslint-disable-next-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
 
-  // ===== Active helpers =====
+  /* Active route helpers */
   const isActive = useCallback(
     (to: string) => {
-      const cur = location.pathname.replace(/\/+$/, "");
+      const cur  = location.pathname.replace(/\/+$/, "");
       const base = to.replace(/\/+$/, "");
       return cur === base || cur.startsWith(base + "/");
     },
@@ -74,11 +89,11 @@ const Header: React.FC = () => {
     [isActive]
   );
 
-  // helpers hiển thị
+  /* User display info */
   const displayName = useMemo(() => {
     if (user?.displayName) return user.displayName;
-    if (user?.username) return user.username;
-    if (user?.email) return user.email.split("@")[0];
+    if (user?.username)    return user.username;
+    if (user?.email)       return user.email.split("@")[0];
     return t("header.user_fallback");
   }, [user, t]);
 
@@ -86,21 +101,17 @@ const Header: React.FC = () => {
   const initials = useMemo(() => {
     const base = (user?.displayName || user?.username || user?.email || "A U").trim();
     const parts: string[] = base.replace(/@.*/, "").split(/\s+/).slice(0, 2);
-    return parts.map((p: string) => p?.[0]?.toUpperCase() ?? "").join("");
+    return parts.map(p => p?.[0]?.toUpperCase() ?? "").join("");
   }, [user]);
 
   const plan = (user?.plan || "free") as "free" | "pro" | "enterprise" | "admin";
   const planLabel =
-    plan === "pro"
-      ? t("header.plan.pro")
-      : plan === "enterprise"
-      ? t("header.plan.enterprise")
-      : plan === "admin"
-      ? t("header.plan.admin")
-      : t("header.plan.free");
+    plan === "pro"        ? t("header.plan.pro")
+  : plan === "enterprise" ? t("header.plan.enterprise")
+  : plan === "admin"      ? t("header.plan.admin")
+  :                         t("header.plan.free");
 
-  const openAuth = useCallback(() => setAuthOpen(true), []);
-  const closeAuth = useCallback(() => setAuthOpen(false), []);
+  /* Toast bridge (kept as-is) */
   const showToast = useCallback((message: string, type: "success" | "error" | "info") => {
     (window as any).__toast?.(message, type);
     if (type === "error") console.error(message);
@@ -108,47 +119,24 @@ const Header: React.FC = () => {
     else console.info(message);
   }, []);
 
-  const handleLogout = useCallback(async () => {
-    await logout();
-    setIsMenuOpen(false);
-  }, [logout]);
-
-  // Language smart toggle
-  const toggleLang = useCallback(() => {
-    const next = lang === "vi" ? "en" : "vi";
-    setLang?.(next);
-  }, [lang, setLang]);
-  const langLabel = (lang || "vi").toUpperCase();
-  const langAria = lang === "vi" ? "Switch language to English" : "Chuyển ngôn ngữ sang Tiếng Việt";
-
   return (
     <>
       <header className="main-header">
         <div className="header-left">
           <Link to="/" className="header-logo">auratones</Link>
 
-          {/* DESKTOP/TABLET NAV (ẩn trên <=900px) */}
+          {/* Primary nav (hidden at tablet/mobile) */}
           <nav className="header-nav" aria-label="primary">
-            <Link to="/chords" className={navClass("/chords")} aria-current={isActive("/chords") ? "page" : undefined}>
-              {t("header.nav.chords")}
-            </Link>
-            <Link to="/songs" className={navClass("/songs")} aria-current={isActive("/songs") ? "page" : undefined}>
-              {t("header.nav.songs")}
-            </Link>
-            <Link to="/practice" className={navClass("/practice")} aria-current={isActive("/practice") ? "page" : undefined}>
-              {t("header.nav.practice")}
-            </Link>
-            <Link to="/courses" className={navClass("/courses")} aria-current={isActive("/courses") ? "page" : undefined}>
-              {t("header.nav.courses")}
-            </Link>
-            <Link to="/theory" className={navClass("/theory")} aria-current={isActive("/theory") ? "page" : undefined}>
-              {t("header.nav.theory")}
-            </Link>
+            <Link to="/chords"   className={navClass("/chords")}   aria-current={isActive("/chords")   ? "page" : undefined}>{t("header.nav.chords")}</Link>
+            <Link to="/songs"    className={navClass("/songs")}    aria-current={isActive("/songs")    ? "page" : undefined}>{t("header.nav.songs")}</Link>
+            <Link to="/practice" className={navClass("/practice")} aria-current={isActive("/practice") ? "page" : undefined}>{t("header.nav.practice")}</Link>
+            <Link to="/courses"  className={navClass("/courses")}  aria-current={isActive("/courses")  ? "page" : undefined}>{t("header.nav.courses")}</Link>
+            <Link to="/theory"   className={navClass("/theory")}   aria-current={isActive("/theory")   ? "page" : undefined}>{t("header.nav.theory")}</Link>
           </nav>
         </div>
 
         <div className="header-right">
-          {/* HAMBURGER: hiện ở <=900px, ẩn ở desktop */}
+          {/* Hamburger (visible on tablet/mobile) */}
           <button
             className={`nav-toggle${mobileOpen ? " is-open" : ""}`}
             aria-label="Open navigation"
@@ -159,12 +147,10 @@ const Header: React.FC = () => {
             <span className="bar" /><span className="bar" /><span className="bar" />
           </button>
 
-          {/* DESKTOP controls (ẩn ở <=900px) */}
+          {/* Desktop controls (hidden on tablet/mobile) */}
           {isAuthenticated ? (
             <div className="user-profile" ref={userProfileRef}>
-              <button type="button" className="chip chip-theme" title="Theme" aria-label="Theme">
                 <ThemeSwitcher />
-              </button>
 
               <button
                 type="button"
@@ -243,10 +229,9 @@ const Header: React.FC = () => {
                     </span>
                   </button>
 
-                  <Link to="/profile" className="dropdown-item" onClick={() => setIsMenuOpen(false)}>{t("header.profile")}</Link>
+                  <Link to="/profile"   className="dropdown-item" onClick={() => setIsMenuOpen(false)}>{t("header.profile")}</Link>
                   <Link to="/dashboard" className="dropdown-item" onClick={() => setIsMenuOpen(false)}>{t("header.dashboard")}</Link>
-
-                  {user?.role === 'admin' && (
+                  {user?.role === "admin" && (
                     <Link to="/admin" className="dropdown-item" onClick={() => setIsMenuOpen(false)}>{t("header.admin")}</Link>
                   )}
 
@@ -284,7 +269,7 @@ const Header: React.FC = () => {
         </div>
       </header>
 
-      {/* ===== MOBILE / TABLET DRAWER ===== */}
+      {/* Mobile/Tablet Drawer */}
       <div id="mobile-nav" className={`mobile-nav${mobileOpen ? " open" : ""}`} aria-hidden={!mobileOpen}>
         <div className="mobile-nav__inner" role="dialog" aria-label="Navigation drawer">
           <div className="mobile-head">
@@ -301,11 +286,11 @@ const Header: React.FC = () => {
           </div>
 
           <nav className="mobile-links" role="navigation" aria-label="mobile">
-            <Link to="/chords" onClick={closeMobile} className={isActive("/chords") ? "active" : ""}>{t("header.nav.chords")}</Link>
-            <Link to="/songs" onClick={closeMobile} className={isActive("/songs") ? "active" : ""}>{t("header.nav.songs")}</Link>
+            <Link to="/chords"   onClick={closeMobile} className={isActive("/chords")   ? "active" : ""}>{t("header.nav.chords")}</Link>
+            <Link to="/songs"    onClick={closeMobile} className={isActive("/songs")    ? "active" : ""}>{t("header.nav.songs")}</Link>
             <Link to="/practice" onClick={closeMobile} className={isActive("/practice") ? "active" : ""}>{t("header.nav.practice")}</Link>
-            <Link to="/courses" onClick={closeMobile} className={isActive("/courses") ? "active" : ""}>{t("header.nav.courses")}</Link>
-            <Link to="/theory" onClick={closeMobile} className={isActive("/theory") ? "active" : ""}>{t("header.nav.theory")}</Link>
+            <Link to="/courses"  onClick={closeMobile} className={isActive("/courses")  ? "active" : ""}>{t("header.nav.courses")}</Link>
+            <Link to="/theory"   onClick={closeMobile} className={isActive("/theory")   ? "active" : ""}>{t("header.nav.theory")}</Link>
           </nav>
 
           {isAuthenticated ? (
@@ -324,9 +309,9 @@ const Header: React.FC = () => {
               </div>
 
               <div className="mobile-user-links">
-                <Link to="/profile" onClick={closeMobile}>{t("header.profile")}</Link>
+                <Link to="/profile"   onClick={closeMobile}>{t("header.profile")}</Link>
                 <Link to="/dashboard" onClick={closeMobile}>{t("header.dashboard")}</Link>
-                {user?.role === 'admin' && <Link to="/admin" onClick={closeMobile}>{t("header.admin")}</Link>}
+                {user?.role === "admin" && <Link to="/admin" onClick={closeMobile}>{t("header.admin")}</Link>}
                 <button className="danger" onClick={() => { closeMobile(); handleLogout(); }}>{t("header.signout")}</button>
               </div>
             </div>
@@ -339,7 +324,7 @@ const Header: React.FC = () => {
           )}
         </div>
 
-        {/* SCRIM */}
+        {/* Scrim */}
         <button className="mobile-scrim" aria-label="Close navigation" onClick={closeMobile} />
       </div>
 

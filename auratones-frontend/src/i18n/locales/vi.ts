@@ -8,7 +8,7 @@ const vi = {
       theory: 'Lý thuyết âm nhạc',
     },
     account: 'Tài khoản',
-    login_cta: 'Đăng nhập / Đăng ký',
+    login_cta: 'Đăng nhập',
     profile: 'Hồ sơ',
     dashboard: 'Dashboard',
     admin: 'Trang Admin',
@@ -22,6 +22,18 @@ const vi = {
       text: 'Chữ (maj/m/dim/aug)',
       title_on: 'Hiển thị: Ký tự (Δ/–/ø/°)',
       title_off: 'Hiển thị: Chữ (maj/m/dim/aug)',
+    },
+
+    // ▼ New: Nhãn theme dạng song ngữ ngay trong chuỗi
+    theme: {
+      aria: 'Chọn chủ đề',
+      options: {
+        light:  'Sáng',
+        dark:   'Tối',
+        green:  'Xanh lá',
+        blue:   'Xanh dương',
+        yellow: 'Vàng',
+      },
     },
   },
 
@@ -44,26 +56,10 @@ const vi = {
       title: 'Chọn công cụ để bắt đầu',
       desc: 'Di chuyển qua lại hoặc để hệ thống tự gợi ý sau vài giây.',
       items: {
-        chords: {
-          title: 'Kho hợp âm',
-          desc: 'Tìm hợp âm bài hát tiếng Việt và luyện chuyển hợp âm mượt mà.',
-          cta: 'Khám phá',
-        },
-        songs: {
-          title: 'Kho bài hát',
-          desc: 'Hàng trăm bài có phân tích hợp âm & nhịp — luyện tập theo sở thích.',
-          cta: 'Vào xem',
-        },
-        sheet: {
-          title: 'Viết sheet (Beta)',
-          desc: 'Soạn sheet trực tiếp trên web, lưu phiên bản riêng & chia sẻ dễ dàng.',
-          cta: 'Thử ngay',
-        },
-        practice: {
-          title: 'Ứng dụng luyện bài',
-          desc: 'Metronome, tuner, bài tập ngón & vòng hợp âm theo level.',
-          cta: 'Bắt đầu',
-        },
+        chords:   { title: 'Kho hợp âm', desc: 'Tìm hợp âm bài hát tiếng Việt và luyện chuyển hợp âm mượt mà.', cta: 'Khám phá' },
+        songs:    { title: 'Kho bài hát', desc: 'Hàng trăm bài có phân tích hợp âm & nhịp — luyện tập theo sở thích.', cta: 'Vào xem' },
+        sheet:    { title: 'Viết sheet (Beta)', desc: 'Soạn sheet trực tiếp trên web, lưu phiên bản riêng & chia sẻ dễ dàng.', cta: 'Thử ngay' },
+        practice: { title: 'Ứng dụng luyện bài', desc: 'Metronome, tuner, bài tập ngón & vòng hợp âm theo level.', cta: 'Bắt đầu' },
       },
     },
     why: {

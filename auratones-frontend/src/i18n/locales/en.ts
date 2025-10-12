@@ -8,7 +8,7 @@ const en = {
       theory: 'Music theory',
     },
     account: 'Account',
-    login_cta: 'Sign in / Sign up',
+    login_cta: 'Log in',
     profile: 'Profile',
     dashboard: 'Dashboard',
     admin: 'Admin Page',
@@ -22,6 +22,18 @@ const en = {
       text: 'Text (maj/m/dim/aug)',
       title_on: 'Display: Symbol (Δ/–/ø/°)',
       title_off: 'Display: Text (maj/m/dim/aug)',
+    },
+
+    // ▼ New: Theme switcher labels (bilingual in-string)
+    theme: {
+      aria: 'Choose theme',
+      options: {
+        light:  'Light',
+        dark:   'Dark',
+        green:  'Green',
+        blue:   'Blue',
+        yellow: 'Yellow',
+      },
     },
   },
 
@@ -44,26 +56,10 @@ const en = {
       title: 'Pick a tool to start',
       desc: 'Navigate or let it auto-advance after a few seconds.',
       items: {
-        chords: {
-          title: 'Chord Library',
-          desc: 'Find chords for Vietnamese songs and practice smooth transitions.',
-          cta: 'Explore',
-        },
-        songs: {
-          title: 'Song Library',
-          desc: 'Hundreds of analyzed songs — practice what you love.',
-          cta: 'View',
-        },
-        sheet: {
-          title: 'Write Sheet (Beta)',
-          desc: 'Compose in browser, save personal versions, share easily.',
-          cta: 'Try now',
-        },
-        practice: {
-          title: 'Practice App',
-          desc: 'Metronome, tuner, finger drills & chord loops by level.',
-          cta: 'Start',
-        },
+        chords: { title: 'Chord Library', desc: 'Find chords for Vietnamese songs and practice smooth transitions.', cta: 'Explore' },
+        songs:  { title: 'Song Library',  desc: 'Hundreds of analyzed songs — practice what you love.',            cta: 'View' },
+        sheet:  { title: 'Write Sheet (Beta)', desc: 'Compose in browser, save personal versions, share easily.',   cta: 'Try now' },
+        practice: { title: 'Practice App', desc: 'Metronome, tuner, finger drills & chord loops by level.',        cta: 'Start' },
       },
     },
     why: {
