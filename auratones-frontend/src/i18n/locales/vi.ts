@@ -91,6 +91,54 @@ const vi = {
       register_now: 'Đăng ký ngay',
     },
   },
+  chords: {
+    aria: {
+      toc: "Mục lục theo nốt gốc",
+      roots: "Nốt gốc",
+      chooseInstrument: "Chọn nhạc cụ",
+      filter: "Bộ lọc hợp âm",
+      search: "Tìm hợp âm",
+    },
+    labels: {
+      roots: "Nốt gốc",
+    },
+    instruments: {
+      guitar: "Guitar",
+      ukulele: "Ukulele",
+      piano: "Piano",
+    },
+    filters: {
+      none: "Không lọc",
+      chordOfCMajor: "CMajor (C Dm Em F G Am)",
+      chordOfCMajorPlus: "CMajor+ (thêm 7th, dim)",
+    },
+    placeholders: {
+      search: "Tìm… (vd: C, Am, Cmaj7)",
+    },
+    actions: {
+      addChord: "Thêm hợp âm",
+    },
+    state: {
+      loading: "Đang tải hợp âm từ máy chủ…",
+      load_error_prefix: "Không tải được dữ liệu",
+      load_error_fallback: "Lỗi tải dữ liệu",
+      empty_filtered: "Không tìm thấy hợp âm phù hợp bộ lọc/tìm kiếm.",
+    },
+    toast: {
+      submitted_system: "Đã gửi hợp âm vào hệ thống.",
+      submitted_contrib: "Đã gửi bản đóng góp (preview).",
+      submit_fail: "Gửi hợp âm thất bại",
+      voicing_saved: "Đã lưu voicing vào hệ thống.",
+      voicing_saved_confirmed: "Đã lưu voicing (đã xác nhận ghi đè/trùng).",
+      voicing_save_fail: "Ghi voicing thất bại",
+      voicing_dup_confirm: "Voicing trùng. Bạn có muốn vẫn lưu?",
+      voicing_dup_cancelled: "Đã hủy lưu vì trùng voicing.",
+      delete_not_found: "Không tìm thấy voicing cần xoá.",
+      delete_success_single: "Đã xoá voicing.",
+      delete_success_scope: "Đã xoá voicing (bao gồm các bản cùng form & fingers).",
+      delete_fail: "Xoá voicing thất bại.",
+    },
+  },
 };
 
 export default vi;

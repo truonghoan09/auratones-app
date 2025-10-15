@@ -9,7 +9,7 @@ import { useAuthContext } from "../contexts/AuthContext";
 import Auth from "../components/Auth";
 import DeleteVoicingScopeDialog from "../components/chord/DeleteVoicingScopeDialog";
 
-
+import { useI18n } from "../contexts/I18nContext";
 import { fetchChords, postChord, postChordVoicing, deleteChordVoicing } from "../services/chords";
 
 type CanonicalDraft = {
@@ -23,7 +23,9 @@ type CanonicalDraft = {
 const ROOTS = ["C","C#","Db","D","D#","Eb","E","F","F#","Gb","G","G#","Ab","A","A#","Bb","B"] as const;
 type RootName = (typeof ROOTS)[number];
 
+/* normalize cho contains-search (không dùng cho strict root) */
 function normalize(s: string) { return s.toLowerCase().replace(/\s+/g, ""); }
+/* lấy root từ prefix symbol */
 function getRootFromSymbol(symbol: string): RootName | null {
   const m = /^([A-G])([#b])?/i.exec(symbol.trim());
   if (!m) return null;
@@ -41,6 +43,8 @@ type FilterKey = keyof typeof FILTERS;
 type EditDeletePayload = { chord: ChordEntry; variantIndex: number };
 
 export default function ChordPage() {
+  const { t } = useI18n();
+
   const [instrument, setInstrument] = useState<Instrument>("guitar");
   const [query, setQuery] = useState("");
   const [filterKey, setFilterKey] = useState<FilterKey>("none");
@@ -55,6 +59,7 @@ export default function ChordPage() {
 
   const pendingBackRef = useRef(false);
 
+  /* fetch list */
   const refreshChords = useCallback(async () => {
     setLoading(true);
     setErr(null);
@@ -63,12 +68,13 @@ export default function ChordPage() {
       const sorted = Array.isArray(items) ? [...items].sort((a, b) => a.symbol.localeCompare(b.symbol)) : [];
       setServerChords(sorted);
     } catch (e: any) {
-      setErr(e?.message ?? "Lỗi tải dữ liệu");
+      setErr(e?.message ?? t("chords.state.load_error_fallback"));
     } finally {
       setLoading(false);
     }
-  }, [instrument]);
+  }, [instrument, t]);
 
+  /* fetch on instrument change */
   useEffect(() => {
     let alive = true;
     setLoading(true);
@@ -80,20 +86,43 @@ export default function ChordPage() {
         const sorted = Array.isArray(items) ? [...items].sort((a, b) => a.symbol.localeCompare(b.symbol)) : [];
         setServerChords(sorted);
       })
-      .catch((e) => { if (alive) setErr(e?.message ?? "Lỗi tải dữ liệu"); })
+      .catch((e) => { if (alive) setErr(e?.message ?? t("chords.state.load_error_fallback")); })
       .finally(() => { if (alive) setLoading(false); });
     return () => { alive = false; };
-  }, [instrument]);
+  }, [instrument, t]);
 
   const allChords = useMemo<ChordEntry[]>(() => serverChords ?? [], [serverChords]);
 
+  /* strict root query:
+     - Nếu query khớp CHÍNH XÁC ^([A-G])([#b])?$ (in HOA), coi là tìm nốt gốc/bass.
+     - Ngược lại dùng contains-insensitive như cũ. */
+  const strictRootQuery = useMemo<RootName | null>(() => {
+    const q = query.trim();
+    const m = /^([A-G])([#b])?$/.exec(q);
+    if (!m) return null;
+    const token = `${m[1]}${m[2] ?? ""}` as RootName;
+    return (ROOTS as readonly string[]).includes(token) ? token : null;
+  }, [query]);
+
+  /* filter + search */
   const filtered = useMemo(() => {
     let list = allChords;
+
     if (filterKey !== "none") {
       const allow = new Set(FILTERS[filterKey].map(normalize));
       list = list.filter((c) => allow.has(normalize(c.symbol)));
     }
-    if (query.trim()) {
+
+    if (strictRootQuery) {
+      const rxBass = new RegExp(`/(?:${strictRootQuery})(?:$|[^A-G#b])`);
+      list = list.filter((c) => {
+        const mainRoot = getRootFromSymbol(c.symbol);
+        const rootOk = mainRoot === strictRootQuery;
+        const bassOk = rxBass.test(c.symbol);
+        const aliasOk = (c.aliases ?? []).some((a) => getRootFromSymbol(a) === strictRootQuery || rxBass.test(a));
+        return rootOk || bassOk || aliasOk;
+      });
+    } else if (query.trim()) {
       const q = normalize(query);
       list = list.filter((c) => {
         const main = normalize(c.symbol);
@@ -101,9 +130,11 @@ export default function ChordPage() {
         return [main, ...aliases].some((n) => n.includes(q));
       });
     }
-    return [...list].sort((a, b) => a.symbol.localeCompare(b.symbol));
-  }, [allChords, query, filterKey]);
 
+    return [...list].sort((a, b) => a.symbol.localeCompare(b.symbol));
+  }, [allChords, query, filterKey, strictRootQuery]);
+
+  /* group theo root */
   const grouped = useMemo(() => {
     const map = new Map<RootName, any[]>();
     for (const r of ROOTS) map.set(r as RootName, []);
@@ -121,6 +152,7 @@ export default function ChordPage() {
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
   const [activeRoot, setActiveRoot] = useState<RootName | null>(null);
 
+  /* highlight TOC theo viewport */
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -140,6 +172,7 @@ export default function ChordPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [grouped.length]);
 
+  /* scroll tới root */
   const scrollToRoot = useCallback((r: RootName) => {
     const el = sectionRefs.current[r];
     if (!el) return;
@@ -147,7 +180,7 @@ export default function ChordPage() {
     window.scrollTo({ top: y, behavior: "smooth" });
   }, []);
 
-  // Canonical & Voicing dialogs (giữ)
+  /* Canonical & Voicing dialogs (kept) */
   const [canonicalOpen, setCanonicalOpen] = useState(false);
   const [canonicalInstrument, setCanonicalInstrument] = useState<Instrument>("guitar");
   const [canonicalSymbol, setCanonicalSymbol] = useState<string>("");
@@ -157,11 +190,12 @@ export default function ChordPage() {
   const [voicingInstrument, setVoicingInstrument] = useState<Instrument>("guitar");
   const [voicingSymbol, setVoicingSymbol] = useState<string>("");
 
-  // Delete Scope dialog (giữ)
+  /* Delete Scope dialog */
   const [delScopeOpen, setDelScopeOpen] = useState(false);
   const [delScopeChord, setDelScopeChord] = useState<ChordEntry | null>(null);
   const [delScopeIndex, setDelScopeIndex] = useState<number | null>(null);
 
+  /* submit canonical */
   const handleSubmitCanonical = useCallback(async (payload: {
     instrument: Instrument;
     symbol: string;
@@ -197,14 +231,17 @@ export default function ChordPage() {
         variants: [],
         visibility: isAdmin ? "system" : "contribute",
       });
-      (window as any).__toast?.(isAdmin ? "Đã gửi hợp âm vào hệ thống." : "Đã gửi bản đóng góp (preview).", "success");
+      (window as any).__toast?.(
+        isAdmin ? t("chords.toast.submitted_system") : t("chords.toast.submitted_contrib"),
+        "success"
+      );
       setCanonicalDraft(null);
       setCanonicalOpen(false);
     } catch (e: any) {
       console.error(e);
-      (window as any).__toast?.(e?.message || "Gửi hợp âm thất bại", "error");
+      (window as any).__toast?.(e?.message || t("chords.toast.submit_fail"), "error");
     }
-  }, [isAdmin]);
+  }, [isAdmin, t]);
 
   const handleCloseCanonical = useCallback(() => {
     setCanonicalOpen(false);
@@ -223,6 +260,7 @@ export default function ChordPage() {
     }
   }, [voicingOpen]);
 
+  /* submit voicing */
   const handleSubmitVoicing = useCallback(async (payload: {
     instrument: Instrument;
     symbol: string;
@@ -248,33 +286,33 @@ export default function ChordPage() {
 
     try {
       await postChordVoicing(bundleForInspect);
-      (window as any).__toast?.("Đã lưu voicing vào hệ thống.", "success");
+      (window as any).__toast?.(t("chords.toast.voicing_saved"), "success");
       setVoicingOpen(false);
       setCanonicalDraft(null);
       await refreshChords();
     } catch (e: any) {
       if (e?.duplicate) {
-        const ok = window.confirm(e?.data?.message || "Voicing trùng. Bạn có muốn vẫn lưu?");
+        const ok = window.confirm(e?.data?.message || t("chords.toast.voicing_dup_confirm"));
         if (!ok) {
-          (window as any).__toast?.("Đã hủy lưu vì trùng voicing.", "info");
+          (window as any).__toast?.(t("chords.toast.voicing_dup_cancelled"), "info");
           return;
         }
         try {
           await postChordVoicing(bundleForInspect, { confirm: true });
-          (window as any).__toast?.("Đã lưu voicing (đã xác nhận ghi đè/trùng).", "success");
+          (window as any).__toast?.(t("chords.toast.voicing_saved_confirmed"), "success");
           setVoicingOpen(false);
           setCanonicalDraft(null);
           await refreshChords();
         } catch (ee: any) {
           console.error(ee);
-          (window as any).__toast?.(ee?.message || "Ghi voicing thất bại", "error");
+          (window as any).__toast?.(ee?.message || t("chords.toast.voicing_save_fail"), "error");
         }
       } else {
         console.error(e);
-        (window as any).__toast?.(e?.message || "Ghi voicing thất bại", "error");
+        (window as any).__toast?.(e?.message || t("chords.toast.voicing_save_fail"), "error");
       }
     }
-  }, [canonicalDraft, refreshChords]);
+  }, [canonicalDraft, refreshChords, t]);
 
   const handleOpenCanonicalDirect = useCallback(() => {
     if (!isAuthenticated) { setAuthOpen(true); return; }
@@ -285,7 +323,7 @@ export default function ChordPage() {
   }, [isAuthenticated, instrument]);
 
   const handleEditVoicing = useCallback((payload: EditDeletePayload) => {
-    console.log("đang bấm edit", payload);
+    console.log("edit voicing", payload);
   }, []);
 
   const handleDeleteVoicing = useCallback(async (payload: EditDeletePayload) => {
@@ -293,13 +331,13 @@ export default function ChordPage() {
     const { chord, variantIndex } = payload;
     const variant = chord?.variants?.[variantIndex];
     if (!variant) {
-      (window as any).__toast?.("Không tìm thấy voicing cần xoá.", "error");
+      (window as any).__toast?.(t("chords.toast.delete_not_found"), "error");
       return;
     }
     setDelScopeChord(chord);
     setDelScopeIndex(variantIndex);
     setDelScopeOpen(true);
-  }, []);
+  }, [t]);
 
   void canonicalOpen;
   void canonicalInstrument;
@@ -330,8 +368,8 @@ export default function ChordPage() {
 
       (window as any).__toast?.(
         scope === "shape+fingers"
-          ? "Đã xoá voicing (bao gồm các bản cùng form & fingers)."
-          : "Đã xoá voicing.",
+          ? t("chords.toast.delete_success_scope")
+          : t("chords.toast.delete_success_single"),
         "success"
       );
 
@@ -350,9 +388,10 @@ export default function ChordPage() {
       await refreshChords();
     } catch (e: any) {
       console.error(e);
-      (window as any).__toast?.(e?.message || "Xoá voicing thất bại.", "error");
+      (window as any).__toast?.(e?.message || t("chords.toast.delete_fail"), "error");
     }
-  }, [delScopeChord, delScopeIndex, isAdmin, refreshChords]);
+  }, [delScopeChord, delScopeIndex, isAdmin, refreshChords, t]);
+
   return (
     <>
       <Header />
@@ -360,9 +399,9 @@ export default function ChordPage() {
       <div className="chord-page__surface">
         <div className={`chord-page__container ${compactNav ? "compact" : "with-toc"}`}>
           {!compactNav && (
-            <aside className="root-sidebar" aria-label="Mục lục theo nốt gốc">
+            <aside className="root-sidebar" aria-label={t("chords.aria.toc")}>
               <div className="root-sidebar__inner">
-                <div className="root-sidebar__title">Nốt gốc</div>
+                <div className="root-sidebar__title">{t("chords.labels.roots")}</div>
                 <ul className="root-list" role="tablist">
                   {visibleRoots.map((r) => (
                     <li key={r}>
@@ -382,42 +421,71 @@ export default function ChordPage() {
           )}
 
           <section className="chord-main">
+            {/* Toolbar: hàng trên (cố định), hàng dưới (filter + future space) */}
             <header className="toolbar">
-              <div className="left">
-                <div className="seg" role="tablist" aria-label="Chọn nhạc cụ">
-                  <button className={instrument === "guitar" ? "active" : ""} onClick={() => setInstrument("guitar")} role="tab" aria-selected={instrument === "guitar"}>Guitar</button>
-                  <button className={instrument === "ukulele" ? "active" : ""} onClick={() => setInstrument("ukulele")} role="tab" aria-selected={instrument === "ukulele"}>Ukulele</button>
-                  <button className={instrument === "piano" ? "active" : ""} onClick={() => setInstrument("piano")} role="tab" aria-selected={instrument === "piano"}>Piano</button>
+              <div className="toolbar__row toolbar__row--top">
+                <div className="left">
+                  <div className="seg" role="tablist" aria-label={t("chords.aria.chooseInstrument")}>
+                    <button
+                      className={instrument === "guitar" ? "active" : ""}
+                      onClick={() => setInstrument("guitar")}
+                      role="tab"
+                      aria-selected={instrument === "guitar"}
+                    >
+                      {t("chords.instruments.guitar")}
+                    </button>
+                    <button
+                      className={instrument === "ukulele" ? "active" : ""}
+                      onClick={() => setInstrument("ukulele")}
+                      role="tab"
+                      aria-selected={instrument === "ukulele"}
+                    >
+                      {t("chords.instruments.ukulele")}
+                    </button>
+                    <button
+                      className={instrument === "piano" ? "active" : ""}
+                      onClick={() => setInstrument("piano")}
+                      role="tab"
+                      aria-selected={instrument === "piano"}
+                    >
+                      {t("chords.instruments.piano")}
+                    </button>
+                  </div>
                 </div>
 
-                <div className="seg">
-                  <select value={filterKey} onChange={(e) => setFilterKey(e.target.value as FilterKey)} aria-label="Bộ lọc hợp âm">
-                    <option value="none">Không lọc</option>
-                    <option value="chordOfCMajor">CMajor (C Dm Em F G Am)</option>
-                    <option value="chordOfCMajorPlus">CMajor+ (thêm 7th, dim)</option>
-                  </select>
+                <div className="right">
+                  <input
+                    className="search"
+                    placeholder={t("chords.placeholders.search")}
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    aria-label={t("chords.aria.search")}
+                  />
+                  <button className="btn-primary" onClick={handleOpenCanonicalDirect} disabled={isLoading}>
+                    {t("chords.actions.addChord")}
+                  </button>
                 </div>
               </div>
 
-              <div className="right" style={{ gap: 10, display: "flex", alignItems: "center", flexWrap: "wrap" }}>
-                <input
-                  className="search"
-                  placeholder="Tìm hợp âm… (ví dụ: C, Am, Cmaj7)"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  aria-label="Tìm hợp âm"
-                />
-                <button className="btn-primary" onClick={handleOpenCanonicalDirect} disabled={isLoading}>
-                  Thêm hợp âm
-                </button>
+              <div className="toolbar__row toolbar__row--filters" aria-label={t("chords.aria.filter")}>
+                <div className="seg seg--filters">
+                  <select value={filterKey} onChange={(e) => setFilterKey(e.target.value as FilterKey)}>
+                    <option value="none">{t("chords.filters.none")}</option>
+                    <option value="chordOfCMajor">{t("chords.filters.chordOfCMajor")}</option>
+                    <option value="chordOfCMajorPlus">{t("chords.filters.chordOfCMajorPlus")}</option>
+                  </select>
+                </div>
+
+                {/* reserved: user-defined filters (future) */}
+                <div className="filters__future-space" aria-hidden="true" />
               </div>
             </header>
 
-            {loading && <div className="empty-state">Đang tải hợp âm từ máy chủ…</div>}
-            {err && !loading && <div className="empty-state">Không tải được dữ liệu: {err}</div>}
+            {loading && <div className="empty-state">{t("chords.state.loading")}</div>}
+            {err && !loading && <div className="empty-state">{t("chords.state.load_error_prefix")}: {err}</div>}
 
             {compactNav && visibleRoots.length > 0 && (
-              <div className="root-chips" aria-label="Nốt gốc">
+              <div className="root-chips" aria-label={t("chords.aria.roots")}>
                 {visibleRoots.map((r) => (
                   <button key={r} className={`chip ${activeRoot === r ? "active" : ""}`} onClick={() => scrollToRoot(r)}>
                     {r}
@@ -427,7 +495,7 @@ export default function ChordPage() {
             )}
 
             {grouped.length === 0 ? (
-              <div className="empty-state">Không tìm thấy hợp âm phù hợp bộ lọc/tìm kiếm.</div>
+              <div className="empty-state">{t("chords.state.empty_filtered")}</div>
             ) : (
               <div className="root-sections">
                 {grouped.map(([root, list], idx) => (

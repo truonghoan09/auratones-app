@@ -90,6 +90,54 @@ const en = {
       register_now: 'Register now',
     },
   },
+  chords: {
+    aria: {
+      toc: "Root index",
+      roots: "Roots",
+      chooseInstrument: "Choose instrument",
+      filter: "Chord filter",
+      search: "Search chords",
+    },
+    labels: {
+      roots: "Roots",
+    },
+    instruments: {
+      guitar: "Guitar",
+      ukulele: "Ukulele",
+      piano: "Piano",
+    },
+    filters: {
+      none: "No filter",
+      chordOfCMajor: "CMajor (C Dm Em F G Am)",
+      chordOfCMajorPlus: "CMajor+ (with 7th, dim)",
+    },
+    placeholders: {
+      search: "Search… (e.g., C, Am, Cmaj7)",
+    },
+    actions: {
+      addChord: "Add chord",
+    },
+    state: {
+      loading: "Loading chords from server…",
+      load_error_prefix: "Failed to load",
+      load_error_fallback: "Failed to load data",
+      empty_filtered: "No chords match the current filter/search.",
+    },
+    toast: {
+      submitted_system: "Chord submitted to system.",
+      submitted_contrib: "Contribution submitted (preview).",
+      submit_fail: "Failed to submit chord",
+      voicing_saved: "Voicing saved.",
+      voicing_saved_confirmed: "Voicing saved (overwrite/duplicate confirmed).",
+      voicing_save_fail: "Failed to save voicing",
+      voicing_dup_confirm: "Duplicate voicing. Save anyway?",
+      voicing_dup_cancelled: "Cancelled due to duplicate voicing.",
+      delete_not_found: "Voicing to delete not found.",
+      delete_success_single: "Voicing deleted.",
+      delete_success_scope: "Voicing deleted (including same shape & fingers).",
+      delete_fail: "Failed to delete voicing.",
+    },
+  },
 };
 
 export default en;
