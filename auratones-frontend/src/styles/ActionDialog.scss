@@ -1,0 +1,70 @@
+/* src/styles/ActionDialog.scss */
+.action-dialog {
+  position: fixed; inset: 0; z-index: 1500;
+  display: grid; place-items: center;
+  pointer-events: auto;
+  overscroll-behavior: contain; /* chặn scroll nền trên mobile */
+}
+
+.ad-backdrop {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,.5);
+  border: 0;
+}
+
+.ad-panel {
+  position: relative;
+  width: min(640px, 94vw);
+  max-height: 92vh;
+  display: flex; flex-direction: column;
+  background: var(--card-background);
+  color: var(--text-color);
+  border: 1px solid color-mix(in srgb, var(--text-color) 10%, transparent);
+  border-radius: 16px;
+  box-shadow: var(--box-shadow);
+  overflow: hidden;
+}
+.ad-sm { width: min(420px, 94vw); }
+.ad-md { width: min(640px, 94vw); }
+.ad-lg { width: min(820px, 96vw); }
+
+.ad-head {
+  display: grid; grid-template-columns: auto 1fr auto; align-items: center;
+  gap: 10px; padding: 12px 14px;
+  border-bottom: 1px solid color-mix(in srgb, var(--text-color) 10%, transparent);
+}
+.ad-icon { width: 24px; height: 24px; display: grid; place-items: center; }
+.ad-title { margin: 0; font-size: 1.05rem; font-weight: 800; }
+.ad-close { border: 0; background: transparent; font-size: 20px; cursor: pointer; color: var(--text-color); }
+
+.ad-body { padding: 14px; overflow: auto; }
+.ad-content { line-height: 1.55; }
+.ad-children { margin-top: 10px; }
+
+.ad-actions {
+  padding: 12px 14px; display: flex; gap: 10px; justify-content: flex-end;
+  border-top: 1px solid color-mix(in srgb, var(--text-color) 10%, transparent);
+}
+.ad-btn {
+  height: 36px; padding: 0 14px; border-radius: 999px;
+  font-weight: 800; cursor: pointer; border: 1px solid transparent;
+  background: var(--card-background); color: var(--text-color);
+  border-color: color-mix(in srgb, var(--text-color) 18%, transparent);
+}
+.ad-btn.primary {
+  background: var(--accent-color); color: #fff; border-color: var(--accent-color);
+  box-shadow: 0 6px 16px rgba(var(--accent-color-rgb), .28);
+}
+.ad-btn.secondary:hover { background: rgba(var(--accent-color-rgb), .08); color: var(--accent-color); }
+.ad-btn.danger { color: var(--danger-color); border-color: color-mix(in srgb, var(--danger-color) 60%, transparent); }
+.ad-btn.ghost { background: transparent; border-color: transparent; }
+.ad-btn:disabled { opacity: .6; cursor: not-allowed; }
+
+@media (max-width: 648px) {
+  .ad-panel {
+    width: calc(100vw - 2rem);
+    margin-inline: auto;
+    border-radius: 14px;
+    max-height: 94vh;
+  }
+}

@@ -138,7 +138,14 @@ const vi = {
       delete_success_scope: "Đã xoá voicing (bao gồm các bản cùng form & fingers).",
       delete_fail: "Xoá voicing thất bại.",
     },
+    like_prompt: {
+      title: "Thông báo",
+      message: "Bạn cần đăng nhập để thực hiện chức năng \"Yêu thích\"!",
+      login: "Đăng nhập",
+      continue_guest: "Tiếp tục (Không đăng nhập)",
+    },
   },
+
 };
 
 export default vi;

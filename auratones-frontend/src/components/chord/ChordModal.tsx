@@ -1,32 +1,27 @@
-// src/components/chord/ChordModal.tsx
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import type { ChordEntry } from "../../types/chord";
 import ChordDiagram from "./ChordDiagram";
 import PianoDiagram from "./PianoDiagram";
-import { toggleVoicingLike, fetchVoicingLikes } from "../../services/chords"; // <-- thêm fetchVoicingLikes
+import { toggleVoicingLike, fetchVoicingLikes } from "../../services/chords";
+import { useI18n } from "../../contexts/I18nContext";
 import "../../styles/ChordModal.scss";
+import ActionDialog from "../common/ActionDialog";
 
-/** ====== Props ====== */
 type Props = {
   chord: ChordEntry | null;
   onClose: () => void;
   isAdmin?: boolean;
   onEditVoicing?: (payload: { chord: ChordEntry; variantIndex: number }) => void;
   onDeleteVoicing?: (payload: { chord: ChordEntry; variantIndex: number }) => void;
+  isAuthenticated?: boolean;
+  onRequestLogin?: () => void;
 };
 
-/** ====== Sorting State ====== */
-type PriorityMode = "default" | "popularity"; // baseFret asc vs likesCount
-type MineDir = "asc" | "desc";               // your like timeline ↑(older-first) / ↓(newer-first)
+type PriorityMode = "default" | "popularity";
+type MineDir = "asc" | "desc";
 
-/** ====== Helpers (khớp với BE relaxed FP) ====== */
-function isNumber(x: any): x is number {
-  return typeof x === "number" && Number.isFinite(x);
-}
-function asInt(x: any, def: number) {
-  const n = Number.parseInt(x, 10);
-  return Number.isFinite(n) ? n : def;
-}
+function isNumber(x: any): x is number { return typeof x === "number" && Number.isFinite(x); }
+function asInt(x: any, def: number) { const n = Number.parseInt(x, 10); return Number.isFinite(n) ? n : def; }
 function fpRelaxed(v: any): string {
   const frets = Array.isArray(v?.frets) ? v.frets.map((n: any) => asInt(n, 0)) : [];
   const normBarres = Array.isArray(v?.barres)
@@ -44,8 +39,6 @@ function fpRelaxed(v: any): string {
   const normFingers = fgs.length > 0 && fgs.every((n: number) => n === 0) ? [] : fgs;
   return JSON.stringify({ frets, barres: normBarres, fingers: normFingers });
 }
-
-// min “hiệu dụng” để tie-break khi baseFret trùng
 function minUsedFret(v: any): number {
   const frets = Array.isArray(v?.frets) ? v.frets : [];
   let min = Infinity;
@@ -53,8 +46,7 @@ function minUsedFret(v: any): number {
     const f = frets[i];
     if (isNumber(f) && f > 0) min = Math.min(min, f);
   }
-  if (!Number.isFinite(min)) return 9999;
-  return min;
+  return Number.isFinite(min) ? min : 9999;
 }
 
 export default function ChordModal({
@@ -63,71 +55,68 @@ export default function ChordModal({
   isAdmin,
   onEditVoicing,
   onDeleteVoicing,
+  isAuthenticated,
+  onRequestLogin,
 }: Props) {
-  /** ===== Hooks: giữ đúng thứ tự, không nằm trong if ===== */
-  const [index, setIndex] = useState(0);
+  const { t } = useI18n();
 
-  // Sorting UI states
+  const [index, setIndex] = useState(0);
   const [priority, setPriority] = useState<PriorityMode>("default");
   const [mineEnabled, setMineEnabled] = useState<boolean>(false);
   const [mineDir, setMineDir] = useState<MineDir>("desc");
 
-  // Likes
   const [likesCount, setLikesCount] = useState<Record<string, number>>({});
-  const [userLikedFp, setUserLikedFp] = useState<Record<string, number>>({}); // fp -> likedAt ts
+  const [userLikedFp, setUserLikedFp] = useState<Record<string, number>>({});
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuBtnRef = useRef<HTMLButtonElement | null>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const gradId = useMemo(() => `heartGrad_${Math.random().toString(36).slice(2)}`, []);
 
-  // Reset khi chord đổi (giữ nguyên của bạn)
   useEffect(() => {
     setIndex(0);
-
-    if (chord?.likesCountByFp) setLikesCount(chord.likesCountByFp);
-    else setLikesCount({});
-
-    if (chord?.userLikesFpToTs) setUserLikedFp(chord.userLikesFpToTs);
-    else setUserLikedFp({});
+    setLikesCount(chord?.likesCountByFp ?? {});
+    setUserLikedFp(chord?.userLikesFpToTs ?? {});
+    setMenuOpen(false);
   }, [chord]);
 
-  // ✅ NEW: hydrate likes từ BE để đảm bảo sau reload không về 0
   useEffect(() => {
     if (!chord) return;
     let alive = true;
-
     fetchVoicingLikes({ instrument: chord.instrument, symbol: chord.symbol })
       .then((res) => {
         if (!alive) return;
         if (res?.countsByFp) setLikesCount(res.countsByFp);
         if (res?.userLikesFpToTs) setUserLikedFp(res.userLikesFpToTs);
       })
-      .catch(() => {
-        // im lặng nếu lỗi mạng, vẫn dùng dữ liệu sẵn có
-      });
-
+      .catch(() => {});
     return () => { alive = false; };
   }, [chord?.instrument, chord?.symbol]);
 
-  // Keyboard
+  useEffect(() => {
+    if (!chord) return;
+    const prev = document.documentElement.style.overflow;
+    document.documentElement.style.overflow = "hidden";
+    return () => { document.documentElement.style.overflow = prev; };
+  }, [chord]);
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (!chord) return;
       if (e.key === "Escape") {
-        e.preventDefault();
-        onClose();
+        if (menuOpen) { setMenuOpen(false); return; }
+        e.preventDefault(); onClose();
       }
-      if (e.key === "ArrowRight" || e.key === "ArrowDown") {
-        setIndex((i) => Math.min((orderedIndices.length || 1) - 1, i + 1));
-      }
-      if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
-        setIndex((i) => Math.max(0, i - 1));
-      }
+      if (e.key === "ArrowRight" || e.key === "ArrowDown") setIndex((i) => Math.min((orderedIndices.length || 1) - 1, i + 1));
+      if (e.key === "ArrowLeft"  || e.key === "ArrowUp")   setIndex((i) => Math.max(0, i - 1));
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [chord, onClose]); // cố ý không phụ thuộc orderedIndices để tránh rebind liên tục
+  }, [chord, onClose, menuOpen]);
 
-  // Swipe
+  /* Swipe chỉ theo NGANG: chặn cuộn dọc bằng preventDefault trên touchmove */
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -144,6 +133,11 @@ export default function ChordModal({
       dx = x - startX;
       (el as HTMLElement).style.setProperty("--offset", `${dx}px`);
       el.classList.add("dragging");
+
+      // 🔒 chặn cuộn dọc trong khi kéo ngang
+      if ("touches" in e) {
+        e.preventDefault();
+      }
     };
     const onEnd = () => {
       if (!active) return;
@@ -160,21 +154,23 @@ export default function ChordModal({
     el.addEventListener("mousedown", onStart);
     el.addEventListener("mousemove", onMove);
     window.addEventListener("mouseup", onEnd);
-    el.addEventListener("touchstart", onStart, { passive: true });
-    el.addEventListener("touchmove", onMove, { passive: true });
+
+    // ⚠️ dùng passive: false để cho phép preventDefault()
+    el.addEventListener("touchstart", onStart, { passive: false });
+    el.addEventListener("touchmove", onMove, { passive: false });
     window.addEventListener("touchend", onEnd);
 
     return () => {
       el.removeEventListener("mousedown", onStart);
       el.removeEventListener("mousemove", onMove);
       window.removeEventListener("mouseup", onEnd);
-      el.removeEventListener("touchstart", onStart);
-      el.removeEventListener("touchmove", onMove);
+
+      el.removeEventListener("touchstart", onStart as any);
+      el.removeEventListener("touchmove", onMove as any);
       window.removeEventListener("touchend", onEnd);
     };
   }, [index, chord]);
 
-  // Detect admin (giữ nguyên cho edit/delete)
   const admin = useMemo(() => {
     if (typeof isAdmin === "boolean") return isAdmin;
     try {
@@ -187,7 +183,6 @@ export default function ChordModal({
     return false;
   }, [isAdmin]);
 
-  /** ====== Build base orders ====== */
   const defaultOrder = useMemo(() => {
     const n = chord?.variants?.length ?? 0;
     if (!chord || n === 0) return [] as number[];
@@ -204,13 +199,10 @@ export default function ChordModal({
     if (!chord) return [] as number[];
     const withKey = defaultOrder.map((i, ord) => {
       const fp = fpRelaxed(chord.variants[i]);
-      const cnt = likesCount[fp] ?? 0;
+      const cnt = (likesCount[fp] ?? 0);
       return { i, cnt, ord };
     });
-    withKey.sort((a, b) => {
-      if (b.cnt !== a.cnt) return b.cnt - a.cnt;
-      return a.ord - b.ord;
-    });
+    withKey.sort((a, b) => (b.cnt - a.cnt) || (a.ord - b.ord));
     return withKey.map((x) => x.i);
   }, [chord, defaultOrder, likesCount]);
 
@@ -238,18 +230,13 @@ export default function ChordModal({
     return likedPairs.map((x) => x.i);
   }, [chord, defaultOrder, userLikedFp]);
 
-  /** ====== Compose final ordered indices ====== */
   const orderedIndices = useMemo(() => {
     if (!chord) return [] as number[];
+    if (!mineEnabled) return priority === "default" ? defaultOrder : popularityOrder;
 
-    if (!mineEnabled) {
-      return priority === "default" ? defaultOrder : popularityOrder;
-    }
-
-    const minePart = (mineDir === "asc" ? mineAscFirst : mineDescFirst);
+    const minePart = mineDir === "asc" ? mineAscFirst : mineDescFirst;
     const likedSet = new Set(minePart);
     const base = (priority === "default" ? defaultOrder : popularityOrder).filter(i => !likedSet.has(i));
-
     return [...minePart, ...base];
   }, [chord, mineEnabled, mineDir, priority, defaultOrder, popularityOrder, mineAscFirst, mineDescFirst]);
 
@@ -258,11 +245,10 @@ export default function ChordModal({
     return orderedIndices.map((i) => chord.variants[i]);
   }, [chord, orderedIndices]);
 
-  /** ====== Current slide state ====== */
   const isOpen = !!chord;
   if (!isOpen) return null;
-  const c = chord as ChordEntry;
 
+  const c = chord as ChordEntry;
   const name = c.symbol;
   const isPiano = c.instrument === "piano";
   const count = variantsOrdered.length;
@@ -273,10 +259,9 @@ export default function ChordModal({
   const currentLiked = !!userLikedFp[currentFp];
   const currentLikes = likesCount[currentFp] ?? 0;
 
-  /** ====== Actions ====== */
   const handleToggleLike = async () => {
+    if (!isAuthenticated) { setShowLoginPrompt(true); return; }
     try {
-      // optimistic
       setUserLikedFp((prev) => {
         const next = { ...prev };
         if (next[currentFp]) delete next[currentFp];
@@ -298,7 +283,6 @@ export default function ChordModal({
         return next;
       });
     } catch (e: any) {
-      // rollback đơn giản
       setUserLikedFp((prev) => {
         const next = { ...prev };
         if (currentLiked) next[currentFp] = Date.now();
@@ -309,24 +293,27 @@ export default function ChordModal({
         const base = prev[currentFp] ?? 0;
         return { ...prev, [currentFp]: currentLiked ? base + 1 : Math.max(0, base - 1) };
       });
-      (window as any).__toast?.(e?.message || "Không gửi được trạng thái yêu thích.", "error");
+      (window as any).__toast?.(e?.message || t("common.like_error"), "error");
     }
   };
 
-  /** ====== Render ====== */
+  const handleMenuAction = (fn: () => void) => {
+    fn();
+    setMenuOpen(false);
+    menuBtnRef.current?.focus();
+  };
+
   return (
     <div className="chord-modal" role="dialog" aria-modal="true">
-      <div className="backdrop" onClick={onClose} />
+      <button className="backdrop" onClick={onClose} aria-label={t("common.close")} />
       <div className="panel" ref={containerRef}>
         <header className="cm-header">
           <div className="title-wrap">
             <div className="title">{name}</div>
-
-            {/* Heart + Count (ngay cạnh tên) */}
             <button
               className={`like-chip ${currentLiked ? "liked" : ""}`}
               onClick={handleToggleLike}
-              title={currentLiked ? "Bỏ yêu thích voicing này" : "Yêu thích voicing này"}
+              title={currentLiked ? t("chords.like_tooltip_unlike") : t("chords.like_tooltip_like")}
               aria-pressed={currentLiked}
               disabled={!currentVariant}
             >
@@ -355,52 +342,121 @@ export default function ChordModal({
             </button>
           </div>
 
-          {/* Header right: sort controls + admin edit/delete + close */}
-          <div className="header-right">
-            <div className="sort-group" role="group" aria-label="Ưu tiên sắp xếp">
-              <button
-                className={`sort-pill ${priority === "default" ? "active" : ""}`}
-                onClick={() => setPriority("default")}
-                title="Ưu tiên Base Fret"
-              >
-                Default
-              </button>
-              <button
-                className={`sort-pill ${priority === "popularity" ? "active" : ""}`}
-                onClick={() => setPriority("popularity")}
-                title="Ưu tiên nhiều Likes"
-              >
-                Likes
-              </button>
-            </div>
-
-            <div className="mine-wrap" aria-label="Sắp xếp theo thứ tự tim riêng">
-              <label className={`mine-toggle ${mineEnabled ? "on" : ""}`}>
-                <input
-                  type="checkbox"
-                  checked={mineEnabled}
-                  onChange={(e) => setMineEnabled(e.target.checked)}
-                  aria-label="Bật/tắt sắp xếp theo thứ tự thả tim cá nhân"
-                />
-                <span className="knob" />
-                <span className="lbl">Mine</span>
-              </label>
-              <div className={`mine-dir ${!mineEnabled ? "disabled" : ""}`}>
+          <div className="header-controls">
+            <div className="controls-inline" role="group" aria-label={t("chords.sort.aria")}>
+              <div className="sort-group">
                 <button
-                  className={`dir-btn ${mineDir === "asc" ? "active" : ""}`}
-                  onClick={() => mineEnabled && setMineDir("asc")}
-                  title="Cũ trước (Mine ↑)"
+                  className={`sort-pill ${priority === "default" ? "active" : ""}`}
+                  onClick={() => setPriority("default")}
+                  title={t("chords.sort.default")}
                 >
-                  ↑
+                  Default
                 </button>
                 <button
-                  className={`dir-btn ${mineDir === "desc" ? "active" : ""}`}
-                  onClick={() => mineEnabled && setMineDir("desc")}
-                  title="Mới trước (Mine ↓)"
+                  className={`sort-pill ${priority === "popularity" ? "active" : ""}`}
+                  onClick={() => setPriority("popularity")}
+                  title={t("chords.sort.likes")}
                 >
-                  ↓
+                  Likes
                 </button>
               </div>
+
+              {isAuthenticated && (
+                <div className="mine-wrap" aria-label={t("chords.sort.mine")}>
+                  <label className={`mine-toggle ${mineEnabled ? "on" : ""}`}>
+                    <input
+                      type="checkbox"
+                      checked={mineEnabled}
+                      onChange={(e) => setMineEnabled(e.target.checked)}
+                      aria-label={t("chords.sort.mine_toggle")}
+                    />
+                    <span className="knob" />
+                    <span className="lbl">Mine</span>
+                  </label>
+                  <div className={`mine-dir ${!mineEnabled ? "disabled" : ""}`}>
+                    <button
+                      className={`dir-btn ${mineDir === "asc" ? "active" : ""}`}
+                      onClick={() => mineEnabled && setMineDir("asc")}
+                      title={t("chords.sort.mine_asc")}
+                    >
+                      ↑
+                    </button>
+                    <button
+                      className={`dir-btn ${mineDir === "desc" ? "active" : ""}`}
+                      onClick={() => mineEnabled && setMineDir("desc")}
+                      title={t("chords.sort.mine_desc")}
+                    >
+                      ↓
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="controls-menu">
+              <button
+                ref={menuBtnRef}
+                className={`menu-btn ${menuOpen ? "open" : ""}`}
+                aria-haspopup="menu"
+                aria-expanded={menuOpen}
+                aria-label="More options"
+                onClick={() => setMenuOpen((v) => !v)}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="18" height="18" aria-hidden="true">
+                  <path d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3"/>
+                </svg>
+              </button>
+
+              {menuOpen && (
+                <div className="menu-dropdown" role="menu">
+                  <button
+                    role="menuitem"
+                    className={`menu-item ${priority === "default" ? "active" : ""}`}
+                    onClick={() => handleMenuAction(() => setPriority("default"))}
+                  >
+                    Default
+                  </button>
+                  <button
+                    role="menuitem"
+                    className={`menu-item ${priority === "popularity" ? "active" : ""}`}
+                    onClick={() => handleMenuAction(() => setPriority("popularity"))}
+                  >
+                    Likes
+                  </button>
+
+                  {isAuthenticated && (
+                    <>
+                      <div className="menu-sep" />
+                      <button
+                        role="menuitemcheckbox"
+                        aria-checked={mineEnabled}
+                        className={`menu-item ${mineEnabled ? "checked" : ""}`}
+                        onClick={() => handleMenuAction(() => setMineEnabled(!mineEnabled))}
+                      >
+                        Mine
+                      </button>
+                      <div className={`menu-inline-arrows ${!mineEnabled ? "disabled" : ""}`} role="group" aria-label="Mine order">
+                        <button
+                          className={`arrow ${mineDir === "asc" ? "active" : ""}`}
+                          onClick={() => handleMenuAction(() => mineEnabled && setMineDir("asc"))}
+                          disabled={!mineEnabled}
+                          aria-label="Mine ↑"
+                        >
+                          ↑
+                        </button>
+                        <button
+                          className={`arrow ${mineDir === "desc" ? "active" : ""}`}
+                          onClick={() => handleMenuAction(() => mineEnabled && setMineDir("desc"))}
+                          disabled={!mineEnabled}
+                          aria-label="Mine ↓"
+                        >
+                          ↓
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
 
             {admin && (
@@ -410,7 +466,7 @@ export default function ChordModal({
                   onClick={() => onEditVoicing?.({ chord: c, variantIndex: currentOriginalIndex })}
                   disabled={!onEditVoicing}
                   aria-label="Edit voicing"
-                  title={onEditVoicing ? "Edit voicing này" : "Chưa cấu hình onEditVoicing"}
+                  title="Edit voicing"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" aria-hidden="true">
                     <path fill="currentColor" d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325"/>
@@ -422,7 +478,7 @@ export default function ChordModal({
                   onClick={() => onDeleteVoicing?.({ chord: c, variantIndex: currentOriginalIndex })}
                   disabled={!onDeleteVoicing}
                   aria-label="Delete voicing"
-                  title={onDeleteVoicing ? "Delete voicing này" : "Chưa cấu hình onDeleteVoicing"}
+                  title="Delete voicing"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" aria-hidden="true">
                     <path fill="currentColor" d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5"/>
@@ -431,8 +487,10 @@ export default function ChordModal({
                 </button>
               </div>
             )}
+          </div>
 
-            <button className="close" onClick={onClose} aria-label="Close">×</button>
+          <div className="header-close">
+            <button className="close" onClick={onClose} aria-label={t("common.close")}>×</button>
           </div>
         </header>
 
@@ -441,11 +499,7 @@ export default function ChordModal({
             {variantsOrdered.map((v, i) => (
               <div className="slide" key={v.id ?? `${i}-${orderedIndices[i]}`}>
                 {!isPiano ? (
-                  <ChordDiagram
-                    shape={{ ...v, name }}
-                    numStrings={c.instrument === "guitar" ? 6 : 4}
-                    showName={false}
-                  />
+                  <ChordDiagram shape={{ ...v, name }} numStrings={c.instrument === "guitar" ? 6 : 4} showName={false} />
                 ) : (
                   <PianoDiagram notes={[0, 4, 7]} />
                 )}
@@ -460,6 +514,26 @@ export default function ChordModal({
           <button disabled={index === count - 1 || count === 0} onClick={() => setIndex((i) => Math.min(count - 1, i + 1))}>→</button>
         </footer>
       </div>
+
+      <ActionDialog
+        open={showLoginPrompt}
+        onClose={() => setShowLoginPrompt(false)}
+        title={t("chords.like_prompt.title")}
+        content={t("chords.like_prompt.message")}
+        actions={[
+          {
+            label: t("chords.like_prompt.continue_guest"),
+            variant: "secondary",
+            onClick: () => { setShowLoginPrompt(false); },
+            autoFocus: true,
+          },
+          {
+            label: t("chords.like_prompt.login"),
+            variant: "primary",
+            onClick: () => { setShowLoginPrompt(false); onRequestLogin?.(); },
+          },
+        ]}
+      />
     </div>
   );
 }

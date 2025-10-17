@@ -137,7 +137,14 @@ const en = {
       delete_success_scope: "Voicing deleted (including same shape & fingers).",
       delete_fail: "Failed to delete voicing.",
     },
+    like_prompt: {
+      title: "Notification",
+      message: "You need to log in to use the \"Like\" feature!",
+      login: "Log in",
+      continue_guest: "Continue (without logging in)",
+    },
   },
+
 };
 
 export default en;
