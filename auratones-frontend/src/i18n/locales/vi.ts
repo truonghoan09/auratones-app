@@ -180,7 +180,10 @@ const vi = {
       continue_guest: "Tiếp tục (Không đăng nhập)",
     },
   },
-
+  common: {
+    loading: "Đang tải",
+    please_wait: "Vui lòng chờ…",
+  },
 };
 
 export default vi;

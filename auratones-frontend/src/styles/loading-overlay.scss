@@ -1,0 +1,104 @@
+@use "./mixins" as *;
+
+/* ===== Fullscreen blocking overlay ===== */
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  min-height: 100dvh;
+
+  @include flex-center;                 /* căn giữa tuyệt đối */
+  @include safe-padding(16px, 16px, 16px, 16px);
+
+  background: color-mix(in srgb, var(--background-color, #0b0b0d) 60%, transparent);
+  backdrop-filter: saturate(120%) blur(8px);
+  animation: lo-fade-in .18s ease-out forwards;
+  transform: translateZ(0);             /* chống lệch subpixel */
+}
+
+/* ===== Panel ===== */
+.lo-panel {
+  --panel-bg: color-mix(in srgb, var(--card-background, #fff) 88%, transparent);
+
+  display: flex;
+  flex-direction: column;               /* dots trên – text dưới */
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+
+  min-inline-size: min(86vw, 360px);
+  max-inline-size: 92vw;
+
+  padding: fluid(16px, 2.6vw, 24px) fluid(18px, 3vw, 28px);
+  border-radius: 16px;
+
+  background: var(--panel-bg);
+  color: var(--text-color, #111);
+  border: 1px solid color-mix(in srgb, var(--text-color, #111) 10%, transparent);
+  box-shadow: 0 20px 60px rgba(0,0,0,.35);
+  text-align: center;
+}
+
+/* ===== Dots loader (một hàng, nhảy lần lượt) ===== */
+.lo-dots {
+  --D: #{fluid(8px, 1.4vw, 12px)};     /* đường kính dot */
+  --G: #{fluid(8px, 1.6vw, 12px)};     /* khoảng cách giữa dot */
+  --H: #{fluid(16px, 2.6vw, 20px)};    /* chiều cao khối để dot có không gian nhảy */
+
+  display: inline-flex;
+  align-items: flex-end;                /* dot “đứng” trên baseline chung */
+  justify-content: center;
+  gap: var(--G);
+  min-height: var(--H);                 /* tránh đè text khi dot nhảy */
+}
+
+.lo-dots .dot {
+  inline-size: var(--D);
+  block-size: var(--D);
+  border-radius: 50%;
+  background: var(--accent-color, #3b7ad1);
+  box-shadow: 0 6px 18px rgba(var(--accent-color-rgb, 59,122,209), .35);
+  animation: lo-bounce 1s ease-in-out infinite;
+}
+
+/* Nhảy so le */
+.lo-dots .d1 { animation-delay: 0s;    }
+.lo-dots .d2 { animation-delay: .12s;  }
+.lo-dots .d3 { animation-delay: .24s;  }
+.lo-dots .d4 { animation-delay: .36s;  }
+
+/* ===== Text ===== */
+.lo-text {
+  .lo-title { font-weight: 800; font-size: #{fluid(0.95rem, 1.4vw, 1.05rem)}; }
+  .lo-sub   { font-size: #{fluid(0.88rem, 1.2vw, 0.98rem)}; opacity: .85; margin-top: 2px; }
+}
+
+/* ===== Animations ===== */
+@keyframes lo-fade-in {
+  from { opacity: 0 }
+  to   { opacity: 1 }
+}
+
+/* Dot đi theo trục Y, không quay */
+@keyframes lo-bounce {
+  0%, 100% { transform: translateY(0);         }
+  40%      { transform: translateY(-40%);      } /* nhảy lên */
+  60%      { transform: translateY(-20%);      } /* nhịp nhỏ */
+}
+
+/* ===== Responsive tweaks ===== */
+@include down($bp-tablet) {
+  .lo-panel { min-inline-size: min(90vw, 360px); }
+}
+@include down($bp-mobile) {
+  .lo-panel { min-inline-size: 92vw; border-radius: 14px; }
+}
+@include down($bp-tiny) {
+  .lo-panel { padding: 14px 16px; gap: 10px; }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .loading-overlay { animation: none; }
+  .lo-dots .dot    { animation: none; }
+}

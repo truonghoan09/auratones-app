@@ -179,6 +179,10 @@ const en = {
       continue_guest: "Continue (without logging in)",
     },
   },
+  common: {
+    loading: "Loading",
+    please_wait: "Please wait…",
+  },
 
 };
 
