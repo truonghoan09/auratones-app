@@ -1,3 +1,6 @@
+// Header.tsx
+// NOTE: Bỏ chip display-chord ở header-right; mặc định localStorage 'displayChord' = 'maj/m' nếu chưa có.
+
 import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { Link, useLocation } from "react-router-dom";
 import ThemeSwitcher from "./ThemeSwitcher";
@@ -8,12 +11,10 @@ import { useDisplayMode } from "../contexts/DisplayModeContext";
 import { useI18n } from "../contexts/I18nContext";
 
 const Header: React.FC = () => {
-  /* UI state */
-  const [isMenuOpen, setIsMenuOpen] = useState(false);   // desktop user dropdown
-  const [authOpen, setAuthOpen] = useState(false);       // auth modal
-  const [mobileOpen, setMobileOpen] = useState(false);   // mobile drawer
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [authOpen, setAuthOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
-  /* App contexts */
   const { t, lang, setLang } = useI18n();
   const { mode, toggle } = useDisplayMode();
   const isSymbol = mode === "symbol";
@@ -22,16 +23,25 @@ const Header: React.FC = () => {
   const location = useLocation();
   const userProfileRef = useRef<HTMLDivElement>(null);
 
-  /* Handlers */
+  /* default display-chord */
+  useEffect(() => {
+    try {
+      const KEY = "displayChord";
+      if (typeof window !== "undefined" && localStorage.getItem(KEY) == null) {
+        localStorage.setItem(KEY, "maj/m");
+      }
+    } catch {}
+  }, []);
+
+  /* handlers */
   const handleToggleMenu = useCallback(() => {
-    if (!isLoading) setIsMenuOpen(v => !v);
+    if (!isLoading) setIsMenuOpen((v) => !v);
   }, [isLoading]);
 
-  const toggleMobile = useCallback(() => setMobileOpen(v => !v), []);
+  const toggleMobile = useCallback(() => setMobileOpen((v) => !v), []);
   const closeMobile  = useCallback(() => setMobileOpen(false), []);
-
-  const openAuth  = useCallback(() => setAuthOpen(true), []);
-  const closeAuth = useCallback(() => setAuthOpen(false), []);
+  const openAuth     = useCallback(() => setAuthOpen(true), []);
+  const closeAuth    = useCallback(() => setAuthOpen(false), []);
 
   const handleLogout = useCallback(async () => {
     await logout();
@@ -46,7 +56,7 @@ const Header: React.FC = () => {
   const langLabel = (lang || "vi").toUpperCase();
   const langAria  = lang === "vi" ? "Switch language to English" : "Chuyển ngôn ngữ sang Tiếng Việt";
 
-  /* Close desktop dropdown on outside click */
+  /* close dropdown on outside click */
   useEffect(() => {
     const onOutside = (e: MouseEvent) => {
       if (userProfileRef.current && !userProfileRef.current.contains(e.target as Node)) {
@@ -57,7 +67,7 @@ const Header: React.FC = () => {
     return () => document.removeEventListener("mousedown", onOutside);
   }, [isMenuOpen]);
 
-  /* Esc closes dropdown and mobile drawer */
+  /* esc to close */
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -69,13 +79,11 @@ const Header: React.FC = () => {
     return () => window.removeEventListener("keydown", onKey);
   }, [isMenuOpen, mobileOpen]);
 
-  /* Auto-close mobile drawer on route change */
-  useEffect(() => {
-    if (mobileOpen) setMobileOpen(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.pathname]);
+  /* auto-close drawer on route change */
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { if (mobileOpen) setMobileOpen(false); }, [location.pathname]);
 
-  /* Active route helpers */
+  /* route helpers */
   const isActive = useCallback(
     (to: string) => {
       const cur  = location.pathname.replace(/\/+$/, "");
@@ -89,7 +97,7 @@ const Header: React.FC = () => {
     [isActive]
   );
 
-  /* User display info */
+  /* user display */
   const displayName = useMemo(() => {
     if (user?.displayName) return user.displayName;
     if (user?.username)    return user.username;
@@ -101,7 +109,7 @@ const Header: React.FC = () => {
   const initials = useMemo(() => {
     const base = (user?.displayName || user?.username || user?.email || "A U").trim();
     const parts: string[] = base.replace(/@.*/, "").split(/\s+/).slice(0, 2);
-    return parts.map(p => p?.[0]?.toUpperCase() ?? "").join("");
+    return parts.map((p) => p?.[0]?.toUpperCase() ?? "").join("");
   }, [user]);
 
   const plan = (user?.plan || "free") as "free" | "pro" | "enterprise" | "admin";
@@ -111,13 +119,15 @@ const Header: React.FC = () => {
   : plan === "admin"      ? t("header.plan.admin")
   :                         t("header.plan.free");
 
-  /* Toast bridge (kept as-is) */
   const showToast = useCallback((message: string, type: "success" | "error" | "info") => {
     (window as any).__toast?.(message, type);
     if (type === "error") console.error(message);
     else if (type === "success") console.log(message);
     else console.info(message);
   }, []);
+
+  const chordLabel = isSymbol ? t("header.chord_display.symbol_short") : t("header.chord_display.text_short");
+  const chordTitle = isSymbol ? t("header.chord_display.title_on") : t("header.chord_display.title_off");
 
   return (
     <>
@@ -147,11 +157,10 @@ const Header: React.FC = () => {
             <span className="bar" /><span className="bar" /><span className="bar" />
           </button>
 
-          {/* Desktop controls (hidden on tablet/mobile) */}
+          {/* (removed) chord chip on desktop */}
           {isAuthenticated ? (
             <div className="user-profile" ref={userProfileRef}>
-                <ThemeSwitcher />
-
+              <ThemeSwitcher />
               <button
                 type="button"
                 className="chip chip-lang"
@@ -202,33 +211,6 @@ const Header: React.FC = () => {
 
                   <div className="dropdown-sep" />
 
-                  <button
-                    type="button"
-                    className={`dropdown-item icon-toggle${isSymbol ? " is-on" : ""}`}
-                    role="switch"
-                    aria-checked={isSymbol}
-                    onClick={toggle}
-                    title={isSymbol ? t("header.chord_display.title_on") : t("header.chord_display.title_off")}
-                  >
-                    <span className="icon-toggle__left">
-                      {isSymbol ? (
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-                          <path fill="currentColor" d="M5 3a5 5 0 0 0 0 10h6a5 5 0 0 0 0-10zm6 9a4 4 0 1 1 0-8 4 4 0 0 1 0 8"/>
-                        </svg>
-                      ) : (
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-                          <path fill="currentColor" d="M11 4a4 4 0 0 1 0 8H8a5 5 0 0 0 2-4 5 5 0 0 0-2-4zm-6 8a4 4 0 1 1 0-8 4 4 0 0 1 0 8M0 8a5 5 0 0 0 5 5h6a5 5 0 0 0 0-10H5a5 5 0 0 0-5 5"/>
-                        </svg>
-                      )}
-                    </span>
-                    <span className="icon-toggle__label">
-                      {t("header.chord_display.label")}
-                      <span className="icon-toggle__value">
-                        {isSymbol ? t("header.chord_display.symbol") : t("header.chord_display.text")}
-                      </span>
-                    </span>
-                  </button>
-
                   <Link to="/profile"   className="dropdown-item" onClick={() => setIsMenuOpen(false)}>{t("header.profile")}</Link>
                   <Link to="/dashboard" className="dropdown-item" onClick={() => setIsMenuOpen(false)}>{t("header.dashboard")}</Link>
                   {user?.role === "admin" && (
@@ -278,6 +260,30 @@ const Header: React.FC = () => {
           </div>
 
           <div className="mobile-controls">
+            {/* chord chip in secondary nav */}
+            <button
+              type="button"
+              className={`chip chip-chord${isSymbol ? " is-on" : ""}`}
+              onClick={toggle}
+              role="switch"
+              aria-checked={isSymbol}
+              title={chordTitle}
+              aria-label={chordTitle}
+            >
+              <span className="chip-icon" aria-hidden="true">
+                {isSymbol ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                    <path fill="currentColor" d="M5 3a5 5 0 0 0 0 10h6a5 5 0 0 0 0-10zm6 9a4 4 0 1 1 0-8 4 4 0 0 1 0 8"/>
+                  </svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                    <path fill="currentColor" d="M11 4a4 4 0 0 1 0 8H8a5 5 0 0 0 2-4 5 5 0 0 0-2-4zm-6 8a4 4 0 1 1 0-8 4 4 0 0 1 0 8M0 8a5 5 0 0 0 5 5h6a5 5 0 0 0 0-10H5a5 5 0 0 0-5 5"/>
+                  </svg>
+                )}
+              </span>
+              <span className="chip-label">{chordLabel}</span>
+            </button>
+
             <button type="button" className="chip chip-theme" title="Theme" aria-label="Theme"><ThemeSwitcher /></button>
             <button type="button" className="chip chip-lang" onClick={toggleLang} aria-label={langAria} title={langAria}>
               <span className="chip-icon" aria-hidden="true">🌐</span>

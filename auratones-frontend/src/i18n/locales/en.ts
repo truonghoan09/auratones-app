@@ -22,9 +22,12 @@ const en = {
       text: 'Text (maj/m/dim/aug)',
       title_on: 'Display: Symbol (Δ/–/ø/°)',
       title_off: 'Display: Text (maj/m/dim/aug)',
+      // ▼ NEW: compact labels for the header chip
+      symbol_short: 'Δ / ø',
+      text_short: 'maj / m',
     },
 
-    // ▼ New: Theme switcher labels (bilingual in-string)
+    // Theme switcher labels
     theme: {
       aria: 'Choose theme',
       options: {
@@ -183,7 +186,6 @@ const en = {
     loading: "Loading",
     please_wait: "Please wait…",
   },
-
 };
 
 export default en;

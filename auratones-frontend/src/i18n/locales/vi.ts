@@ -22,9 +22,12 @@ const vi = {
       text: 'Chữ (maj/m/dim/aug)',
       title_on: 'Hiển thị: Ký tự (Δ/–/ø/°)',
       title_off: 'Hiển thị: Chữ (maj/m/dim/aug)',
+      // ▼ NEW: nhãn gọn cho nút chip
+      symbol_short: 'Δ / ø',
+      text_short: 'maj / m',
     },
 
-    // ▼ New: Nhãn theme dạng song ngữ ngay trong chuỗi
+    // Theme switcher labels
     theme: {
       aria: 'Chọn chủ đề',
       options: {

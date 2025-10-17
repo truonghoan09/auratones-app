@@ -1,5 +1,9 @@
 /* src/styles/ChordModal.scss */
+@use "./mixins" as m;
 
+/* =========
+   Modal root
+   ========= */
 .chord-modal {
   position: fixed;
   inset: 0;
@@ -7,23 +11,42 @@
   display: grid;
   place-items: center;
   overscroll-behavior: contain;
+  overflow-x: hidden; /* yêu cầu: ẩn tràn ngang */
+
+  /* pad đối xứng để modal luôn thật-sự nằm giữa */
+  --modal-block-pad: #{m.fluid(12px, 4svh, 24px)};
+  padding-block: var(--modal-block-pad);
 }
+
 .chord-modal .backdrop {
   position: absolute;
   inset: 0;
   background: rgba(0,0,0,.5);
   border: 0;
 }
+
+/* ======
+   Panel
+   ====== */
 .chord-modal .panel {
   position: relative;
   width: min(92vw, 820px);
   background: var(--card-background, #fff);
   border-radius: 14px;
   box-shadow: 0 24px 60px rgba(0,0,0,.3);
-  overflow: hidden;
+
+  /* luôn ở giữa, không cắt footer, và cắt ngang để nội dung không vượt khỏi panel */
+  max-height: calc(100dvh - (var(--modal-block-pad) * 2));
+  overflow-y: visible;
+  overflow-x: hidden;                    /* ✅ cắt ngang trong modal */
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
 }
 
-/* Header grid */
+/* ============
+   Header grid
+   ============ */
 .cm-header {
   position: relative;
   display: grid;
@@ -31,31 +54,68 @@
   align-items: center;
   gap: 12px;
   padding: 10px 14px;
-  border-bottom: 1px solid rgba(0,0,0,.06);
-  background: rgba(0,0,0,.02);
+  border-bottom: 1px solid color-mix(in srgb, var(--text-color, #111) 6%, transparent);
+  background: color-mix(in srgb, var(--card-background, #fff) 96%, var(--text-color, #111) 4%);
 }
+
 .title-wrap { display: flex; align-items: center; gap: 10px; min-width: 0; }
+
 .cm-header .title {
-  font-weight: 800; font-size: 20px; color: var(--text-color, #212121);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  font-weight: 800;
+  font-size: 20px;
+  color: var(--text-color, #212121);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
+
+/* ========== 
+   Like chip (theo theme, tim luôn đỏ)
+   ========== */
+
 .like-chip {
-  display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 999px;
-  background: #fff; border: 1px solid rgba(0,0,0,.08); color: var(--text-color, #212121);
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 10px; border-radius: 999px;
+
+  /* Nền & border theo theme (accent + card) */
+  background: color-mix(in srgb, var(--accent-color, #6e9ddf) 10%, var(--card-background, #fff));
+  border: 1px solid color-mix(in srgb, var(--accent-color, #71a5ef) 28%, transparent);
+  color: color-mix(in srgb, var(--accent-color, #3b7ad1) 80%, #0b1220 20%);
+
   box-shadow: var(--box-shadow, 0 4px 12px rgba(0,0,0,.08));
-  cursor: pointer; line-height: 1; transition: transform .08s ease, box-shadow .12s ease, background .12s ease;
+  cursor: pointer; line-height: 1;
+  transition: transform .08s ease, box-shadow .12s ease, background .12s ease, border-color .12s ease, color .12s ease;
 }
 .like-chip:hover { transform: translateY(-1px); box-shadow: 0 8px 18px rgba(0,0,0,.12); }
 .like-chip:disabled { opacity: .6; cursor: not-allowed; }
 .like-chip .icon { width: 18px; height: 18px; display: grid; place-items: center; }
-.like-chip .icon svg { width: 18px; height: 18px; display: block; color: #e11d48; }
 .like-chip .count { font-weight: 700; font-size: 13px; min-width: 1.5ch; text-align: right; }
+.like-chip:focus-visible { @include m.focus-ring(--accent-color-rgb, .22); }
 
-/* Controls */
+/* ✅ Trái tim luôn đỏ ở cả 2 trạng thái */
+.like-chip .icon svg path { fill: var(--heart-color, #dc2626) !important; }
+.like-chip .icon svg.filled path { fill: var(--heart-color, #dc2626) !important; }
+
+/* Khi đã like: nền/border theo theme (accent), text trắng; tim vẫn đỏ */
+.like-chip.liked {
+  background: var(--accent-color, #3b7ad1);
+  border-color: var(--accent-color, #3b7ad1);
+  color: #fff;
+}
+.like-chip.liked .count { color: #fff; }
+/* Giữ icon trái tim đỏ trên nền accent */
+.like-chip.liked .icon svg path { fill: var(--heart-color, #dc2626) !important; }
+
+/* =========
+   Controls
+   ========= */
 .header-controls { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .controls-inline { display: inline-flex; align-items: center; gap: 10px; }
+
 .sort-group {
-  display: inline-flex; background: rgba(0,0,0,.04); border: 1px solid rgba(0,0,0,.08);
+  display: inline-flex;
+  background: color-mix(in srgb, var(--text-color, #111) 4%, transparent);
+  border: 1px solid color-mix(in srgb, var(--text-color, #111) 8%, transparent);
   padding: 3px; border-radius: 999px;
 }
 .sort-group .sort-pill {
@@ -63,86 +123,189 @@
   font-weight: 700; font-size: 12px; padding: 6px 10px; border-radius: 999px; cursor: pointer;
   transition: background .14s ease, color .14s ease;
 }
-.sort-group .sort-pill.active { background: rgba(var(--accent-color-rgb, 59,122,209), .15); color: var(--accent-color, #3b7ad1); }
+.sort-group .sort-pill.active {
+  background: color-mix(in srgb, var(--primary-color, #2563eb) 18%, transparent);
+  color: color-mix(in srgb, var(--primary-color, #2563eb) 78%, #0b1220 22%);
+}
 
+/* Mine toggle & arrows */
 .mine-wrap { display: inline-flex; align-items: center; gap: 6px; }
 .mine-toggle {
   position: relative; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; user-select: none;
-  background: rgba(0,0,0,.04); border: 1px solid rgba(0,0,0,.08); border-radius: 999px; padding: 3px 8px;
+  background: color-mix(in srgb, var(--text-color, #111) 4%, transparent);
+  border: 1px solid color-mix(in srgb, var(--text-color, #111) 8%, transparent);
+  border-radius: 999px; padding: 3px 8px;
 }
 .mine-toggle input { display: none; }
 .mine-toggle .knob { width: 18px; height: 18px; border-radius: 999px; background: #bbb; transition: background .15s ease; }
 .mine-toggle .lbl { font-size: 12px; font-weight: 700; color: var(--text-color, #212121); }
-.mine-toggle.on .knob { background: var(--accent-color, #3b7ad1); }
+.mine-toggle.on .knob { background: var(--primary-color, #2563eb); }
+
 .mine-dir { display: inline-flex; gap: 4px; margin-left: 2px; }
 .mine-dir .dir-btn {
-  appearance: none; border: 1px solid rgba(0,0,0,.08); background: #fff; color: var(--text-color, #212121);
+  appearance: none; border: 1px solid color-mix(in srgb, var(--text-color, #111) 8%, transparent);
+  background: var(--card-background, #fff); color: var(--text-color, #212121);
   width: 28px; height: 26px; border-radius: 8px; font-weight: 800; cursor: pointer;
   transition: background .12s ease, color .12s ease, border-color .12s ease, transform .06s ease;
 }
 .mine-dir .dir-btn:hover { transform: translateY(-1px); }
 .mine-dir .dir-btn.active {
-  background: rgba(var(--accent-color-rgb, 59,122,209), .15);
-  border-color: rgba(var(--accent-color-rgb, 59,122,209), .35);
-  color: var(--accent-color, #3b7ad1);
+  background: color-mix(in srgb, var(--primary-color, #2563eb) 18%, transparent);
+  border-color: color-mix(in srgb, var(--primary-color, #2563eb) 38%, transparent);
+  color: var(--primary-color, #2563eb);
 }
 .mine-dir.disabled { opacity: .5; pointer-events: none; }
 
-/* Menu (mobile) */
+/* =====
+   Menu
+   ===== */
 .controls-menu { position: relative; display: none; }
 .menu-btn {
-  appearance: none; border: 1px solid rgba(0,0,0,.12); background: #fff; color: var(--text-color);
+  appearance: none; border: 1px solid color-mix(in srgb, var(--text-color, #111) 12%, transparent);
+  background: var(--card-background, #fff); color: var(--text-color, #111);
   width: 36px; height: 32px; border-radius: 8px; display: grid; place-items: center; cursor: pointer;
 }
-.menu-btn.open { background: rgba(var(--accent-color-rgb,59,122,209), .1); border-color: rgba(var(--accent-color-rgb), .35); color: var(--accent-color); }
+.menu-btn.open {
+  background: color-mix(in srgb, var(--primary-color, #2563eb) 10%, transparent);
+  border-color: color-mix(in srgb, var(--primary-color, #2563eb) 35%, transparent);
+  color: var(--primary-color, #2563eb);
+}
 .menu-dropdown {
   position: absolute; top: calc(100% + 6px); right: 0; min-width: 180px; max-width: 260px;
-  background: var(--card-background); color: var(--text-color);
-  border: 1px solid rgba(0,0,0,.12); border-radius: 12px; box-shadow: 0 16px 40px rgba(0,0,0,.18);
+  background: var(--card-background, #fff); color: var(--text-color, #111);
+  border: 1px solid color-mix(in srgb, var(--text-color, #111) 12%, transparent);
+  border-radius: 12px; box-shadow: 0 16px 40px rgba(0,0,0,.18);
   padding: 6px; z-index: 20;
 }
 .menu-item {
   width: 100%; text-align: left; padding: 10px 10px; background: transparent; border: none; border-radius: 8px;
-  cursor: pointer; font-weight: 700; color: var(--text-color);
+  cursor: pointer; font-weight: 700; color: var(--text-color, #111);
 }
-.menu-item:hover { background: rgba(var(--accent-color-rgb,59,122,209), .10); color: var(--accent-color); }
-.menu-item.active { background: rgba(var(--accent-color-rgb,59,122,209), .18); color: var(--accent-color); }
+.menu-item:hover { background: color-mix(in srgb, var(--primary-color, #2563eb) 10%, transparent); color: var(--primary-color, #2563eb); }
+.menu-item.active { background: color-mix(in srgb, var(--primary-color, #2563eb) 18%, transparent); color: var(--primary-color, #2563eb); }
 .menu-item.checked::after { content: " ✓"; font-weight: 800; }
-.menu-sep { height: 1px; background: rgba(0,0,0,.08); margin: 6px 0; }
+.menu-sep { height: 1px; background: color-mix(in srgb, var(--text-color, #111) 8%, transparent); margin: 6px 0; }
 .menu-inline-arrows { display: flex; gap: 6px; padding: 8px 4px 2px; }
 .menu-inline-arrows .arrow {
-  width: 36px; height: 30px; border-radius: 8px; appearance: none; border: 1px solid rgba(0,0,0,.12); background: #fff; cursor: pointer; font-weight: 900;
+  width: 36px; height: 30px; border-radius: 8px; appearance: none;
+  border: 1px solid color-mix(in srgb, var(--text-color, #111) 12%, transparent);
+  background: var(--card-background, #fff); cursor: pointer; font-weight: 900;
 }
-.menu-inline-arrows .arrow.active { background: rgba(var(--accent-color-rgb,59,122,209), .15); border-color: rgba(var(--accent-color-rgb,59,122,209), .35); color: var(--accent-color); }
+.menu-inline-arrows .arrow.active {
+  background: color-mix(in srgb, var(--primary-color, #2563eb) 15%, transparent);
+  border-color: color-mix(in srgb, var(--primary-color, #2563eb) 35%, transparent);
+  color: var(--primary-color, #2563eb);
+}
 .menu-inline-arrows.disabled { opacity: .5; pointer-events: none; }
 
-/* Close column */
-.header-close { display: grid; align-items: center; justify-items: end; }
-.cm-header .close {
-  appearance: none; border: 0; background: transparent; font-size: 24px; line-height: 1; cursor: pointer;
-  width: 36px; height: 36px; border-radius: 999px; display: grid; place-items: center; z-index: 30;
+/* ==================
+   Admin action group
+   ================== */
+/* ✅ gap giữa Edit & Delete */
+.admin-actions {
+  display: inline-flex;
+  gap: 8px;
 }
 
-/* Viewer – CHỈ CHO PHÉP KÉO NGANG */
+/* Nút Edit/Delete theo primary/danger */
+.admin-actions .icon-btn {
+  appearance: none;
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-weight: 700; font-size: 13px;
+  border: 1px solid transparent;
+  background: var(--card-background, #fff);
+  color: var(--text-color, #111);
+  transition: transform .06s ease, box-shadow .12s ease, background .12s ease, border-color .12s ease, color .12s ease;
+}
+.admin-actions .icon-btn svg { width: 16px; height: 16px; }
+
+.admin-actions .icon-btn.edit-btn {
+  background: color-mix(in srgb, var(--primary-color, #2563eb) 12%, var(--card-background, #fff));
+  border-color: color-mix(in srgb, var(--primary-color, #2563eb) 35%, transparent);
+  color: color-mix(in srgb, var(--primary-color, #2563eb) 78%, #0b1220 22%);
+}
+.admin-actions .icon-btn.edit-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(var(--primary-color-rgb, 37,99,235), .18);
+  border-color: var(--primary-color, #2563eb);
+  color: var(--primary-color, #2563eb);
+}
+.admin-actions .icon-btn.edit-btn:focus-visible { @include m.focus-ring(--primary-color-rgb); }
+
+.admin-actions .icon-btn.danger,
+.admin-actions .icon-btn.delete-btn {
+  background: color-mix(in srgb, var(--danger-color, #dc2626) 10%, var(--card-background, #fff));
+  border-color: color-mix(in srgb, var(--danger-color, #dc2626) 24%, transparent);
+  color: color-mix(in srgb, var(--danger-color, #dc2626) 84%, #0b1220 16%);
+}
+.admin-actions .icon-btn.danger:hover,
+.admin-actions .icon-btn.delete-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(var(--danger-color-rgb, 220,38,38), .18);
+  border-color: var(--danger-color, #dc2626);
+  color: var(--danger-color, #dc2626);
+}
+.admin-actions .icon-btn.danger:focus-visible,
+.admin-actions .icon-btn.delete-btn:focus-visible { @include m.focus-ring(--danger-color-rgb); }
+
+/* ============
+   Close button
+   ============ */
+.header-close { display: grid; align-items: center; justify-items: end; }
+
+.cm-header .close {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--text-color, #111);
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+
+  display: grid;
+  place-items: center;
+  z-index: 30;
+
+  transition: background-color .12s ease, color .12s ease, transform .06s ease, box-shadow .12s ease;
+}
+.cm-header .close:hover {
+  background: color-mix(in srgb, var(--text-color, #111) 10%, transparent);
+  transform: translateY(-1px);
+}
+.cm-header .close:focus-visible { @include m.focus-ring(--primary-color-rgb); }
+
+/* ======
+   Viewer
+   ====== */
+/* CHỈ CHO PHÉP KÉO NGANG, và cắt nội dung trong viewer */
 .chord-modal .viewer {
   position: relative;
-  overflow: hidden;
+  overflow: hidden;                 /* ✅ giữ hidden để không tràn ra panel */
   height: min(80vh, 620px);
   background: var(--card-background, #fff);
-  touch-action: pan-x;            /* khóa theo NGANG */
-  overscroll-behavior: contain;   /* chặn “bật” scroll nền */
+  touch-action: pan-x;
+  overscroll-behavior: contain;
 }
 .chord-modal .carousel {
-  position: absolute; inset: 0; display: grid; grid-auto-flow: column; grid-auto-columns: 100%;
-  translate: calc(-100% * var(--index, 0)); transition: translate .35s ease;
+  position: absolute; inset: 0;
+  display: grid; grid-auto-flow: column; grid-auto-columns: 100%;
+  translate: calc(-100% * var(--index, 0));
+  transition: translate .35s ease;
 }
 .chord-modal .dragging { transition: none !important; }
 
-/* ✅ Fix: áp offset vào trục X, không phải Y */
+/* áp offset vào trục X khi kéo */
 .chord-modal .dragging .carousel {
   translate: calc(-100% * var(--index, 0) + var(--offset, 0px));
 }
 
+/* Giữ nguyên scale diagram như cũ, không cho overflow ngang */
 .chord-modal {
   --diagram-scale: 0.95;
   .slide {
@@ -150,20 +313,29 @@
     > * { transform: scale(var(--diagram-scale)); transform-origin: top center; will-change: transform; }
     svg { overflow: visible; transform-box: fill-box; }
   }
-  .viewer { overflow: visible; }
 }
 
-/* Footer */
+/* ======
+   Footer
+   ====== */
 .chord-modal footer {
   display: flex; gap: 12px; align-items: center; justify-content: center;
-  padding: 10px; border-top: 1px solid rgba(0,0,0,.06); background: rgba(0,0,0,.02);
+  padding: 10px;
+  border-top: 1px solid color-mix(in srgb, var(--text-color, #111) 6%, transparent);
+  background: color-mix(in srgb, var(--card-background, #fff) 96%, var(--text-color, #111) 4%);
 }
 .chord-modal footer button {
-  padding: 6px 10px; border-radius: 8px; border: 1px solid #ddd; background: #fff; cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  background: #fff;
+  cursor: pointer;
 }
 .chord-modal footer button:disabled { opacity: .4; cursor: default; }
 
-/* Mobile: chỉ hiện menu 3 chấm */
+/* =======
+   Mobile
+   ======= */
 @media (max-width: 720px) {
   .controls-inline { display: none; }
   .controls-menu { display: block; }

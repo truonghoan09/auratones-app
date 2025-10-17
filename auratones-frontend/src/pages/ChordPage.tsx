@@ -529,8 +529,10 @@ export default function ChordPage() {
               chord={openChord}
               onClose={() => setOpenChord(null)}
               isAdmin={isAdmin}
+              isAuthenticated={isAuthenticated}
               onEditVoicing={handleEditVoicing}
               onDeleteVoicing={handleDeleteVoicing}
+              onRequestLogin={() => setAuthOpen(true)}
             />
           </section>
         </div>

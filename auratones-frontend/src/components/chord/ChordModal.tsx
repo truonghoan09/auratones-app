@@ -1,3 +1,4 @@
+// src/components/chord/ChordModal.tsx
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import type { ChordEntry } from "../../types/chord";
 import ChordDiagram from "./ChordDiagram";
@@ -259,41 +260,58 @@ export default function ChordModal({
   const currentLiked = !!userLikedFp[currentFp];
   const currentLikes = likesCount[currentFp] ?? 0;
 
+  // ✅ LIKE/UNLIKE: không lệ thuộc prop mơ hồ; chỉ chặn nếu isAuthenticated === false.
+  // Nếu server trả 401/Unauthorized -> rollback + mở login prompt.
   const handleToggleLike = async () => {
-    if (!isAuthenticated) { setShowLoginPrompt(true); return; }
+    if (isAuthenticated === false) { setShowLoginPrompt(true); return; }
+
+    const fp = currentFp;
+    const variant = currentVariant;
+    const instrument = c.instrument;
+    const symbol = c.symbol;
+
+    const nextLiked = !currentLiked;
+    const prevTs = userLikedFp[fp];
+    const prevCount = currentLikes;
+
+    // Optimistic
+    setUserLikedFp((prev) => {
+      const next = { ...prev };
+      if (nextLiked) next[fp] = Date.now();
+      else delete next[fp];
+      return next;
+    });
+    setLikesCount((prev) => ({
+      ...prev,
+      [fp]: Math.max(0, (prev[fp] ?? prevCount) + (nextLiked ? 1 : -1)),
+    }));
+
     try {
+      const resp = await toggleVoicingLike({ instrument, symbol, variant });
+
+      // Sync server
+      setLikesCount((prev) => ({ ...prev, [fp]: resp.count }));
       setUserLikedFp((prev) => {
         const next = { ...prev };
-        if (next[currentFp]) delete next[currentFp];
-        else next[currentFp] = Date.now();
-        return next;
-      });
-
-      const resp = await toggleVoicingLike({
-        instrument: c.instrument,
-        symbol: c.symbol,
-        variant: currentVariant,
-      });
-
-      setLikesCount((prev) => ({ ...prev, [currentFp]: resp.count }));
-      setUserLikedFp((prev) => {
-        const next = { ...prev };
-        if (resp.liked) next[currentFp] = resp.likedAt || Date.now();
-        else delete next[currentFp];
+        if (resp.liked) next[fp] = resp.likedAt || Date.now();
+        else delete next[fp];
         return next;
       });
     } catch (e: any) {
+      // Rollback
       setUserLikedFp((prev) => {
         const next = { ...prev };
-        if (currentLiked) next[currentFp] = Date.now();
-        else delete next[currentFp];
+        if (prevTs) next[fp] = prevTs; else delete next[fp];
         return next;
       });
-      setLikesCount((prev) => {
-        const base = prev[currentFp] ?? 0;
-        return { ...prev, [currentFp]: currentLiked ? base + 1 : Math.max(0, base - 1) };
-      });
-      (window as any).__toast?.(e?.message || t("common.like_error"), "error");
+      setLikesCount((prev) => ({ ...prev, [fp]: prevCount }));
+
+      const msg = (e?.message || "").toString().toLowerCase();
+      if (msg.includes("unauthorized") || msg.includes("401")) {
+        setShowLoginPrompt(true);
+      } else {
+        (window as any).__toast?.(e?.message || t("common.like_error"), "error");
+      }
     }
   };
 
@@ -435,7 +453,7 @@ export default function ChordModal({
                       >
                         Mine
                       </button>
-                      <div className={`menu-inline-arrows ${!mineEnabled ? "disabled" : ""}`} role="group" aria-label="Mine order">
+                      <div className="menu-inline-arrows" role="group" aria-label="Mine order">
                         <button
                           className={`arrow ${mineDir === "asc" ? "active" : ""}`}
                           onClick={() => handleMenuAction(() => mineEnabled && setMineDir("asc"))}
