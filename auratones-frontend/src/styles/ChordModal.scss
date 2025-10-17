@@ -129,7 +129,7 @@
   overflow: hidden;
   height: min(80vh, 620px);
   background: var(--card-background, #fff);
-  touch-action: pan-x;            /* 🔒 khóa theo NGANG */
+  touch-action: pan-x;            /* khóa theo NGANG */
   overscroll-behavior: contain;   /* chặn “bật” scroll nền */
 }
 .chord-modal .carousel {
@@ -137,7 +137,11 @@
   translate: calc(-100% * var(--index, 0)); transition: translate .35s ease;
 }
 .chord-modal .dragging { transition: none !important; }
-.chord-modal .dragging .carousel { translate: calc(-100% * var(--index, 0)) var(--offset, 0px); }
+
+/* ✅ Fix: áp offset vào trục X, không phải Y */
+.chord-modal .dragging .carousel {
+  translate: calc(-100% * var(--index, 0) + var(--offset, 0px));
+}
 
 .chord-modal {
   --diagram-scale: 0.95;
