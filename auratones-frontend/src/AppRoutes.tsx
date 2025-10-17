@@ -7,6 +7,8 @@ import AuthError from './pages/AuthError';
 import ChordPage from './pages/ChordPage';
 import AdminGuard from './components/guards/AdminGuard';
 import AdminPage from './pages/AdminPage';
+import NotFound from './pages/NotFound';
+import UnderConstruction from './pages/UnderConstruction';
 
 interface AppRoutesProps {
   onLoginClick: () => void;
@@ -32,7 +34,12 @@ const AppRoutes: React.FC<AppRoutesProps> = () => {
             <AdminPage />
           </AdminGuard>}
       />
+      <Route path="/songs" element={<UnderConstruction />} />
+      <Route path="/practice" element={<UnderConstruction />} />
+      <Route path="/courses" element={<UnderConstruction />} />
+      <Route path="/theory" element={<UnderConstruction />} />
       {/* Thêm các route khác của bạn ở đây */}
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 };

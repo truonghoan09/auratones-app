@@ -26,20 +26,22 @@ const { getAuthUrl, exchangeCodeForTokens, fetchUserInfo } = require('../config/
 const STATE_COOKIE = (process.env.OAUTH_STATE_COOKIE_NAME || 'auratones_oauth_state').trim();
 const SUCCESS_REDIRECT = (process.env.OAUTH_SUCCESS_REDIRECT || '').trim();
 const FAILURE_REDIRECT = (process.env.OAUTH_FAILURE_REDIRECT || '').trim();
-
-// Cookie lưu return_to tạm thời cho Google OAuth
 const RETURN_TO_COOKIE = (process.env.OAUTH_RETURN_TO_COOKIE_NAME || 'aur_rt').trim();
 
 // ===================================================================
 // Helpers
 // ===================================================================
 
+// Chuẩn hoá lỗi trả về để FE dễ map
+function sendErr(res, httpStatus, code, message, fields) {
+  return res.status(httpStatus).json({ code, message, fields: Array.isArray(fields) ? fields : undefined });
+}
+
 // Chỉ cho phép đường dẫn nội bộ (relative path), tránh open-redirect.
-// Ví dụ hợp lệ: "/", "/chords", "/chords?x=1#y"
 function sanitizeReturnTo(raw) {
   if (typeof raw !== 'string' || !raw) return null;
-  if (!raw.startsWith('/')) return null;      // chỉ nhận relative path
-  if (raw.startsWith('//')) return null;      // chặn protocol-relative
+  if (!raw.startsWith('/')) return null;
+  if (raw.startsWith('//')) return null;
   return raw;
 }
 
@@ -47,9 +49,7 @@ function sanitizeReturnTo(raw) {
 function getReturnToFromBody(body) {
   const v = body?.returnTo;
   if (!v) return null;
-  // ưu tiên string chuẩn mới
   if (typeof v === 'string') return sanitizeReturnTo(v);
-  // backward-compat: nếu ai đó còn gửi object cũ
   if (typeof v === 'object' && v !== null) {
     const candidate = v.path || v.href || null;
     return sanitizeReturnTo(candidate);
@@ -57,7 +57,7 @@ function getReturnToFromBody(body) {
   return null;
 }
 
-// Hồ sơ mặc định (dễ mở rộng về sau)
+// Hồ sơ mặc định
 function defaultProfile(overrides = {}) {
   return {
     uid: null,
@@ -104,7 +104,7 @@ function signAppToken(user) {
   return jwt.sign(claims, secret, { expiresIn });
 }
 
-// So sánh, đồng bộ avatar Google -> R2 (trả về public r2.dev URL)
+// So sánh, đồng bộ avatar Google -> R2
 async function ensureAvatarUpToDate(userRef, current, googlePhotoURL) {
   if (!googlePhotoURL) {
     return {
@@ -142,7 +142,7 @@ async function ensureAvatarUpToDate(userRef, current, googlePhotoURL) {
   return { avatarURL: publicUrl, avatarKey: key, photoHash: hash };
 }
 
-// Tìm user theo email/username
+// Tìm user
 async function findUserByEmail(email) {
   if (!email) return null;
   const q = await db.collection('users').where('email', '==', email).limit(1).get();
@@ -175,12 +175,12 @@ router.get('/r2-health', async (_req, res) => {
 // ===================================================================
 router.get('/check-username', async (req, res) => {
   const { username } = req.query;
-  if (!username) return res.status(400).json({ message: 'Username is required.' });
+  if (!username) return sendErr(res, 400, 'USERNAME_REQUIRED', 'Username is required.', ['username']);
   try {
     const existed = await findUserByUsername(username);
     res.status(200).json({ isUsernameTaken: Boolean(existed) });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return sendErr(res, 500, 'SERVER_ERROR', error.message);
   }
 });
 
@@ -189,18 +189,19 @@ router.get('/check-username', async (req, res) => {
 // ===================================================================
 router.post('/register', async (req, res) => {
   const { username, password, email } = req.body;
-  const return_to = getReturnToFromBody(req.body); // sanitized string or null
+  const return_to = getReturnToFromBody(req.body);
 
-  if (!username || !password) {
-    return res.status(400).json({ message: 'Username and password are required.' });
-  }
+  if (!username && !password) return sendErr(res, 400, 'MISSING_FIELDS', 'Username and password are required.', ['username', 'password']);
+  if (!username) return sendErr(res, 400, 'USERNAME_REQUIRED', 'Username is required.', ['username']);
+  if (!password) return sendErr(res, 400, 'PASSWORD_REQUIRED', 'Password is required.', ['password']);
+
   try {
     const existedUsername = await findUserByUsername(username);
-    if (existedUsername) return res.status(409).json({ message: 'Username already taken.' });
+    if (existedUsername) return sendErr(res, 409, 'USERNAME_TAKEN', 'Username already taken.', ['username']);
 
     if (email) {
       const existedEmail = await findUserByEmail(email);
-      if (existedEmail) return res.status(409).json({ message: 'Email already in use.' });
+      if (existedEmail) return sendErr(res, 409, 'EMAIL_IN_USE', 'Email already in use.', ['email']);
     }
 
     const hash = await bcrypt.hash(password, 12);
@@ -218,9 +219,10 @@ router.post('/register', async (req, res) => {
 
     const token = signAppToken(profile);
     res.status(201).json({
+      code: 'REGISTERED',
       message: 'User registered and logged in',
       token,
-      return_to, // 👈 FE dùng để điều hướng
+      return_to,
       user: {
         uid: profile.uid,
         username: profile.username,
@@ -232,7 +234,7 @@ router.post('/register', async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return sendErr(res, 500, 'SERVER_ERROR', error.message);
   }
 });
 
@@ -241,21 +243,29 @@ router.post('/register', async (req, res) => {
 // ===================================================================
 router.post('/login', async (req, res) => {
   const { username, password } = req.body;
-  const return_to = getReturnToFromBody(req.body); // sanitized string or null
+  const return_to = getReturnToFromBody(req.body);
 
-  if (!username || !password) return res.status(400).json({ message: 'Username and password are required.' });
+  if (!username && !password) return sendErr(res, 400, 'MISSING_FIELDS', 'Username and password are required.', ['username', 'password']);
+  if (!username) return sendErr(res, 400, 'USERNAME_REQUIRED', 'Username is required.', ['username']);
+  if (!password) return sendErr(res, 400, 'PASSWORD_REQUIRED', 'Password is required.', ['password']);
 
   try {
     const found = await findUserByUsername(username);
-    if (!found) return res.status(404).json({ message: 'User not found.' });
+    if (!found) return sendErr(res, 404, 'USER_NOT_FOUND', 'User not found.', ['username']);
 
     const user = found.data;
     if (!user.passwordHash) {
-      return res.status(400).json({ message: 'This account has no password. Please login with Google or set a password.' });
+      return sendErr(
+        res,
+        400,
+        'NO_PASSWORD_ACCOUNT',
+        'This account has no password. Please login with Google or set a password.',
+        ['password']
+      );
     }
 
     const ok = await bcrypt.compare(password, user.passwordHash);
-    if (!ok) return res.status(401).json({ message: 'Incorrect password.' });
+    if (!ok) return sendErr(res, 401, 'INCORRECT_PASSWORD', 'Incorrect password.', ['password']);
 
     await db.collection('users').doc(found.id).set(
       { lastLogin: FieldValue.serverTimestamp(), 'usage.totalSessions': (user.usage?.totalSessions || 0) + 1 },
@@ -264,9 +274,10 @@ router.post('/login', async (req, res) => {
 
     const token = signAppToken({ ...user, uid: found.id });
     res.status(200).json({
+      code: 'LOGIN_SUCCESS',
       message: 'Login successful',
       token,
-      return_to, // 👈 FE dùng để điều hướng
+      return_to,
       user: {
         uid: found.id,
         username: user.username,
@@ -278,20 +289,16 @@ router.post('/login', async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return sendErr(res, 500, 'SERVER_ERROR', error.message);
   }
 });
 
 // ===================================================================
 // Google OAuth (server-side)
 // ===================================================================
-
-// Bắt đầu OAuth → redirect sang Google
-// Cho phép FE đính kèm ?return_to=/path-nguoi-dung-dang-đứng
 router.get('/google', (req, res) => {
   const state = crypto.randomBytes(12).toString('hex');
 
-  // lưu state chống CSRF
   res.cookie(STATE_COOKIE, state, {
     httpOnly: true,
     sameSite: 'lax',
@@ -299,7 +306,6 @@ router.get('/google', (req, res) => {
     maxAge: 10 * 60 * 1000,
   });
 
-  // lưu return_to (nếu có & hợp lệ) vào cookie ngắn hạn
   const rt = sanitizeReturnTo(req.query.return_to);
   if (rt) {
     res.cookie(RETURN_TO_COOKIE, rt, {
@@ -316,7 +322,6 @@ router.get('/google', (req, res) => {
   return res.redirect(url);
 });
 
-// Callback từ Google
 router.get('/google/callback', async (req, res) => {
   try {
     const { code, state } = req.query;
@@ -324,7 +329,6 @@ router.get('/google/callback', async (req, res) => {
     if (!code || !state || !saved || state !== saved) throw new Error('Invalid OAuth state');
     res.clearCookie(STATE_COOKIE);
 
-    // Lấy return_to tạm từ cookie
     let return_to = null;
     try {
       const fromCookie = req.cookies ? req.cookies[RETURN_TO_COOKIE] : null;
@@ -333,18 +337,15 @@ router.get('/google/callback', async (req, res) => {
       res.clearCookie(RETURN_TO_COOKIE);
     }
 
-    // 1) Đổi code -> access token
     const tokens = await exchangeCodeForTokens(code.toString());
     if (!tokens.access_token) throw new Error('No access token from Google');
 
-    // 2) Lấy user info Google
     const info = await fetchUserInfo(tokens.access_token);
     const googleSub = info.sub;
     const email = info.email || null;
     const displayName = info.name || null;
     const googlePhotoURL = info.picture || null;
 
-    // 3) Truy tìm user theo email, nếu chưa có thì tạo
     let userDocId;
     let userData;
     const byEmail = await findUserByEmail(email);
@@ -363,13 +364,11 @@ router.get('/google/callback', async (req, res) => {
       await newRef.set(userData);
     }
 
-    // 4) Đồng bộ avatar về R2
     const userRef = db.collection('users').doc(userDocId);
     const currentSnap = await userRef.get();
     const current = currentSnap.exists ? currentSnap.data() : {};
     const { avatarURL, avatarKey, photoHash } = await ensureAvatarUpToDate(userRef, current, googlePhotoURL);
 
-    // 5) Cập nhật hồ sơ
     await userRef.set(
       {
         email: email || current.email || null,
@@ -388,7 +387,6 @@ router.get('/google/callback', async (req, res) => {
       { merge: true }
     );
 
-    // 6) Cấp JWT + trả về
     const freshSnap = await userRef.get();
     const mergedUser = freshSnap.data();
     const token = signAppToken({ ...mergedUser, uid: userDocId });
@@ -401,9 +399,10 @@ router.get('/google/callback', async (req, res) => {
       return res.redirect(url.toString());
     }
     return res.json({
+      code: 'GOOGLE_LOGIN_SUCCESS',
       message: 'Google login successful',
       token,
-      return_to, // 👈 FE điều hướng
+      return_to,
       user: {
         uid: userDocId,
         username: mergedUser.username || null,
@@ -416,42 +415,41 @@ router.get('/google/callback', async (req, res) => {
     });
   } catch (err) {
     if (FAILURE_REDIRECT) return res.redirect(FAILURE_REDIRECT);
-    res.status(500).json({ message: err.message });
+    return sendErr(res, 500, 'SERVER_ERROR', err.message);
   }
 });
 
 // ===================================================================
 // Linking & Profile
 // ===================================================================
-
 router.post('/link/set-password', authMiddleware, async (req, res) => {
   const { newPassword } = req.body;
   if (!newPassword || newPassword.length < 6) {
-    return res.status(400).json({ message: 'Password must be at least 6 characters.' });
+    return sendErr(res, 400, 'PASSWORD_TOO_SHORT', 'Password must be at least 6 characters.', ['password']);
   }
   try {
     const hash = await bcrypt.hash(newPassword, 12);
     const ref = db.collection('users').doc(req.user.uid);
     await ref.set({ passwordHash: hash, providers: { password: true } }, { merge: true });
-    res.json({ message: 'Password set successfully.' });
+    res.json({ code: 'PASSWORD_SET', message: 'Password set successfully.' });
   } catch (e) {
-    res.status(500).json({ message: e.message });
+    return sendErr(res, 500, 'SERVER_ERROR', e.message);
   }
 });
 
 router.post('/link/set-username', authMiddleware, async (req, res) => {
   const { username } = req.body;
-  if (!username) return res.status(400).json({ message: 'Username is required.' });
+  if (!username) return sendErr(res, 400, 'USERNAME_REQUIRED', 'Username is required.', ['username']);
 
   try {
     const existed = await findUserByUsername(username);
     if (existed && existed.id !== req.user.uid) {
-      return res.status(409).json({ message: 'Username already taken.' });
+      return sendErr(res, 409, 'USERNAME_TAKEN', 'Username already taken.', ['username']);
     }
     await db.collection('users').doc(req.user.uid).set({ username }, { merge: true });
-    res.json({ message: 'Username set successfully.' });
+    res.json({ code: 'USERNAME_SET', message: 'Username set successfully.' });
   } catch (e) {
-    res.status(500).json({ message: e.message });
+    return sendErr(res, 500, 'SERVER_ERROR', e.message);
   }
 });
 
@@ -462,54 +460,49 @@ router.post('/profile', authMiddleware, async (req, res) => {
     for (const k of allowed) {
       if (req.body[k] !== undefined) patch[k] = req.body[k];
     }
-    if (Object.keys(patch).length === 0) return res.status(400).json({ message: 'Nothing to update.' });
+    if (Object.keys(patch).length === 0) return sendErr(res, 400, 'NOTHING_TO_UPDATE', 'Nothing to update.');
 
     await db.collection('users').doc(req.user.uid).set(patch, { merge: true });
-    res.json({ message: 'Profile updated.' });
+    res.json({ code: 'PROFILE_UPDATED', message: 'Profile updated.' });
   } catch (e) {
-    res.status(500).json({ message: e.message });
+    return sendErr(res, 500, 'SERVER_ERROR', e.message);
   }
 });
 
 // ===================================================================
-// Me / Logout
+// Me / Logout / Debug
 // ===================================================================
 router.get('/me', authMiddleware, async (req, res) => {
   try {
     const snap = await db.collection('users').doc(req.user.uid).get();
-    if (!snap.exists) return res.status(404).json({ message: 'User not found.' });
+    if (!snap.exists) return sendErr(res, 404, 'USER_NOT_FOUND', 'User not found.');
     const d = snap.data();
 
     res.json({
+      code: 'ME_OK',
       uid: req.user.uid,
       username: d.username || null,
       email: d.email || null,
       displayName: d.displayName || d.username || null,
       avatar: d.avatarURL || null,
-
       role: d.role || 'user',
       plan: d.plan || 'free',
       subscription: d.subscription || { status: 'inactive', renewAt: null },
       entitlements: d.entitlements || { sheetSlots: 10, storageGB: 1 },
-
       storage: d.storage || { usedBytes: 0 },
       usage: d.usage || { lastActiveAt: null, totalSessions: 0 },
-
       providers: d.providers || { password: !!d.passwordHash, google: { linked: false, sub: null } },
       settings: d.settings || { lang: 'vi', theme: 'light' },
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return sendErr(res, 500, 'SERVER_ERROR', error.message);
   }
 });
 
 router.post('/logout', (_req, res) => {
-  res.status(200).json({ message: 'Logged out' });
+  res.status(200).json({ code: 'LOGGED_OUT', message: 'Logged out' });
 });
 
-// ===================================================================
-// Debug
-// ===================================================================
 router.get('/_debug/token', (req, res) => {
   res.json({
     authorization: req.headers.authorization || null,

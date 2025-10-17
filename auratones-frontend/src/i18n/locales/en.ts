@@ -35,6 +35,41 @@ const en = {
         yellow: 'Yellow',
       },
     },
+    auth: {
+      close: "Close",
+      username_label: "Username",
+      password_label: "Password",
+      username_placeholder: "Username",
+      password_placeholder: "Password",
+      or: "or",
+      google_aria: "Continue with Google",
+
+      forgot: "Forgot password?",
+
+      login: {
+        title: "Log in",
+        submit: "Log in",
+        to_register: "Switch to register",
+      },
+      register: {
+        title: "Sign up",
+        submit: "Sign up",
+        to_login: "Switch to log in",
+      },
+      toast: {
+        missing_both: "Please enter both username and password.",
+        missing_username: "Please enter username.",
+        missing_password: "Please enter password.",
+        user_not_found: "User not found.",
+        incorrect_password: "Incorrect password.",
+        no_password_account: "This account has no password. Please log in with Google or set a password.",
+        username_taken: "Username already taken.",
+        email_in_use: "Email already in use.",
+        server_error_generic: "Something went wrong. Please try again later.",
+        registered_success: "Registered and signed in.",
+        login_success: "Login successful.",
+      },
+    }
   },
 
   home: {

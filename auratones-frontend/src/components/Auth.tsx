@@ -1,131 +1,226 @@
 // src/components/Auth.tsx
-import { useState, useEffect } from 'react';
-import UserSetup from './UserSetup';
-import '../styles/auth.scss';
-import { useAuth } from '../hooks/useAuth';
+import { useState, useEffect, useCallback } from "react";
+import { Link } from "react-router-dom";
+import UserSetup from "./UserSetup";
+import Toast from "./Toast";
+import "../styles/auth.scss";
+import { useAuth } from "../hooks/useAuth";
+import { useI18n } from "../contexts/I18nContext";
 
 interface AuthProps {
-    showToast: (message: string, type: 'success' | 'error' | 'info') => void;
-    isModal: boolean;
-    onClose: () => void;
+  showToast: (message: string, type: "success" | "error" | "info") => void;
+  isModal: boolean;
+  onClose: () => void;
 }
 
-const Auth = ({
-    showToast,
-    isModal,
-    onClose,
-}: AuthProps) => {
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
+type ToastType = "success" | "error" | "info";
 
-    // Gọi hook useAuth để sử dụng các hàm
-    const { 
-        isLoginView, 
-        setIsLoginView, 
-        showUserSetupModal, 
-        setShowUserSetupModal, 
-        handleUsernameLogin, 
-        handleUsernameRegister, 
-        handleGoogleAuth 
-    } = useAuth(showToast, onClose);
+const Auth = ({ showToast, isModal, onClose }: AuthProps) => {
+  const { t } = useI18n();
 
-    useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') {
-                onClose?.();
-            }
-        };
-        if (isModal) {
-            document.addEventListener('keydown', handleKeyDown);
-        }
-        return () => {
-            if (isModal) {
-                document.removeEventListener('keydown', handleKeyDown);
-            }
-        }
-    }, [isModal, onClose]);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
 
-    const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
-        if (e.target === e.currentTarget && onClose) {
-            onClose();
-        }
-    };
-    
-    const handleUserNotFoundConfirm = () => {
-        setShowUserSetupModal(false);
-        setIsLoginView(false);
-    };
+  // highlight inputs
+  const [uErr, setUErr] = useState(false);
+  const [pErr, setPErr] = useState(false);
 
-    const handleUserNotFoundCancel = () => {
-        setShowUserSetupModal(false);
-        setUsername('');
-        setPassword('');
-    };
-    
-    const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-        if (event.key === 'Enter') {
-            event.preventDefault();
-            if (isLoginView) {
-                handleUsernameLogin(username, password);
-            } else {
-                handleUsernameRegister(username, password);
-            }
-        }
-    };
+  // local toast
+  const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
+  const showToastLocal = useCallback(
+    (message: string, type: ToastType = "info") => {
+      setToast({ message, type });
+      try { showToast?.(message, type); } catch {}
+    },
+    [showToast]
+  );
 
-    return (
-        <div className="auth-modal-overlay" onClick={handleOverlayClick}>
-            {isModal && onClose && (
-                <span className="close-btn" onClick={onClose}>&times;</span>
-            )}
-            <div className="auth-form" onClick={(e) => e.stopPropagation()}>
-                {isLoginView ? (
-                    <>
-                        <h2>Đăng nhập</h2>
-                        <input type="text" placeholder="Tên người dùng" value={username} onChange={(e) => setUsername(e.target.value)} onKeyDown={handleKeyDown} />
-                        <input type="password" placeholder="Mật khẩu" value={password} onChange={(e) => setPassword(e.target.value)} onKeyDown={handleKeyDown} />
-                        <button onClick={() => handleUsernameLogin(username, password)}>Đăng nhập</button>
-                        <button onClick={() => setIsLoginView(false)}>Chuyển sang đăng ký</button>
-                        <p>hoặc</p>
-                        <button onClick={handleGoogleAuth}>
-                            <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="20" height="20" viewBox="0 0 48 48">
-                                <path fill="#fbc02d" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12 s5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24s8.955,20,20,20 s20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"></path>
-                                <path fill="#e53935" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039 l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"></path>
-                                <path fill="#4caf50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36 c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"></path>
-                                <path fill="#1565c0" d="M43.611,20.083L43.595,20L42,20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571 c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"></path>
-                            </svg>
-                            <span>Google</span>
-                        </button>
-                    </>
-                ) : (
-                    <>
-                        <h2>Đăng ký</h2>
-                        <input type="text" placeholder="Tên người dùng" value={username} onChange={(e) => setUsername(e.target.value)} onKeyDown={handleKeyDown} />
-                        <input type="password" placeholder="Mật khẩu" value={password} onChange={(e) => setPassword(e.target.value)} onKeyDown={handleKeyDown} />
-                        <button onClick={() => handleUsernameRegister(username, password)}>Đăng ký</button>
-                        <button onClick={() => setIsLoginView(true)}>Chuyển sang đăng nhập</button>
-                        <p>hoặc</p>
-                        <button onClick={handleGoogleAuth}>
-                            <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="20" height="20" viewBox="0 0 48 48">
-                                <path fill="#fbc02d" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12 s5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24s8.955,20,20,20 s20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"></path>
-                                <path fill="#e53935" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039 l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"></path>
-                                <path fill="#4caf50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36 c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"></path>
-                                <path fill="#1565c0" d="M43.611,20.083L43.595,20L42,20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571 c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"></path>
-                            </svg>
-                            <span>Google</span>
-                        </button>
-                    </>
-                )}
+  const {
+    isLoginView,
+    setIsLoginView,
+    showUserSetupModal,
+    setShowUserSetupModal,
+    handleUsernameLogin,
+    handleUsernameRegister,
+    handleGoogleAuth,
+  } = useAuth(showToastLocal, onClose);
+
+  // ESC
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => { if (e.key === "Escape") onClose?.(); };
+    if (isModal) document.addEventListener("keydown", handleKeyDown);
+    return () => { if (isModal) document.removeEventListener("keydown", handleKeyDown); };
+  }, [isModal, onClose]);
+
+  // Close by backdrop
+  const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget && onClose) onClose();
+  };
+
+  // UserSetup actions
+  const handleUserNotFoundConfirm = () => { setShowUserSetupModal(false); setIsLoginView(false); };
+  const handleUserNotFoundCancel = () => {
+    setShowUserSetupModal(false); setUsername(""); setPassword(""); setUErr(false); setPErr(false);
+  };
+
+  // Helper: map server code → set error flags + toast
+  const applyServerError = useCallback((code?: string, fields?: string[]) => {
+    const fs = fields || [];
+    const hasU = fs.includes("username");
+    const hasP = fs.includes("password");
+    if (hasU) setUErr(true);
+    if (hasP) setPErr(true);
+
+    // song ngữ theo i18n
+    const keyBase = "header.auth.toast.";
+    let key = "server_error_generic";
+    switch (code) {
+      case "MISSING_FIELDS": key = "missing_both"; break;
+      case "USERNAME_REQUIRED": key = "missing_username"; break;
+      case "PASSWORD_REQUIRED": key = "missing_password"; break;
+      case "USER_NOT_FOUND": key = "user_not_found"; break;
+      case "INCORRECT_PASSWORD": key = "incorrect_password"; break;
+      case "NO_PASSWORD_ACCOUNT": key = "no_password_account"; break;
+      case "USERNAME_TAKEN": key = "username_taken"; break;
+      case "EMAIL_IN_USE": key = "email_in_use"; break;
+      case "SERVER_ERROR": key = "server_error_generic"; break;
+    }
+    showToastLocal(t(keyBase + key), "error");
+  }, [showToastLocal, t]);
+
+  // Submit (Enter or click)
+  const onSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const u = username.trim();
+    const p = password.trim();
+    const missU = u.length === 0;
+    const missP = p.length === 0;
+    setUErr(missU);
+    setPErr(missP);
+
+    if (missU || missP) {
+      const key =
+        missU && missP ? "missing_both" : missU ? "missing_username" : "missing_password";
+      showToastLocal(t("header.auth.toast." + key), "error");
+      return;
+    }
+
+    try {
+      if (isLoginView) {
+        await handleUsernameLogin(u, p);
+        showToastLocal(t("header.auth.toast.login_success"), "success");
+      } else {
+        await handleUsernameRegister(u, p);
+        showToastLocal(t("header.auth.toast.registered_success"), "success");
+      }
+    } catch (err: any) {
+      // kỳ vọng hook ném err.response.data = { code, fields, message }
+      const data = err?.response?.data || {};
+      applyServerError(data.code, data.fields);
+    }
+  }, [username, password, isLoginView, handleUsernameLogin, handleUsernameRegister, showToastLocal, t, applyServerError]);
+
+  return (
+    <div className="auth-modal-overlay" onClick={handleOverlayClick}>
+      {isModal && onClose && (
+        <button className="close-btn" onClick={onClose} aria-label={t("auth.close")}>
+          &times;
+        </button>
+      )}
+
+      <form className="auth-form" onSubmit={onSubmit} onClick={(e) => e.stopPropagation()}>
+        {isLoginView ? (
+          <>
+            <h2>{t("header.auth.login.title")}</h2>
+
+            <input
+              type="text"
+              placeholder={t("header.auth.username_placeholder")}
+              value={username}
+              onChange={(e) => { setUsername(e.target.value); if (uErr) setUErr(false); }}
+              aria-label={t("header.auth.username_label")}
+              aria-invalid={uErr || undefined}
+              className={uErr ? "input-error" : undefined}
+            />
+            <input
+              type="password"
+              placeholder={t("header.auth.password_placeholder")}
+              value={password}
+              onChange={(e) => { setPassword(e.target.value); if (pErr) setPErr(false); }}
+              aria-label={t("header.auth.password_label")}
+              aria-invalid={pErr || undefined}
+              className={pErr ? "input-error" : undefined}
+            />
+
+            <div className="auth-extra">
+              <Link to="/abc" className="forgot-link">{t("header.auth.forgot")}</Link>
             </div>
-            {showUserSetupModal && (
-                <UserSetup
-                    username={username}
-                    onConfirm={handleUserNotFoundConfirm}
-                    onCancel={handleUserNotFoundCancel}
-                />
-            )}
-        </div>
-    );
+
+            <button type="submit">{t("header.auth.login.submit")}</button>
+            <button type="button" onClick={() => setIsLoginView(false)}>{t("header.auth.login.to_register")}</button>
+
+            <p className="auth-or">{t("header.auth.or")}</p>
+            <button type="button" onClick={handleGoogleAuth} aria-label={t("header.auth.google_aria")}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 48 48" aria-hidden="true">
+                <path fill="#fbc02d" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12 s5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"></path>
+                <path fill="#e53935" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039 l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"></path>
+                <path fill="#4caf50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36 c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"></path>
+                <path fill="#1565c0" d="M43.611,20.083L43.595,20L42,20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571 c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"></path>
+              </svg>
+              <span>Google</span>
+            </button>
+          </>
+        ) : (
+          <>
+            <h2>{t("header.auth.register.title")}</h2>
+
+            <input
+              type="text"
+              placeholder={t("header.auth.username_placeholder")}
+              value={username}
+              onChange={(e) => { setUsername(e.target.value); if (uErr) setUErr(false); }}
+              aria-label={t("header.auth.username_label")}
+              aria-invalid={uErr || undefined}
+              className={uErr ? "input-error" : undefined}
+            />
+            <input
+              type="password"
+              placeholder={t("header.auth.password_placeholder")}
+              value={password}
+              onChange={(e) => { setPassword(e.target.value); if (pErr) setPErr(false); }}
+              aria-label={t("header.auth.password_label")}
+              aria-invalid={pErr || undefined}
+              className={pErr ? "input-error" : undefined}
+            />
+
+            <button type="submit">{t("header.auth.register.submit")}</button>
+            <button type="button" onClick={() => setIsLoginView(true)}>{t("auth.register.to_login")}</button>
+
+            <p className="auth-or">{t("header.auth.or")}</p>
+            <button type="button" onClick={handleGoogleAuth} aria-label={t("header.auth.google_aria")}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 48 48" aria-hidden="true">
+                <path fill="#fbc02d" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12 s5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"></path>
+                <path fill="#e53935" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36 c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"></path>
+                <path fill="#1565c0" d="M43.611,20.083L43.595,20L42,20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571 c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"></path>
+              </svg>
+              <span>Google</span>
+            </button>
+          </>
+        )}
+      </form>
+
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+
+      {showUserSetupModal && (
+        <UserSetup
+          username={username}
+          onConfirm={handleUserNotFoundConfirm}
+          onCancel={handleUserNotFoundCancel}
+        />
+      )}
+    </div>
+  );
 };
 
 export default Auth;

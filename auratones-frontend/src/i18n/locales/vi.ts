@@ -35,6 +35,41 @@ const vi = {
         yellow: 'Vàng',
       },
     },
+    auth: {
+      close: "Đóng",
+      username_label: "Tên người dùng",
+      password_label: "Mật khẩu",
+      username_placeholder: "Tên người dùng",
+      password_placeholder: "Mật khẩu",
+      or: "hoặc",
+      google_aria: "Tiếp tục với Google",
+
+      forgot: "Quên mật khẩu?",
+
+      login: {
+        title: "Đăng nhập",
+        submit: "Đăng nhập",
+        to_register: "Chuyển sang đăng ký",
+      },
+      register: {
+        title: "Đăng ký",
+        submit: "Đăng ký",
+        to_login: "Chuyển sang đăng nhập",
+      },
+      toast: {
+        missing_both: "Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu.",
+        missing_username: "Vui lòng nhập tên đăng nhập.",
+        missing_password: "Vui lòng nhập mật khẩu.",
+        user_not_found: "Không tìm thấy người dùng.",
+        incorrect_password: "Mật khẩu không đúng.",
+        no_password_account: "Tài khoản này chưa có mật khẩu. Hãy đăng nhập bằng Google hoặc đặt mật khẩu.",
+        username_taken: "Tên người dùng đã được sử dụng.",
+        email_in_use: "Email đã được sử dụng.",
+        server_error_generic: "Có lỗi xảy ra, vui lòng thử lại sau.",
+        registered_success: "Đăng ký thành công và đã đăng nhập.",
+        login_success: "Đăng nhập thành công.",
+      },
+    }
   },
 
   home: {

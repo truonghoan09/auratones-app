@@ -1,216 +1,118 @@
-// src/styles/auth.scss
+/* src/styles/auth.scss */
 
 @import 'variables';
 @import 'mixins';
 
 .user-setup-modal {
-  position: absolute; // Vị trí tuyệt đối để nằm trong auth-modal-overlay
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
   @include flex-center;
-  background-color: rgba(0, 0, 0, 0.6); // Lớp phủ tối hơn
-  z-index: 10; // Z-index cao hơn auth-form
-  
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 10;
+
   .modal-content {
     background-color: var(--card-background);
     padding: var(--spacing-xl);
     border-radius: var(--border-radius-md);
     box-shadow: var(--box-shadow);
     text-align: center;
-    width: 90%;
-    max-width: 450px;
-    color: var(--text-color);
-    
-    h2 {
-      color: var(--text-color);
-      margin-bottom: var(--spacing-md);
-    }
-    p {
-      color: var(--secondary-color);
-      margin-bottom: var(--spacing-md);
-    }
+    width: 90%; max-width: 450px; color: var(--text-color);
+
+    h2 { color: var(--text-color); margin-bottom: var(--spacing-md); }
+    p { color: var(--secondary-color); margin-bottom: var(--spacing-md); }
 
     button {
-      @include button-styles(); // Sử dụng mixin chung
-      width: 120px;
-      margin: var(--spacing-sm);
+      @include button-styles();
+      width: 120px; margin: var(--spacing-sm);
 
-      // Styles cho nút "OK"
-      &.confirm-btn {
-        background-color: var(--accent-color); // Màu của nút chính (có ý nghĩa "OK")
-        color: var(--card-background);
-
-        // Hiệu ứng hover
-        &:hover {
-          background-color: var(--primary-color); // Đổi màu khi hover
-        }
-      }
-
-      // Styles cho nút "Hủy bỏ"
-      &.cancel-btn {
-        background-color: transparent;
-        border: 1px solid var(--danger-color); // Sử dụng màu đỏ cho viền
-        color: var(--danger-color); // Sử dụng màu đỏ cho chữ
-
-        &:hover {
-          background-color: var(--danger-color); // Đổi màu nền khi hover
-          color: var(--card-background); // Đổi màu chữ khi hover
-        }
-      }
+      &.confirm-btn { background-color: var(--accent-color); color: var(--card-background);
+        &:hover { background-color: var(--primary-color); } }
+      &.cancel-btn { background: transparent; border: 1px solid var(--danger-color); color: var(--danger-color);
+        &:hover { background: var(--danger-color); color: var(--card-background); } }
     }
   }
 }
 
 .auth-container {
-  @include flex-center;
-  flex-direction: column;
-  // Sử dụng biến CSS
-  padding: var(--spacing-xl);
-  width: 100%;
-  
+  @include flex-center; flex-direction: column;
+  padding: var(--spacing-xl); width: 100%;
+
   & > div {
-    background-color: var(--card-background);
-    padding: var(--spacing-xl);
-    border-radius: var(--border-radius-md);
-    box-shadow: var(--box-shadow);
-    width: 100%;
-    max-width: 35%; 
-    text-align: center;
-    margin-top: 50px;
-    margin-bottom: 50px;
+    background: var(--card-background); padding: var(--spacing-xl);
+    border-radius: var(--border-radius-md); box-shadow: var(--box-shadow);
+    width: 100%; max-width: 35%; text-align: center; margin: 50px 0;
   }
 }
 
 .auth-form {
-  display: flex;
-  flex-direction: column;
-  // Đảm bảo thuộc tính `gap` sử dụng biến CSS
-  gap: var(--spacing-md); 
-  background-color: var(--card-background);
-  padding: var(--spacing-xl);
-  border-radius: var(--border-radius-md);
-  box-shadow: var(--box-shadow);
-  width: 90%;
-  max-width: 50vmin; 
-  text-align: center;
-  position: relative;
-  box-sizing: border-box;
-  color: var(--text-color);
+  display: flex; flex-direction: column; gap: var(--spacing-md);
+  background: var(--card-background); padding: var(--spacing-xl);
+  border-radius: var(--border-radius-md); box-shadow: var(--box-shadow);
+  width: 90%; max-width: 50vmin; text-align: center; position: relative;
+  box-sizing: border-box; color: var(--text-color);
 
-  h2 {
-    color: var(--text-color);
-    margin-bottom: var(--spacing-md);
-  }
+  h2 { color: var(--text-color); margin-bottom: var(--spacing-md); }
 
   input {
-    width: 100%;
-    padding: var(--spacing-sm);
+    width: 100%; padding: var(--spacing-sm);
     border: 1px solid var(--secondary-color);
     border-radius: var(--border-radius-sm);
-    box-sizing: border-box;
-    font-size: 1rem;
-    color: var(--text-color);
-    background-color: var(--card-background);
+    box-sizing: border-box; font-size: 1rem;
+    color: var(--text-color); background: var(--card-background);
 
-    &::placeholder {
-      color: rgb(189, 188, 188);
-    }
-    &:focus {
-      outline: none;
-      border-color: var(--accent-color);
-      box-shadow: 0 0 0 3px rgba(var(--accent-color-rgb), 0.2); 
-    }
+    &::placeholder { color: rgb(189, 188, 188); }
+    &:focus { outline: none; border-color: var(--accent-color); box-shadow: 0 0 0 3px rgba(var(--accent-color-rgb), .2); }
   }
-  
+
+  /* highlight lỗi */
+  .input-error {
+    border-color: var(--danger-color) !important;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger-color) 30%, transparent) !important;
+  }
+
+  .auth-extra { display: flex; justify-content: flex-end; margin-top: -6px; margin-bottom: 2px; }
+  .forgot-link { font-weight: 700; font-size: .92rem; text-decoration: none; color: var(--accent-color); }
+  .forgot-link:hover { text-decoration: underline; }
+
   button {
     @include button-styles();
-    display: flex;
-    width: 100%;
-    box-sizing: border-box;
-    background-color: var(--accent-color);
-    color: var(--card-background);
-    margin-top: var(--spacing-xs);
-    align-items: center;
-    gap: 10px;
-    justify-content: center;
+    display: flex; width: 100%; box-sizing: border-box;
+    background: var(--accent-color); color: var(--card-background);
+    margin-top: var(--spacing-xs); align-items: center; gap: 10px; justify-content: center;
   }
 
-  p {
-    color: var(--secondary-color);
-  }
+  .auth-or { color: var(--secondary-color); }
 }
 
 .auth-signed-in {
-  @include flex-center;
-  flex-direction: column;
-  // Đảm bảo thuộc tính `gap` sử dụng biến CSS
-  gap: var(--spacing-md); 
-  h2 {
-    color: var(--text-color);
-  }
-  button {
-    @include button-styles();
-    background-color: var(--accent-color);
-  }
+  @include flex-center; flex-direction: column; gap: var(--spacing-md);
+  h2 { color: var(--text-color); }
+  button { @include button-styles(); background: var(--accent-color); }
 }
 
-
-// --- Overlay và Animations cho Modal ---
+/* Overlay & animations */
 .auth-modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  @include flex-center;
-  z-index: 1000;
-  animation: modal-fade-in 0.3s ease-out forwards;
-
-  &.fade-out {
-    animation: modal-fade-out 0.3s ease-out forwards;
-  }
+  position: fixed; inset: 0; background: rgba(0,0,0,.5);
+  @include flex-center; z-index: 1000;
+  animation: modal-fade-in .3s ease-out forwards;
+  &.fade-out { animation: modal-fade-out .3s ease-out forwards; }
 }
 
 .close-btn {
-  position: absolute;
-  top: var(--spacing-sm);
-  right: var(--spacing-sm);
-  font-size: 2rem;
-  font-weight: 300;
-  cursor: pointer;
-  color: var(--secondary-color);
-  line-height: 1;
-
-  &:hover {
-    color: var(--primary-color);
-  }
+  position: absolute; top: var(--spacing-sm); right: var(--spacing-sm);
+  font-size: 2rem; font-weight: 300; cursor: pointer; color: var(--secondary-color);
+  line-height: 1; border: 0; width: 36px; height: 36px;
+  border-radius: 50%; /* bo tròn 50% */
+  display: grid; place-items: center; background: transparent;
+  transition: background .15s ease, color .15s ease;
+  &:hover { color: var(--primary-color); background: color-mix(in srgb, var(--accent-color) 12%, transparent); }
 }
 
-.auth-modal-overlay .auth-form {
-  animation: modal-slide-in 0.3s ease-out forwards;
-}
+.auth-modal-overlay .auth-form { animation: modal-slide-in .3s ease-out forwards; }
+.auth-modal-overlay.fade-out .auth-form { animation: modal-slide-out .3s ease-out forwards; }
 
-.auth-modal-overlay.fade-out .auth-form {
-  animation: modal-slide-out 0.3s ease-out forwards;
-}
-
-// Keyframes (giữ nguyên)
-@keyframes modal-fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-@keyframes modal-fade-out {
-  from { opacity: 1; }
-  to { opacity: 0; }
-}
-@keyframes modal-slide-in {
-  from { transform: translateY(-50px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-@keyframes modal-slide-out {
-  from { transform: translateY(0); opacity: 1; }
-  to { transform: translateY(-50px); opacity: 0; }
-}
+/* Keyframes */
+@keyframes modal-fade-in { from {opacity:0} to {opacity:1} }
+@keyframes modal-fade-out { from {opacity:1} to {opacity:0} }
+@keyframes modal-slide-in { from { transform: translateY(-50px); opacity:0 } to { transform: translateY(0); opacity:1 } }
+@keyframes modal-slide-out { from { transform: translateY(0); opacity:1 } to { transform: translateY(-50px); opacity:0 } }
