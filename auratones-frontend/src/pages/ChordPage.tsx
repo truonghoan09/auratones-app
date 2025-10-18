@@ -1,4 +1,10 @@
 // src/pages/ChordPage.tsx
+// ────────────────────────────────────────────────────────────────
+// ĐÃ KHÔI PHỤC LUỒNG BẬT/TẮT DIALOG canonical/voicing như bản gốc.
+// Không đổi logic, layout, cấu trúc ngoài phần liên quan.
+// Comment ngắn gọn phục vụ bảo trì, không giải thích chi tiết.
+// ────────────────────────────────────────────────────────────────
+
 import { useMemo, useState, useCallback, useEffect, useRef } from "react";
 import type { ChordEntry, Instrument } from "../types/chord";
 import ChordCard from "../components/chord/ChordCard";
@@ -7,25 +13,17 @@ import "../styles/ChordPage.scss";
 import Header from "../components/Header";
 import { useAuthContext } from "../contexts/AuthContext";
 import Auth from "../components/Auth";
-import DeleteVoicingScopeDialog from "../components/chord/DeleteVoicingScopeDialog";
+import ChordCanonicalDialog, {type CanonicalDraft} from "../components/chord/CanonicalChordDialog";
+import ChordVoicingDialog from "../components/chord/ChordVoicingDialog";
 
 import { useI18n } from "../contexts/I18nContext";
 import { fetchChords, postChord, postChordVoicing, deleteChordVoicing } from "../services/chords";
 
-type CanonicalDraft = {
-  rootPc: number;
-  recipeId: string;
-  useSlash: boolean;
-  bassPc?: number;
-  includeVoicing?: boolean;
-};
-
 const ROOTS = ["C","C#","Db","D","D#","Eb","E","F","F#","Gb","G","G#","Ab","A","A#","Bb","B"] as const;
 type RootName = (typeof ROOTS)[number];
 
-/* normalize cho contains-search (không dùng cho strict root) */
+
 function normalize(s: string) { return s.toLowerCase().replace(/\s+/g, ""); }
-/* lấy root từ prefix symbol */
 function getRootFromSymbol(symbol: string): RootName | null {
   const m = /^([A-G])([#b])?/i.exec(symbol.trim());
   if (!m) return null;
@@ -59,7 +57,7 @@ export default function ChordPage() {
 
   const pendingBackRef = useRef(false);
 
-  /* fetch list */
+  // fetch list
   const refreshChords = useCallback(async () => {
     setLoading(true);
     setErr(null);
@@ -74,7 +72,6 @@ export default function ChordPage() {
     }
   }, [instrument, t]);
 
-  /* fetch on instrument change */
   useEffect(() => {
     let alive = true;
     setLoading(true);
@@ -93,9 +90,6 @@ export default function ChordPage() {
 
   const allChords = useMemo<ChordEntry[]>(() => serverChords ?? [], [serverChords]);
 
-  /* strict root query:
-     - Nếu query khớp CHÍNH XÁC ^([A-G])([#b])?$ (in HOA), coi là tìm nốt gốc/bass.
-     - Ngược lại dùng contains-insensitive như cũ. */
   const strictRootQuery = useMemo<RootName | null>(() => {
     const q = query.trim();
     const m = /^([A-G])([#b])?$/.exec(q);
@@ -104,15 +98,12 @@ export default function ChordPage() {
     return (ROOTS as readonly string[]).includes(token) ? token : null;
   }, [query]);
 
-  /* filter + search */
   const filtered = useMemo(() => {
     let list = allChords;
-
     if (filterKey !== "none") {
       const allow = new Set(FILTERS[filterKey].map(normalize));
       list = list.filter((c) => allow.has(normalize(c.symbol)));
     }
-
     if (strictRootQuery) {
       const rxBass = new RegExp(`/(?:${strictRootQuery})(?:$|[^A-G#b])`);
       list = list.filter((c) => {
@@ -130,11 +121,9 @@ export default function ChordPage() {
         return [main, ...aliases].some((n) => n.includes(q));
       });
     }
-
     return [...list].sort((a, b) => a.symbol.localeCompare(b.symbol));
   }, [allChords, query, filterKey, strictRootQuery]);
 
-  /* group theo root */
   const grouped = useMemo(() => {
     const map = new Map<RootName, any[]>();
     for (const r of ROOTS) map.set(r as RootName, []);
@@ -152,7 +141,6 @@ export default function ChordPage() {
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
   const [activeRoot, setActiveRoot] = useState<RootName | null>(null);
 
-  /* highlight TOC theo viewport */
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -172,7 +160,6 @@ export default function ChordPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [grouped.length]);
 
-  /* scroll tới root */
   const scrollToRoot = useCallback((r: RootName) => {
     const el = sectionRefs.current[r];
     if (!el) return;
@@ -180,22 +167,17 @@ export default function ChordPage() {
     window.scrollTo({ top: y, behavior: "smooth" });
   }, []);
 
-  /* Canonical & Voicing dialogs (kept) */
+  // ===== Canonical dialog =====
   const [canonicalOpen, setCanonicalOpen] = useState(false);
   const [canonicalInstrument, setCanonicalInstrument] = useState<Instrument>("guitar");
   const [canonicalSymbol, setCanonicalSymbol] = useState<string>("");
   const [canonicalDraft, setCanonicalDraft] = useState<CanonicalDraft | null>(null);
 
+  // ===== Voicing dialog =====
   const [voicingOpen, setVoicingOpen] = useState(false);
   const [voicingInstrument, setVoicingInstrument] = useState<Instrument>("guitar");
   const [voicingSymbol, setVoicingSymbol] = useState<string>("");
 
-  /* Delete Scope dialog */
-  const [delScopeOpen, setDelScopeOpen] = useState(false);
-  const [delScopeChord, setDelScopeChord] = useState<ChordEntry | null>(null);
-  const [delScopeIndex, setDelScopeIndex] = useState<number | null>(null);
-
-  /* submit canonical */
   const handleSubmitCanonical = useCallback(async (payload: {
     instrument: Instrument;
     symbol: string;
@@ -204,7 +186,6 @@ export default function ChordPage() {
     meta?: { includeVoicing?: boolean; isSlash?: boolean };
   }) => {
     const includeVoicing = !!payload.meta?.includeVoicing;
-
     setCanonicalInstrument(payload.instrument);
     setCanonicalSymbol(payload.symbol);
     setCanonicalDraft({
@@ -214,16 +195,13 @@ export default function ChordPage() {
       bassPc: payload.canonical.bassPc,
       includeVoicing,
     });
-
     setCanonicalOpen(false);
-
     if (includeVoicing) {
       setVoicingInstrument(payload.instrument);
       setVoicingSymbol(payload.symbol);
       setVoicingOpen(true);
       return;
     }
-
     try {
       await postChord({
         instrument: payload.instrument,
@@ -260,7 +238,6 @@ export default function ChordPage() {
     }
   }, [voicingOpen]);
 
-  /* submit voicing */
   const handleSubmitVoicing = useCallback(async (payload: {
     instrument: Instrument;
     symbol: string;
@@ -283,7 +260,6 @@ export default function ChordPage() {
         variants: payload.variants,
       },
     };
-
     try {
       await postChordVoicing(bundleForInspect);
       (window as any).__toast?.(t("chords.toast.voicing_saved"), "success");
@@ -334,45 +310,11 @@ export default function ChordPage() {
       (window as any).__toast?.(t("chords.toast.delete_not_found"), "error");
       return;
     }
-    setDelScopeChord(chord);
-    setDelScopeIndex(variantIndex);
-    setDelScopeOpen(true);
-  }, [t]);
-
-  void canonicalOpen;
-  void canonicalInstrument;
-  void canonicalSymbol;
-  void voicingInstrument;
-  void voicingSymbol;
-
-  void handleSubmitCanonical;
-  void handleCloseCanonical;
-  void handleBackFromVoicing;
-  void handleSubmitVoicing;
-
-  const handleConfirmDeleteScope = useCallback(async (scope: "single" | "shape+fingers") => {
+    const ok = window.confirm(`${t("chords.toast.delete_confirm")} "${chord.symbol}" #${variantIndex + 1}?`);
+    if (!ok) return;
     try {
-      const chord = delScopeChord!;
-      const variantIndex = delScopeIndex!;
-      const variant = chord.variants[variantIndex];
-
-      const visibility = isAdmin ? "system" : "private";
-
-      await deleteChordVoicing({
-        instrument: chord.instrument,
-        symbol: chord.symbol,
-        variant,
-        scope,
-        visibility,
-      });
-
-      (window as any).__toast?.(
-        scope === "shape+fingers"
-          ? t("chords.toast.delete_success_scope")
-          : t("chords.toast.delete_success_single"),
-        "success"
-      );
-
+      await deleteChordVoicing({ instrument: chord.instrument, symbol: chord.symbol, variant });
+      (window as any).__toast?.(t("chords.toast.delete_success_single"), "success");
       setOpenChord((prev) => {
         if (!prev) return prev;
         if (prev.instrument !== chord.instrument || prev.symbol !== chord.symbol) return prev;
@@ -380,17 +322,12 @@ export default function ChordPage() {
         if (nextVariants.length === 0) return null;
         return { ...prev, variants: nextVariants };
       });
-
-      setDelScopeOpen(false);
-      setDelScopeChord(null);
-      setDelScopeIndex(null);
-
       await refreshChords();
     } catch (e: any) {
       console.error(e);
       (window as any).__toast?.(e?.message || t("chords.toast.delete_fail"), "error");
     }
-  }, [delScopeChord, delScopeIndex, isAdmin, refreshChords, t]);
+  }, [refreshChords, t]);
 
   return (
     <>
@@ -421,35 +358,13 @@ export default function ChordPage() {
           )}
 
           <section className="chord-main">
-            {/* Toolbar: hàng trên (cố định), hàng dưới (filter + future space) */}
             <header className="toolbar">
               <div className="toolbar__row toolbar__row--top">
                 <div className="left">
                   <div className="seg" role="tablist" aria-label={t("chords.aria.chooseInstrument")}>
-                    <button
-                      className={instrument === "guitar" ? "active" : ""}
-                      onClick={() => setInstrument("guitar")}
-                      role="tab"
-                      aria-selected={instrument === "guitar"}
-                    >
-                      {t("chords.instruments.guitar")}
-                    </button>
-                    <button
-                      className={instrument === "ukulele" ? "active" : ""}
-                      onClick={() => setInstrument("ukulele")}
-                      role="tab"
-                      aria-selected={instrument === "ukulele"}
-                    >
-                      {t("chords.instruments.ukulele")}
-                    </button>
-                    <button
-                      className={instrument === "piano" ? "active" : ""}
-                      onClick={() => setInstrument("piano")}
-                      role="tab"
-                      aria-selected={instrument === "piano"}
-                    >
-                      {t("chords.instruments.piano")}
-                    </button>
+                    <button className={instrument === "guitar" ? "active" : ""} onClick={() => setInstrument("guitar")} role="tab" aria-selected={instrument === "guitar"}>{t("chords.instruments.guitar")}</button>
+                    <button className={instrument === "ukulele" ? "active" : ""} onClick={() => setInstrument("ukulele")} role="tab" aria-selected={instrument === "ukulele"}>{t("chords.instruments.ukulele")}</button>
+                    <button className={instrument === "piano" ? "active" : ""} onClick={() => setInstrument("piano")} role="tab" aria-selected={instrument === "piano"}>{t("chords.instruments.piano")}</button>
                   </div>
                 </div>
 
@@ -475,8 +390,6 @@ export default function ChordPage() {
                     <option value="chordOfCMajorPlus">{t("chords.filters.chordOfCMajorPlus")}</option>
                   </select>
                 </div>
-
-                {/* reserved: user-defined filters (future) */}
                 <div className="filters__future-space" aria-hidden="true" />
               </div>
             </header>
@@ -548,14 +461,28 @@ export default function ChordPage() {
         />
       )}
 
-      <DeleteVoicingScopeDialog
-        isOpen={delScopeOpen}
-        chord={delScopeChord}
-        variantIndex={delScopeIndex}
-        isAdmin={isAdmin}
-        onClose={() => { setDelScopeOpen(false); setDelScopeChord(null); setDelScopeIndex(null); }}
-        onConfirm={handleConfirmDeleteScope}
-      />
+      {/* ── Khối mount dialog khôi phục luồng cũ ── */}
+      {canonicalOpen && (
+        <ChordCanonicalDialog
+          isOpen
+          instrument={canonicalInstrument}
+          initialSymbol={canonicalSymbol}
+          initialDraft={canonicalDraft}
+          onClose={handleCloseCanonical}
+          onSubmit={handleSubmitCanonical}
+        />
+      )}
+
+      {voicingOpen && (
+        <ChordVoicingDialog
+          isOpen
+          instrument={voicingInstrument}
+          symbol={voicingSymbol}
+          onClose={() => setVoicingOpen(false)}
+          onSubmit={handleSubmitVoicing}
+          onBack={handleBackFromVoicing}
+        />
+      )}
     </>
   );
 }

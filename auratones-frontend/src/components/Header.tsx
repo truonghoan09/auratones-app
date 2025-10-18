@@ -1,5 +1,7 @@
-// Header.tsx
-// NOTE: Bỏ chip display-chord ở header-right; mặc định localStorage 'displayChord' = 'maj/m' nếu chưa có.
+// =============================
+// src/components/Header.tsx
+// NOTE: Giữ nguyên logic/kết cấu; thêm chip chord ở header-right (desktop) và chỉnh mobile controls.
+// =============================
 
 import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { Link, useLocation } from "react-router-dom";
@@ -23,7 +25,7 @@ const Header: React.FC = () => {
   const location = useLocation();
   const userProfileRef = useRef<HTMLDivElement>(null);
 
-  /* default display-chord */
+  // default display-chord
   useEffect(() => {
     try {
       const KEY = "displayChord";
@@ -33,7 +35,7 @@ const Header: React.FC = () => {
     } catch {}
   }, []);
 
-  /* handlers */
+  // handlers
   const handleToggleMenu = useCallback(() => {
     if (!isLoading) setIsMenuOpen((v) => !v);
   }, [isLoading]);
@@ -56,7 +58,7 @@ const Header: React.FC = () => {
   const langLabel = (lang || "vi").toUpperCase();
   const langAria  = lang === "vi" ? "Switch language to English" : "Chuyển ngôn ngữ sang Tiếng Việt";
 
-  /* close dropdown on outside click */
+  // close dropdown on outside click
   useEffect(() => {
     const onOutside = (e: MouseEvent) => {
       if (userProfileRef.current && !userProfileRef.current.contains(e.target as Node)) {
@@ -67,7 +69,7 @@ const Header: React.FC = () => {
     return () => document.removeEventListener("mousedown", onOutside);
   }, [isMenuOpen]);
 
-  /* esc to close */
+  // esc to close
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -79,11 +81,11 @@ const Header: React.FC = () => {
     return () => window.removeEventListener("keydown", onKey);
   }, [isMenuOpen, mobileOpen]);
 
-  /* auto-close drawer on route change */
+  // auto-close drawer on route change
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { if (mobileOpen) setMobileOpen(false); }, [location.pathname]);
 
-  /* route helpers */
+  // route helpers
   const isActive = useCallback(
     (to: string) => {
       const cur  = location.pathname.replace(/\/+$/, "");
@@ -97,7 +99,7 @@ const Header: React.FC = () => {
     [isActive]
   );
 
-  /* user display */
+  // user display
   const displayName = useMemo(() => {
     if (user?.displayName) return user.displayName;
     if (user?.username)    return user.username;
@@ -154,13 +156,42 @@ const Header: React.FC = () => {
             aria-expanded={mobileOpen}
             onClick={toggleMobile}
           >
-            <span className="bar" /><span className="bar" /><span className="bar" />
+            <span className="bar" />
+            <span className="bar" />
+            <span className="bar" />
           </button>
 
-          {/* (removed) chord chip on desktop */}
+          {/* Desktop controls (visible when header đầy đủ) */}
           {isAuthenticated ? (
             <div className="user-profile" ref={userProfileRef}>
-              <ThemeSwitcher />
+              {/* chord chip: luôn có ngoài desktop, ẩn khi header collapse */}
+              <button
+                type="button"
+                className={`chip chip-chord${isSymbol ? " is-on" : ""}`}
+                onClick={toggle}
+                role="switch"
+                aria-checked={isSymbol}
+                title={chordTitle}
+                aria-label={chordTitle}
+              >
+                <span className="chip-icon" aria-hidden="true">
+                  {isSymbol ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                      <path fill="currentColor" d="M5 3a5 5 0 0 0 0 10h6a5 5 0 0 0 0-10zm6 9a4 4 0 1 1 0-8 4 4 0 0 1 0 8" />
+                    </svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                      <path fill="currentColor" d="M11 4a4 4 0 0 1 0 8H8a5 5 0 0 0 2-4 5 5 0 0 0-2-4zm-6 8a4 4 0 1 1 0-8 4 4 0 0 1 0 8M0 8a5 5 0 0 0 5 5h6a5 5 0 0 0 0-10H5a5 5 0 0 0-5 5" />
+                    </svg>
+                  )}
+                </span>
+                <span className="chip-label">{chordLabel}</span>
+              </button>
+
+              <button type="button" className="chip chip-theme" title="Theme" aria-label="Theme">
+                <ThemeSwitcher />
+              </button>
+
               <button
                 type="button"
                 className="chip chip-lang"
@@ -225,9 +256,34 @@ const Header: React.FC = () => {
             </div>
           ) : (
             <div className="auth-buttons">
+              {/* chord chip: luôn có ngoài desktop, ẩn khi header collapse */}
+              <button
+                type="button"
+                className={`chip chip-chord${isSymbol ? " is-on" : ""}`}
+                onClick={toggle}
+                role="switch"
+                aria-checked={isSymbol}
+                title={chordTitle}
+                aria-label={chordTitle}
+              >
+                <span className="chip-icon" aria-hidden="true">
+                  {isSymbol ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                      <path fill="currentColor" d="M5 3a5 5 0 0 0 0 10h6a5 5 0 0 0 0-10zm6 9a4 4 0 1 1 0-8 4 4 0 0 1 0 8" />
+                    </svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                      <path fill="currentColor" d="M11 4a4 4 0 0 1 0 8H8a5 5 0 0 0 2-4 5 5 0 0 0-2-4zm-6 8a4 4 0 1 1 0-8 4 4 0 0 1 0 8M0 8a5 5 0 0 0 5 5h6a5 5 0 0 0 0-10H5a5 5 0 0 0-5 5" />
+                    </svg>
+                  )}
+                </span>
+                <span className="chip-label">{chordLabel}</span>
+              </button>
+
               <button type="button" className="chip chip-theme" title="Theme" aria-label="Theme">
                 <ThemeSwitcher />
               </button>
+
               <button
                 type="button"
                 className="chip chip-lang"
@@ -238,6 +294,7 @@ const Header: React.FC = () => {
                 <span className="chip-icon" aria-hidden="true">🌐</span>
                 <span className="chip-label">{langLabel}</span>
               </button>
+
               <button
                 className="btn-primary login-btn"
                 onClick={openAuth}
@@ -260,7 +317,7 @@ const Header: React.FC = () => {
           </div>
 
           <div className="mobile-controls">
-            {/* chord chip in secondary nav */}
+            {/* chord chip (chỉ trong nav phụ) */}
             <button
               type="button"
               className={`chip chip-chord${isSymbol ? " is-on" : ""}`}
@@ -273,19 +330,28 @@ const Header: React.FC = () => {
               <span className="chip-icon" aria-hidden="true">
                 {isSymbol ? (
                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-                    <path fill="currentColor" d="M5 3a5 5 0 0 0 0 10h6a5 5 0 0 0 0-10zm6 9a4 4 0 1 1 0-8 4 4 0 0 1 0 8"/>
+                    <path fill="currentColor" d="M5 3a5 5 0 0 0 0 10h6a5 5 0 0 0 0-10zm6 9a4 4 0 1 1 0-8 4 4 0 0 1 0 8" />
                   </svg>
                 ) : (
                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-                    <path fill="currentColor" d="M11 4a4 4 0 0 1 0 8H8a5 5 0 0 0 2-4 5 5 0 0 0-2-4zm-6 8a4 4 0 1 1 0-8 4 4 0 0 1 0 8M0 8a5 5 0 0 0 5 5h6a5 5 0 0 0 0-10H5a5 5 0 0 0-5 5"/>
+                    <path fill="currentColor" d="M11 4a4 4 0 0 1 0 8H8a5 5 0 0 0 2-4 5 5 0 0 0-2-4zm-6 8a4 4 0 1 1 0-8 4 4 0 0 1 0 8M0 8a5 5 0 0 0 5 5h6a5 5 0 0 0 0-10H5a5 5 0 0 0-5 5" />
                   </svg>
                 )}
               </span>
               <span className="chip-label">{chordLabel}</span>
             </button>
 
-            <button type="button" className="chip chip-theme" title="Theme" aria-label="Theme"><ThemeSwitcher /></button>
-            <button type="button" className="chip chip-lang" onClick={toggleLang} aria-label={langAria} title={langAria}>
+            <button type="button" className="chip chip-theme" title="Theme" aria-label="Theme">
+              <ThemeSwitcher />
+            </button>
+
+            <button
+              type="button"
+              className="chip chip-lang"
+              onClick={toggleLang}
+              aria-label={langAria}
+              title={langAria}
+            >
               <span className="chip-icon" aria-hidden="true">🌐</span>
               <span className="chip-label">{langLabel}</span>
             </button>

@@ -1,6 +1,6 @@
 /* ===========================================
    src/styles/header.scss
-   Sử dụng helpers từ _mixins.scss cho responsive
+   NOTE: Tối ưu mobile controls: theme không nền khi split 2 dòng; chord/lang có nền nhẹ; chip chord xuất hiện ở header-right desktop.
    =========================================== */
 @use "./mixins" as *;
 
@@ -19,33 +19,20 @@
   --z-scrim: 1190;
 }
 
-/* ===== Main header (single row, no wrap) ===== */
+/* ===== Main header ===== */
 .main-header {
-  position: sticky;
-  top: 0;
-  z-index: var(--z-header);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  height: 4rem;
-  padding: 0rem 1rem;
-  background: var(--card-background);
-  color: var(--text-color);
-  box-shadow: var(--box-shadow);
-  white-space: nowrap;
-  max-width: 100vw;
-  overflow-x: clip;
-  box-sizing: border-box;
+  position: sticky; top: 0; z-index: var(--z-header);
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; height: 4rem; padding: 0rem 1rem;
+  background: var(--card-background); color: var(--text-color);
+  box-shadow: var(--box-shadow); white-space: nowrap; max-width: 100vw;
+  overflow-x: clip; box-sizing: border-box;
 }
 
 .header-left { outline: none; display: flex; align-items: center; gap: 14px; min-width: 0; position: relative; }
 .header-logo {
-  font-weight: 800;
-  text-transform: lowercase;
-  letter-spacing: .6px;
-  color: var(--primary-color);
-  text-decoration: none;
+  font-weight: 800; text-transform: lowercase; letter-spacing: .6px;
+  color: var(--primary-color); text-decoration: none;
   font-size: clamp(16px, 5.2vw, 20px);
 }
 
@@ -76,73 +63,46 @@
 .header-right .auth-buttons { display: flex; align-items: center; gap: 8px; }
 .header-right .user-profile { display: flex; align-items: center; gap: 10px; }
 
-/* ===== Chip buttons ===== */
+/* ===== Chip ===== */
 .chip {
   height: var(--hdr-control-h);
   border-radius: var(--hdr-radius);
   padding: 0 12px;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  line-height: 1;
-  font-weight: 800;
-  color: var(--text-color);
+  display: inline-flex; align-items: center; gap: 8px;
+  background: transparent; border: none; cursor: pointer;
+  line-height: 1; font-weight: 800; color: var(--text-color);
   transition: background .15s ease, transform .08s ease, opacity .15s ease, color .15s ease;
   &:hover { background: color-mix(in srgb, var(--accent-color) 14%, transparent); }
   &:active { transform: translateY(1px); }
   &:disabled { opacity: .6; cursor: not-allowed; }
 }
 
-/* === Chord toggle: chỉ đổi màu khi bật === */
+/* chord state highlight */
 .chip.chip-chord.is-on { color: var(--accent-color); }
 
 .chip-lang .chip-icon { font-size: 14px; line-height: 1; }
 .chip-lang .chip-label { font-size: 12.5px; letter-spacing: .4px; }
 
-/* --- Isolate theme chip --- */
+/* theme container isolate */
 .chip.chip-theme {
-  background: transparent !important;
-  box-shadow: none !important;
-  border: none !important;
-  padding: 0 !important;
-  gap: 0 !important;
-  pointer-events: none;
+  background: transparent !important; box-shadow: none !important; border: none !important;
+  padding: 0 !important; gap: 0 !important; pointer-events: none;
 }
 .chip.chip-theme > * { pointer-events: auto; }
 
 /* ===== CTA ===== */
 .btn-primary {
-  height: var(--hdr-control-h);
-  padding: 0 14px;
-  border-radius: var(--hdr-radius);
-  border: none;
-  cursor: pointer;
-  font-weight: 700;
-  display: inline-flex;
-  align-items: center;
-  background: var(--accent-color);
-  color: #fff;
+  height: var(--hdr-control-h); padding: 0 14px; border-radius: var(--hdr-radius);
+  border: none; cursor: pointer; font-weight: 700; display: inline-flex; align-items: center;
+  background: var(--accent-color); color: #fff;
   box-shadow: 0 6px 18px rgba(var(--accent-color-rgb), .28);
   transition: transform 120ms ease, box-shadow 120ms ease;
   &:hover { transform: translateY(-1px); box-shadow: 0 10px 22px rgba(var(--accent-color-rgb), .36); }
 }
 
-/* --- Fixed width cho login (desktop header) --- */
-.header-right .auth-buttons .btn-primary.login-btn {
-  width: 128px;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-/* --- Fixed width cho language switch (desktop header) --- */
-.header-right .auth-buttons .chip.chip-lang {
-  width: 88px;
-  justify-content: center;
-  flex-shrink: 0;
-}
+/* desktop fixed widths */
+.header-right .auth-buttons .btn-primary.login-btn { width: 128px; justify-content: center; flex-shrink: 0; }
+.header-right .auth-buttons .chip.chip-lang { width: 88px; justify-content: center; flex-shrink: 0; }
 
 /* ===== Avatar + dropdown ===== */
 .user-profile { position: relative; }
@@ -176,11 +136,9 @@
 
 @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
-/* ===== Hamburger (inline on small widths) ===== */
+/* ===== Hamburger ===== */
 .nav-toggle {
-  position: relative;
-  width: clamp(36px, 10vw, 44px);
-  height: clamp(32px, 9vw, 40px);
+  position: relative; width: clamp(36px, 10vw, 44px); height: clamp(32px, 9vw, 40px);
   border: 0; background: transparent; cursor: pointer;
   border-radius: 10px; transition: background .15s ease, transform .08s ease;
   display: none;
@@ -192,118 +150,223 @@
 .nav-toggle.is-open .bar:nth-child(2){ opacity: 0; }
 .nav-toggle.is-open .bar:nth-child(3){ transform: translateY(-7px) rotate(-45deg); }
 
-/* ===== Drawer (mobile/tablet) ===== */
+/* ===== Drawer ===== */
 .mobile-nav { position: fixed; inset: 0; z-index: var(--z-drawer); pointer-events: none; }
-
 .mobile-nav__inner{
   position: absolute; top: 0; left: 0;
-  width: min(420px, 100svw);
-  max-width: 100svw;
+  width: min(420px, 100svw); max-width: 100svw;
   height: 100dvh; max-height: 100dvh;
-  background: var(--card-background);
-  box-shadow: 0 20px 40px rgba(0,0,0,.35);
-  transform: translateX(-100%);
-  transition: transform .22s ease;
+  background: var(--card-background); box-shadow: 0 20px 40px rgba(0,0,0,.35);
+  transform: translateX(-100%); transition: transform .22s ease;
   display: flex; flex-direction: column;
-  padding:
-    14px
-    max(14px, env(safe-area-inset-right))
-    14px
-    max(14px, env(safe-area-inset-left));
-  pointer-events: auto;
-  z-index: var(--z-drawer);
-  will-change: transform;
-  overflow: auto; overscroll-behavior: contain; box-sizing: border-box;
+  padding: 14px max(14px, env(safe-area-inset-right)) 14px max(14px, env(safe-area-inset-left));
+  pointer-events: auto; z-index: var(--z-drawer);
+  will-change: transform; overflow: auto; overscroll-behavior: contain; box-sizing: border-box;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--card-background) 96%, transparent) 0%, color-mix(in srgb, var(--card-background) 100%, transparent) 100%);
+  border-right: 1px solid color-mix(in srgb, var(--text-color) 14%, transparent);
+  backdrop-filter: saturate(120%) blur(6px);
 }
+.mobile-nav.open { pointer-events: auto; }
+.mobile-nav.open .mobile-nav__inner { transform: translateX(0); }
 
 .mobile-head {
   display: grid; grid-template-columns: 1fr auto; align-items: center;
   .mobile-logo { font-weight: 800; color: var(--primary-color); text-decoration: none; font-size: clamp(14px, 5vw, 18px); }
   .mobile-close { border: none; background: transparent; font-size: 18px; cursor: pointer; color: var(--text-color); }
 }
-.mobile-controls { display: flex; gap: 8px; margin-top: 6px; }
 
-/* ===== Scrim (fix “ô đen” button default) ===== */
+/* ===== Smart controls ===== */
+.mobile-controls {
+  display: flex; gap: 8px; margin-top: 6px;
+  border: 1px solid color-mix(in srgb, var(--text-color) 12%, transparent);
+  border-radius: 999px; padding: 4px;
+  background: color-mix(in srgb, var(--card-background) 86%, transparent);
+  box-shadow: 0 6px 16px rgba(0,0,0,.08);
+}
+.mobile-controls .chip{
+  flex: 1 1 0; height: clamp(32px, 5.5svh, 38px);
+  padding: 0 clamp(8px, 2.4vw, 12px);
+  border-radius: 999px; border: 0; justify-content: center; background: transparent; position: relative;
+  transition: background .16s ease, transform .08s ease, box-shadow .16s ease, color .16s ease;
+}
+.mobile-controls .chip-label{
+  font-size: 12.5px; letter-spacing: .3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 9ch;
+}
+.mobile-controls .chip:hover{
+  background: color-mix(in srgb, var(--accent-color) 12%, transparent);
+  box-shadow: 0 6px 16px rgba(var(--accent-color-rgb), .18);
+}
+.mobile-controls .chip:active{ transform: translateY(1px); }
+.mobile-controls .chip-chord.is-on{
+  color: var(--accent-color);
+  background: color-mix(in srgb, var(--accent-color) 14%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent-color) 28%, transparent);
+}
+/* theme giữ trong suốt */
+.mobile-controls .chip-theme{ pointer-events: none; & > *{ pointer-events: auto; } }
+
+/* separator khi đủ chỗ */
+@media (min-width: 401px){
+  .mobile-controls .chip:not(:last-child)::after{
+    content:""; position:absolute; right:-4px; top:8px; bottom:8px;
+    width:1px; background: color-mix(in srgb, var(--text-color) 10%, transparent);
+  }
+}
+
+/* ===== Mobile links ===== */
+.mobile-links{
+  display: grid; grid-auto-rows: minmax(44px, auto);
+  gap: 10px; margin: 14px 0 10px; padding: 6px 0 12px;
+}
+.mobile-links a{
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 14px; border-radius: 12px;
+  text-decoration: none; color: var(--text-color); background: transparent;
+  border: 1px solid color-mix(in srgb, var(--text-color) 10%, transparent);
+  box-shadow: 0 2px 10px rgba(0,0,0,.06);
+  transition: background .18s ease, box-shadow .2s ease, transform .08s ease, border-color .18s ease;
+  will-change: transform; letter-spacing: .2px;
+}
+.mobile-links a:hover{
+  background: color-mix(in srgb, var(--accent-color) 10%, transparent);
+  border-color: color-mix(in srgb, var(--accent-color) 28%, transparent);
+  box-shadow: 0 6px 16px rgba(var(--accent-color-rgb), .18);
+  transform: translateY(-1px);
+}
+.mobile-links a:active{ transform: translateY(0); box-shadow: 0 3px 10px rgba(0,0,0,.10); }
+.mobile-links a.active{
+  background: color-mix(in srgb, var(--accent-color) 16%, transparent);
+  border-color: color-mix(in srgb, var(--accent-color) 40%, transparent);
+  color: var(--accent-color); font-weight: 800;
+  box-shadow: inset 0 10px 20px rgba(var(--accent-color-rgb), .22), 0 6px 16px rgba(var(--accent-color-rgb), .16);
+}
+.mobile-links a:focus-visible{ outline: 2px solid var(--accent-color); outline-offset: 2px; }
+
+/* ===== Mobile user ===== */
+.mobile-user{ margin-top: 6px; padding: 10px 0 16px; border-top: 1px dashed color-mix(in srgb, var(--text-color) 14%, transparent); }
+.mu-row{
+  display: grid; grid-template-columns: 56px 1fr; gap: 12px; align-items: center;
+  padding: 10px 12px; border-radius: 14px;
+  background: color-mix(in srgb, var(--card-background) 100%, transparent);
+  border: 1px solid color-mix(in srgb, var(--text-color) 10%, transparent);
+  box-shadow: 0 2px 10px rgba(0,0,0,.06);
+}
+.mu-avatar{
+  width: 56px; height: 56px; border-radius: 999px; object-fit: cover;
+  box-shadow: 0 6px 14px rgba(0,0,0,.08);
+  &.fallback{ display: grid; place-items: center; font-weight: 800; color: var(--accent-color); background: rgba(var(--accent-color-rgb), .12); }
+}
+.mu-meta{
+  min-width: 0;
+  .mu-name{ font-weight: 800; line-height: 1.2; }
+  .mu-email{ opacity: .8; font-size: .92rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .mu-plan{ margin-top: 6px; display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: .75rem; font-weight: 800; background: rgba(var(--accent-color-rgb), .12); color: var(--accent-color); }
+}
+.mobile-user-links{
+  display: grid; grid-auto-rows: minmax(44px, auto); gap: 10px; margin-top: 12px;
+}
+.mobile-user-links a, .mobile-user-links .danger{
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 14px; border-radius: 12px; text-decoration: none; background: transparent;
+  border: 1px solid color-mix(in srgb, var(--text-color) 10%, transparent); color: var(--text-color);
+  box-shadow: 0 2px 10px rgba(0,0,0,.06);
+  transition: background .18s ease, box-shadow .2s ease, transform .08s ease, border-color .18s ease, color .18s ease;
+  will-change: transform; letter-spacing: .2px;
+}
+.mobile-user-links a:hover{
+  background: color-mix(in srgb, var(--accent-color) 10%, transparent);
+  border-color: color-mix(in srgb, var(--accent-color) 28%, transparent);
+  box-shadow: 0 6px 16px rgba(var(--accent-color-rgb), .18);
+  transform: translateY(-1px); color: var(--accent-color);
+}
+.mobile-user-links a:active, .mobile-user-links .danger:active{
+  transform: translateY(0); box-shadow: 0 3px 10px rgba(0,0,0,.10);
+}
+.mobile-user-links a:focus-visible, .mobile-user-links .danger:focus-visible{
+  outline: 2px solid var(--accent-color); outline-offset: 2px;
+}
+.mobile-user-links .danger{ cursor: pointer; text-align: left; color: var(--danger-color); }
+.mobile-user-links .danger:hover{
+  background: color-mix(in srgb, var(--danger-color) 10%, transparent);
+  border-color: color-mix(in srgb, var(--danger-color) 28%, transparent);
+  box-shadow: 0 6px 16px rgba(255,0,0,.14);
+}
+
+/* ===== Scrim ===== */
 .mobile-scrim {
-  position: fixed;
-  inset: 0;
-  z-index: var(--z-scrim);
-  /* reset native button UI */
-  appearance: none;
-  -webkit-appearance: none;
-  border: 0;
-  margin: 0;
-  padding: 0;
-  outline: none;
-  box-shadow: none;
-  background: rgba(0,0,0,.28);
-  color: transparent;          /* tránh text highlight trên vài UA */
-  cursor: default;
-  /* state */
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity .22s ease;
+  position: fixed; inset: 0; z-index: var(--z-scrim);
+  appearance: none; -webkit-appearance: none; border: 0; margin: 0; padding: 0; outline: none; box-shadow: none;
+  background: rgba(0,0,0,.28); color: transparent; cursor: default; opacity: 0; pointer-events: none; transition: opacity .22s ease;
 }
-/* Khi mở drawer: hiển thị scrim, cho phép click */
-.mobile-nav.open .mobile-scrim {
-  opacity: 1;
-  pointer-events: auto;
-}
+.mobile-nav.open .mobile-scrim { opacity: 1; pointer-events: auto; }
 
-/* ===== Pre-collapse ===== */
+/* ===== Pre-collapse (ẩn controls ngoài khi header collapse) ===== */
 @include down($bp-lg-collapse) {
   .main-header { padding-block: 14px; }
   .header-nav { display: none !important; }
 
   .header-left { flex: 1 1 auto; position: relative; }
-  .header-logo {
-    position: absolute; left: 50%; transform: translateX(-50%);
-    pointer-events: none; background: transparent;
-  }
+  .header-logo { position: absolute; left: 50%; transform: translateX(-50%); pointer-events: none; background: transparent; }
 
   .header-right .auth-buttons,
-  .header-right .user-profile { display: none !important; }
+  .header-right .user-profile { display: none !important; } /* ẩn chip chord/theme/lang ngoài */
   .header-right .nav-toggle { display: inline-flex !important; }
 
-  .header-right {
-    position: absolute;
-    right: max(12px, env(safe-area-inset-right));
-    top: 50%;
-    transform: translateY(-50%);
-  }
+  .header-right { position: absolute; right: max(12px, env(safe-area-inset-right)); top: 50%; transform: translateY(-50%); }
 }
 
 /* ===== Tablet/mobile ===== */
 @include down($bp-tablet) {
-  .main-header {
-    position: relative;
-    max-width: 100vw;
-    overflow-x: clip;
-    padding-block: 14px;
-  }
-
+  .main-header { position: relative; max-width: 100vw; overflow-x: clip; padding-block: 14px; }
   .header-nav { display: none !important; }
-
   .header-left { flex: 1 1 auto; }
-  .header-logo {
-    position: absolute; left: 50%; transform: translateX(-50%);
-    pointer-events: none; background: transparent;
-  }
-
-  .header-right {
-    position: absolute;
-    right: max(12px, env(safe-area-inset-right));
-    top: 50%;
-    transform: translateY(-50%);
-  }
-
+  .header-logo { position: absolute; left: 50%; transform: translateX(-50%); pointer-events: none; background: transparent; }
+  .header-right { position: absolute; right: max(12px, env(safe-area-inset-right)); top: 50%; transform: translateY(-50%); }
   .header-right .auth-buttons,
   .header-right .user-profile { display: none !important; }
-
   .header-right .nav-toggle { display: inline-flex !important; }
 }
 
-/* ===== Small phones ===== */
+/* ===== Mobile (<= 648px): theme xuống dòng riêng; theme không nền; chord/lang có nền nhẹ; bỏ group background ===== */
 @include down($bp-mobile) {
   .main-header { padding-inline: 12px; padding-block: 16px; }
+
+  .mobile-controls{
+    flex-wrap: wrap; row-gap: 8px;
+    border: 0; padding: 0; background: transparent; box-shadow: none; /* bỏ nền chung */
+  }
+
+  /* hàng 1: chord + lang; hàng 2: theme full width */
+  .mobile-controls .chip-chord{ order: 1; }
+  .mobile-controls .chip-lang { order: 1; }
+  .mobile-controls .chip-theme{
+    order: 2; flex: 1 0 100%; justify-content: center;
+  }
+
+  /* per-chip background */
+  .mobile-controls .chip-chord,
+  .mobile-controls .chip-lang{
+    background: color-mix(in srgb, var(--text-color) 8%, transparent);
+    border: 1px solid color-mix(in srgb, var(--text-color) 12%, transparent);
+  }
+  .mobile-controls .chip-chord.is-on{
+    background: color-mix(in srgb, var(--accent-color) 16%, transparent);
+    border-color: color-mix(in srgb, var(--accent-color) 36%, transparent);
+    color: var(--accent-color);
+    box-shadow: none;
+  }
+
+  /* theme trong suốt hoàn toàn */
+  .mobile-controls .chip-theme{
+    background: transparent !important; border: 0 !important; box-shadow: none !important;
+  }
+
+  /* bỏ separator khi wrap */
+  .mobile-controls .chip::after{ display: none; }
+}
+
+/* Reduce motion */
+@media (prefers-reduced-motion: reduce){
+  .mobile-nav__inner{ transition: none; }
+  .mobile-nav.open .mobile-links a{ animation: none; }
 }

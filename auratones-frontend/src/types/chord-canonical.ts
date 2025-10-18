@@ -23,3 +23,11 @@ export type CanonicalChord = {
   pc: PitchClass;
   recipeId: RecipeId;
 };
+
+export type CanonicalDoc = {
+  id: string;
+  pc: number;
+  recipeId: string;
+  bassPc?: number;    // chỉ có nếu là slash chord
+  hasSlash?: boolean; // flag dùng để lọc slash canonical
+};
