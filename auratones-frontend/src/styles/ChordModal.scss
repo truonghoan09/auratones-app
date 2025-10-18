@@ -340,3 +340,21 @@
   .controls-inline { display: none; }
   .controls-menu { display: block; }
 }
+
+/* ========== Fix stacking context để auth-modal luôn nổi trên ========== */
+/* loại bỏ mọi thuộc tính gây stacking context của chord-modal */
+.chord-modal {
+  transform: none !important;
+  filter: none !important;
+  perspective: none !important;
+  isolation: auto !important;
+  will-change: auto !important;
+  z-index: 1000 !important; /* giữ đúng tầng riêng của modal gốc */
+}
+
+/* ép auth-modal ở tầng cao nhất */
+.auth-modal-overlay,
+.user-setup-modal {
+  z-index: 9999 !important; /* cao hơn mọi modal khác */
+  position: fixed !important; /* tách khỏi context của chord-modal */
+}
