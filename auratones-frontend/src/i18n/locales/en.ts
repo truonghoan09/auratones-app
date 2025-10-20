@@ -1,3 +1,4 @@
+// en.ts — giữ nguyên nội dung, bổ sung/đảm bảo key đường dẫn đồng nhất "header.auth.register.to_login"
 const en = {
   header: {
     nav: {
@@ -22,12 +23,9 @@ const en = {
       text: 'Text (maj/m/dim/aug)',
       title_on: 'Display: Symbol (Δ/–/ø/°)',
       title_off: 'Display: Text (maj/m/dim/aug)',
-      // ▼ NEW: compact labels for the header chip
       symbol_short: 'Δ / ø',
       text_short: 'maj / m',
     },
-
-    // Theme switcher labels
     theme: {
       aria: 'Choose theme',
       options: {
@@ -46,9 +44,7 @@ const en = {
       password_placeholder: "Password",
       or: "or",
       google_aria: "Continue with Google",
-
       forgot: "Forgot password?",
-
       login: {
         title: "Log in",
         submit: "Log in",
@@ -57,7 +53,7 @@ const en = {
       register: {
         title: "Sign up",
         submit: "Sign up",
-        to_login: "Switch to log in",
+        to_login: "Switch to log in", // <- dùng đúng path header.auth.register.to_login
       },
       toast: {
         missing_both: "Please enter both username and password.",
@@ -74,7 +70,6 @@ const en = {
       },
     }
   },
-
   home: {
     hero: {
       eyebrow: 'AURATONES • MUSIC LEARNING',
@@ -136,25 +131,15 @@ const en = {
       filter: "Chord filter",
       search: "Search chords",
     },
-    labels: {
-      roots: "Roots",
-    },
-    instruments: {
-      guitar: "Guitar",
-      ukulele: "Ukulele",
-      piano: "Piano",
-    },
+    labels: { roots: "Roots" },
+    instruments: { guitar: "Guitar", ukulele: "Ukulele", piano: "Piano" },
     filters: {
       none: "No filter",
       chordOfCMajor: "CMajor (C Dm Em F G Am)",
       chordOfCMajorPlus: "CMajor+ (with 7th, dim)",
     },
-    placeholders: {
-      search: "Search… (e.g., C, Am, Cmaj7)",
-    },
-    actions: {
-      addChord: "Add chord",
-    },
+    placeholders: { search: "Search… (e.g., C, Am, Cmaj7)" },
+    actions: { addChord: "Add chord" },
     state: {
       loading: "Loading chords from server…",
       load_error_prefix: "Failed to load",

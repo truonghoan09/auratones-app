@@ -1,3 +1,4 @@
+// vi.ts — giữ nguyên nội dung, đảm bảo key dùng path "header.auth.register.to_login"
 const vi = {
   header: {
     nav: {
@@ -22,12 +23,9 @@ const vi = {
       text: 'Chữ (maj/m/dim/aug)',
       title_on: 'Hiển thị: Ký tự (Δ/–/ø/°)',
       title_off: 'Hiển thị: Chữ (maj/m/dim/aug)',
-      // ▼ NEW: nhãn gọn cho nút chip
       symbol_short: 'Δ / ø',
       text_short: 'maj / m',
     },
-
-    // Theme switcher labels
     theme: {
       aria: 'Chọn chủ đề',
       options: {
@@ -46,9 +44,7 @@ const vi = {
       password_placeholder: "Mật khẩu",
       or: "hoặc",
       google_aria: "Tiếp tục với Google",
-
       forgot: "Quên mật khẩu?",
-
       login: {
         title: "Đăng nhập",
         submit: "Đăng nhập",
@@ -57,7 +53,7 @@ const vi = {
       register: {
         title: "Đăng ký",
         submit: "Đăng ký",
-        to_login: "Chuyển sang đăng nhập",
+        to_login: "Chuyển sang đăng nhập", // <- dùng đúng path header.auth.register.to_login
       },
       toast: {
         missing_both: "Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu.",
@@ -74,7 +70,6 @@ const vi = {
       },
     }
   },
-
   home: {
     hero: {
       eyebrow: 'AURATONES • HỌC NHẠC',
@@ -137,25 +132,15 @@ const vi = {
       filter: "Bộ lọc hợp âm",
       search: "Tìm hợp âm",
     },
-    labels: {
-      roots: "Nốt gốc",
-    },
-    instruments: {
-      guitar: "Guitar",
-      ukulele: "Ukulele",
-      piano: "Piano",
-    },
+    labels: { roots: "Nốt gốc" },
+    instruments: { guitar: "Guitar", ukulele: "Ukulele", piano: "Piano" },
     filters: {
       none: "Không lọc",
       chordOfCMajor: "CMajor (C Dm Em F G Am)",
       chordOfCMajorPlus: "CMajor+ (thêm 7th, dim)",
     },
-    placeholders: {
-      search: "Tìm… (vd: C, Am, Cmaj7)",
-    },
-    actions: {
-      addChord: "Thêm hợp âm",
-    },
+    placeholders: { search: "Tìm… (vd: C, Am, Cmaj7)" },
+    actions: { addChord: "Thêm hợp âm" },
     state: {
       loading: "Đang tải hợp âm từ máy chủ…",
       load_error_prefix: "Không tải được dữ liệu",
