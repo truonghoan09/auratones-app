@@ -1,8 +1,11 @@
 // src/components/tools/Metronome.tsx
 import React, { useState, useRef, useEffect } from "react";
 import "../../styles/Metronome.scss";
+import TempoModal from "./modals/TempoModal";
+import TimeSigModal from "./modals/TimeSigModal";
 
-type NoteUnit =
+/* Type nội bộ cho đơn vị nốt */
+export type NoteUnit =
   | "1"   // whole
   | "2"   // half
   | "4"   // quarter
@@ -13,7 +16,7 @@ type NoteUnit =
   | "8."; // dotted eighth
 
 const Metronome: React.FC = () => {
-  /* Canonical tempo lưu theo BPM của nốt đen (quarter). UI sẽ map qua đơn vị hiển thị/click. */
+  /* Tempo canonical: lưu theo BPM của nốt đen (quarter) */
   const [tempoQ, setTempoQ] = useState<number>(120);
 
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
@@ -21,16 +24,16 @@ const Metronome: React.FC = () => {
   const [timeSig, setTimeSig] = useState<string>("4/4");
   const [accent, setAccent] = useState<number[]>([3, 1, 2, 1]);
 
-  /* Note units */
-  const [displayUnit, setDisplayUnit] = useState<NoteUnit>("4"); // đơn vị hiển thị/nhập (ví dụ ♩=120)
-  const [clickUnit, setClickUnit] = useState<NoteUnit>("4");     // đơn vị gõ thực tế (subdivision)
+  /* Đơn vị hiển thị & click */
+  const [displayUnit, setDisplayUnit] = useState<NoteUnit>("4");
+  const [clickUnit, setClickUnit] = useState<NoteUnit>("4");
   const [rotation, setRotation] = useState<number>(0);
 
   /* UI & input state */
   const [isSigModalOpen, setIsSigModalOpen] = useState<boolean>(false);
-  const [tempoInputStr, setTempoInputStr] = useState<string>("120");   // chuỗi nhập modal tempo (theo displayUnit)
-  const [tempoInputFresh, setTempoInputFresh] = useState<boolean>(true); // nhập số đầu sẽ reset
-  const [soundType, setSoundType] = useState<"beep" | "square" | "triangle">("beep"); // placeholder switch sound
+  const [tempoInputStr, setTempoInputStr] = useState<string>("120");
+  const [tempoInputFresh, setTempoInputFresh] = useState<boolean>(true);
+  const [soundType, setSoundType] = useState<"beep" | "square" | "triangle">("beep");
 
   /* Knob/draggable */
   const knobRef = useRef<HTMLDivElement>(null);
@@ -40,8 +43,8 @@ const Metronome: React.FC = () => {
 
   /* WebAudio timing */
   const audioCtxRef = useRef<AudioContext | null>(null);
-  const nextNoteTimeRef = useRef<number>(0);
-  const nextBeatIndexRef = useRef<number>(0);
+  const nextNoteTimeRef = useRef<number>(0);     // dùng làm "next tick time"
+  const nextBeatIndexRef = useRef<number>(0);    // dùng như "tick index trong ô nhịp"
   const schedulerIdRef = useRef<number | null>(null);
   const [currentBeat, setCurrentBeat] = useState<number>(-1);
 
@@ -49,19 +52,20 @@ const Metronome: React.FC = () => {
   const tempoQRef = useRef<number>(tempoQ);
   const accentRef = useRef<number[]>(accent);
   const clickUnitRef = useRef<NoteUnit>(clickUnit);
+  const timeSigRef = useRef<string>(timeSig);
 
   /* Tap tempo */
   const tapTimesRef = useRef<number[]>([]);
 
   /* Pendulum */
-  const [pendulumSide, setPendulumSide] = useState<-1 | 1>(1); // -1 trái, 1 phải
+  const [pendulumSide, setPendulumSide] = useState<-1 | 1>(1);
   const pendulumSideRef = useRef<-1 | 1>(1);
 
   /* Hằng số timing */
   const scheduleAheadTime = 0.05; // s
   const lookaheadMs = 20;         // ms
   const noteLength = 0.03;        // s
-  const latencyFudgeMs = 2;       // ms (bù sớm)
+  const latencyFudgeMs = 2;       // ms
 
   const [presets] = useState<any[]>([
     {
@@ -76,53 +80,94 @@ const Metronome: React.FC = () => {
 
   /* ======= Helpers: note & tempo mapping ======= */
 
-  /* Tỉ lệ độ dài so với nốt đen (quarter). Ví dụ "8" = 0.5 (nửa nốt đen), "4." = 1.5. */
+  // Độ dài tương đối so với quarter (nốt đen) => số "phần tư" của quarter
   const unitLenVsQuarter = (u: NoteUnit): number => {
     switch (u) {
-      case "1": return 4;     // whole = 4 quarters
-      case "2": return 2;     // half  = 2 quarters
-      case "4": return 1;     // quarter
-      case "8": return 0.5;   // eighth
-      case "16": return 0.25; // sixteenth
-      case "32": return 0.125;// thirty-second
-      case "4.": return 1.5;  // dotted quarter = 3/8 = 1.5 quarters
-      case "8.": return 0.75; // dotted eighth  = 3/16
+      case "1": return 4;
+      case "2": return 2;
+      case "4": return 1;
+      case "8": return 0.5;
+      case "16": return 0.25;
+      case "32": return 0.125;
+      case "4.": return 1.5;
+      case "8.": return 0.75;
       default: return 1;
     }
   };
 
-  /* BPM hiển thị theo displayUnit từ BPM quarter canonical */
-  const displayBpm = (tempoQuarter: number, unit: NoteUnit) =>
-    Math.round(tempoQuarter / unitLenVsQuarter(unit));
-
-  /* Chuyển BPM hiển thị về BPM quarter canonical */
-  const toQuarterBpm = (bpmShown: number, unit: NoteUnit) =>
-    bpmShown * unitLenVsQuarter(unit);
-
-  /* Icon đơn vị nốt cho UI */
+  // Icon đơn vị
   const unitIcon = (u: NoteUnit) => {
     switch (u) {
-      case "1": return "𝅝";   // whole (symbol approximation)
-      case "2": return "𝅗𝅥";   // half
-      case "4": return "♩";   // quarter
-      case "8": return "♪";   // eighth
-      case "16": return "♬";  // sixteenth (approx)
-      case "32": return "♬♬"; // thirty-second (approx)
-      case "4.": return "♩."; // dotted quarter
-      case "8.": return "♪."; // dotted eighth
+      case "1": return "𝅝";
+      case "2": return "𝅗𝅥";
+      case "4": return "♩";
+      case "8": return "♪";
+      case "16": return "♬";
+      case "32": return "♬♬";
+      case "4.": return "♩.";
+      case "8.": return "♪.";
       default: return "♩";
     }
   };
 
-  const clampTempoQ = (t: number) => Math.max(20, Math.min(300, t)); // clamp theo quarter BPM
+  // Chuyển đổi hiển thị tempo với đơn vị hiển thị
+  const displayBpm = (tempoQuarter: number, unit: NoteUnit) =>
+    Math.round(tempoQuarter / unitLenVsQuarter(unit));
+  const toQuarterBpm = (bpmShown: number, unit: NoteUnit) =>
+    bpmShown * unitLenVsQuarter(unit);
+
+  const clampTempoQ = (t: number) => Math.max(20, Math.min(300, t));
+
+  // Mẫu số nhịp -> NoteUnit "đơn" (không chấm). Phách = mẫu số.
+  const bottomToUnit = (bottomStr: string): NoteUnit => {
+    if (bottomStr === "1" || bottomStr === "2" || bottomStr === "4" || bottomStr === "8" || bottomStr === "16" || bottomStr === "32") {
+      return bottomStr as NoteUnit;
+    }
+    return "4";
+  };
+
+  // Tick base = 1/32 của quarter để luôn chia được mọi đơn vị (kể cả dotted).
+  const BASE_TICK_LEN_Q = 0.125; // = 1/8 quarter = chiều dài của 1 nốt 1/32
+
+  // Tính thông số tick dựa trên timeSig + clickUnit hiện tại.
+  const computeGrid = () => {
+    const [tsTopStr, tsBottomStr] = (timeSigRef.current || "4/4").split("/");
+    const beatsPerBar = Math.max(1, parseInt(tsTopStr || "4", 10));
+    const beatUnit: NoteUnit = bottomToUnit(tsBottomStr || "4"); // phách = mẫu số
+    const lenBeatQ = unitLenVsQuarter(beatUnit);                 // độ dài 1 phách theo quarter
+    const lenClickQ = unitLenVsQuarter(clickUnitRef.current);    // độ dài 1 click theo quarter
+
+    // ticks/beat và ticks/click tính trên lưới 1/32
+    const ticksPerBeat = Math.round(lenBeatQ / BASE_TICK_LEN_Q);
+    const ticksPerClick = Math.round(lenClickQ / BASE_TICK_LEN_Q);
+    const barTicks = beatsPerBar * ticksPerBeat;
+
+    // Thời lượng 1 tick (s) = (60/tempoQ) * BASE_TICK_LEN_Q
+    const tickSec = (60.0 / (tempoQRef.current || 60)) * BASE_TICK_LEN_Q;
+    // Thời lượng 1 phách (để pendulum mượt)
+    const beatSec = tickSec * ticksPerBeat;
+
+    return {
+      beatsPerBar,
+      beatUnit,
+      lenBeatQ,
+      lenClickQ,
+      ticksPerBeat,
+      ticksPerClick,
+      barTicks,
+      tickSec,
+      beatSec,
+    };
+  };
 
   /* ======= Effect: sync refs ======= */
   useEffect(() => { tempoQRef.current = tempoQ; }, [tempoQ]);
   useEffect(() => { accentRef.current = accent; }, [accent]);
   useEffect(() => { clickUnitRef.current = clickUnit; }, [clickUnit]);
   useEffect(() => { pendulumSideRef.current = pendulumSide; }, [pendulumSide]);
+  useEffect(() => { timeSigRef.current = timeSig; }, [timeSig]);
 
-  /* ======= Time Signature -> accent ======= */
+  /* ======= Time Signature -> accent (theo số phách = tử số) ======= */
   useEffect(() => {
     const beats = parseInt(timeSig.split("/")[0]) || 4;
     let newAccent: number[] = [];
@@ -130,7 +175,7 @@ const Metronome: React.FC = () => {
     else if (beats === 4) newAccent = [3, 1, 2, 1];
     else newAccent = Array(beats).fill(1);
     setAccent(newAccent);
-    nextBeatIndexRef.current = 0;
+    nextBeatIndexRef.current = 0; // reset tick index trong ô nhịp
   }, [timeSig]);
 
   /* ======= Knob ======= */
@@ -190,7 +235,6 @@ const Metronome: React.FC = () => {
     const ctx = audioCtxRef.current;
     if (!ctx || level === 0) return;
 
-    /* Switch sound placeholder: khác waveform/biên độ theo soundType */
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
 
@@ -203,7 +247,7 @@ const Metronome: React.FC = () => {
     } else if (soundType === "triangle") {
       osc.type = "triangle";
       vol *= 0.9;
-    } // "beep" = default sine
+    }
 
     osc.frequency.value = freq;
     gain.gain.setValueAtTime(vol, time);
@@ -214,35 +258,57 @@ const Metronome: React.FC = () => {
     osc.stop(time + noteLength);
   };
 
-  const queueVisual = (beatIndex: number, atTime: number) => {
+  // Visual/pendulum: chỉ cập nhật ở "phách" (mẫu số) để phù hợp mô tả
+  const queueVisualBeat = (beatIndex: number, atTime: number) => {
     const ctx = audioCtxRef.current;
     if (!ctx) return;
     const delayMs = Math.max(0, (atTime - ctx.currentTime) * 1000);
     window.setTimeout(() => {
       setCurrentBeat(beatIndex);
-      setPendulumSide((s) => (s === 1 ? -1 : 1)); // đổi hướng mỗi click
+      setPendulumSide((s) => (s === 1 ? -1 : 1));
     }, delayMs);
   };
 
-  /* Khoảng giữa các click theo clickUnit (subdivision) từ BPM quarter */
+  // seconds cho 1 TICK (tick base = 1/32 của quarter)
+  const tickSeconds = () => computeGrid().tickSec;
+
+  // seconds cho 1 PHÁCH (để UI pendulum)
+  const beatSeconds = () => computeGrid().beatSec;
+
+  // seconds cho 1 CLICK (âm thanh), hữu ích cho Tap-resync
   const clickSeconds = () => {
-    const spbQuarter = 60.0 / (tempoQRef.current || 60);
-    return spbQuarter * unitLenVsQuarter(clickUnitRef.current);
+    const g = computeGrid();
+    return g.tickSec * g.ticksPerClick;
   };
 
+  // Lập lịch theo TICK base (1/32 quarter) để tổng quát hoá mọi case
   const schedule = () => {
     const ctx = audioCtxRef.current;
     if (!ctx) return;
 
-    const spb = clickSeconds();
-    const pattern = accentRef.current;
+    const g = computeGrid();
     while (nextNoteTimeRef.current < ctx.currentTime + scheduleAheadTime) {
-      const bi = nextBeatIndexRef.current % Math.max(1, pattern.length);
-      const level = pattern[bi] ?? 1;
-      playClick(nextNoteTimeRef.current, level);
-      queueVisual(bi, nextNoteTimeRef.current);
-      nextNoteTimeRef.current += spb;
-      nextBeatIndexRef.current = (bi + 1) % Math.max(1, pattern.length);
+      const tickInBar = nextBeatIndexRef.current % Math.max(1, g.barTicks);
+
+      const isVisualBeat = (tickInBar % g.ticksPerBeat) === 0;
+      const isClickTime  = (tickInBar % g.ticksPerClick) === 0;
+
+      // Beat index để lấy accent (tăng ở phách, không theo click)
+      const beatIndex = Math.floor(tickInBar / g.ticksPerBeat) % Math.max(1, g.beatsPerBar);
+      const levelAtBeat = accentRef.current[beatIndex] ?? 1;
+
+      // Click: nếu trúng thời điểm click thì phát audio. Nếu trúng đúng phách -> dùng accent level, ngược lại -> level thường.
+      if (isClickTime) {
+        const levelForClick = isVisualBeat ? levelAtBeat : 1;
+        playClick(nextNoteTimeRef.current, levelForClick);
+      }
+      // Visual: chỉ nháy ở phách (mẫu số). Đảm bảo pendulum/ô-phách đúng mô tả.
+      if (isVisualBeat) {
+        queueVisualBeat(beatIndex, nextNoteTimeRef.current);
+      }
+
+      nextNoteTimeRef.current += g.tickSec;
+      nextBeatIndexRef.current = (tickInBar + 1) % Math.max(1, g.barTicks);
     }
   };
 
@@ -258,32 +324,32 @@ const Metronome: React.FC = () => {
 
   const handlePlayToggle = async () => {
     if (!isPlaying) {
+      // @ts-expect-error webkit
+      const Ctx = window.AudioContext || (window as any).webkitAudioContext;
       if (!audioCtxRef.current) {
-        // @ts-expect-error webkit
-        const Ctx = window.AudioContext || (window as any).webkitAudioContext;
         audioCtxRef.current = new Ctx({ latencyHint: "interactive" });
       }
       const ctx = audioCtxRef.current!;
       if (ctx.state === "suspended") await ctx.resume();
 
-      const spb = clickSeconds();
+      const g = computeGrid();
       const gesturePerf = performance.now();
       const startAt = ctx.currentTime + 0.0001;
 
-      /* Click #1 mute (visual-only) */
-      playClick(startAt, 0);
-      queueVisual(0, startAt);
-      nextBeatIndexRef.current = 1 % Math.max(1, accentRef.current.length);
+      // Tick 0: Visual-only ở phách đầu tiên (mute click)
+      // -> phù hợp UX đếm vào
+      queueVisualBeat(0, startAt);
+      nextBeatIndexRef.current = 1 % Math.max(1, g.barTicks); // sang tick #1
 
-      /* Bù latency + fudge cho beat #2 */
       const outLatency = (ctx as any).outputLatency ?? 0;
       const baseLat = ctx.baseLatency ?? 0;
       const totalLatency = (outLatency || 0) + (baseLat || 0);
       const fudgeSec = latencyFudgeMs / 1000;
 
-      const secondBeatCtx =
-        perfToCtxTime(ctx, gesturePerf + spb * 1000) - (totalLatency + fudgeSec);
-      nextNoteTimeRef.current = Math.max(secondBeatCtx, ctx.currentTime + 0.001);
+      // căn chỉnh tick thứ 1 theo thời gian thực
+      const secondTickCtx =
+        perfToCtxTime(ctx, gesturePerf + g.tickSec * 1000) - (totalLatency + fudgeSec);
+      nextNoteTimeRef.current = Math.max(secondTickCtx, ctx.currentTime + 0.001);
 
       setIsPlaying(true);
 
@@ -300,7 +366,7 @@ const Metronome: React.FC = () => {
     }
   };
 
-  /* Tap tempo (theo displayUnit): cập nhật tempoQ & retime */
+  /* Tap tempo: tính theo displayUnit, rồi quy về quarter BPM như cũ */
   const handleTap = () => {
     const now = performance.now();
     const arr = tapTimesRef.current;
@@ -317,18 +383,20 @@ const Metronome: React.FC = () => {
     if (!dts.length) return;
 
     const avgMs = dts.reduce((a, b) => a + b, 0) / dts.length;
-    const bpmShown = Math.round(60000 / avgMs); // theo displayUnit
+    const bpmShown = Math.round(60000 / avgMs);
     const nextQ = clampTempoQ(Math.round(toQuarterBpm(bpmShown, displayUnit)));
     setTempoQ(nextQ);
 
+    // Khi đang chạy, dời lịch tick tiếp theo dựa trên clickSeconds() mới
     if (isPlaying && audioCtxRef.current) {
       const ctx = audioCtxRef.current;
       const outLatency = (ctx as any).outputLatency ?? 0;
       const baseLat = ctx.baseLatency ?? 0;
       const totalLatency = (outLatency || 0) + (baseLat || 0);
       const fudgeSec = latencyFudgeMs / 1000;
-      const spbNew = (60.0 / nextQ) * unitLenVsQuarter(clickUnitRef.current);
-      const nextHeardPerf = now + spbNew * 1000;
+
+      const spcNew = clickSeconds(); // seconds per click
+      const nextHeardPerf = now + spcNew * 1000;
       const scheduleAt = perfToCtxTime(ctx, nextHeardPerf) - (totalLatency + fudgeSec);
       nextNoteTimeRef.current = Math.max(scheduleAt, ctx.currentTime + 0.001);
     }
@@ -372,47 +440,14 @@ const Metronome: React.FC = () => {
   /* ======= Tempo Modal (nhập theo displayUnit) ======= */
   const openTempoModal = () => {
     setTempoInputStr(String(displayBpm(tempoQ, displayUnit)));
-    setTempoInputFresh(true); // nhập số đầu sẽ reset
+    setTempoInputFresh(true);
     setIsTempoModalOpen(true);
   };
   const closeTempoModal = () => setIsTempoModalOpen(false);
-  const handleTempoInput = (num: number) => {
-    setTempoInputStr((prev) => {
-      const base = (tempoInputFresh ? "" : prev);
-      const raw = `${base}${num}`.replace(/^0+(?=\d)/, "");
-      setTempoInputFresh(false);
-      return raw.slice(0, 3);
-    });
-  };
-  const handleTempoDelete = () => {
-    setTempoInputStr((s) => (s.length ? s.slice(0, -1) : ""));
-    setTempoInputFresh(false);
-  };
-  const handleTempoClearAll = () => {
-    setTempoInputStr("");
-    setTempoInputFresh(true);
-  };
-  const handleTempoSet = () => {
-    const val = Math.max(1, Math.min(999, Number(tempoInputStr || "0")));
-    const q = clampTempoQ(Math.round(toQuarterBpm(val, displayUnit)));
-    setTempoQ(q);
-    closeTempoModal();
-  };
 
-  /* ======= TimeSig/Unit Modal ======= */
+  /* ======= TimeSig Modal ======= */
   const openSigModal = () => setIsSigModalOpen(true);
   const closeSigModal = () => setIsSigModalOpen(false);
-
-  const tops = Array.from({ length: 16 }, (_, i) => String(i + 1)); // 1..16
-  const bottoms: NoteUnit[] = ["1", "2", "4", "8", "16", "32"];
-
-  /* Apply chọn trong modal TS & Units */
-  const applySigAndUnits = (top: string, bottom: NoteUnit, clickU: NoteUnit, displayU: NoteUnit) => {
-    setTimeSig(`${top}/${bottom}`);
-    setClickUnit(clickU);
-    setDisplayUnit(displayU);
-    /* Không đổi tempoQ (canonical), UI sẽ tự map hiển thị & scheduler click theo clickUnit */
-  };
 
   /* ======= Render ======= */
   const [tsTop, tsBottom] = timeSig.split("/");
@@ -420,10 +455,9 @@ const Metronome: React.FC = () => {
 
   return (
     <div className="metronome">
-      {/* Header: Tempo & Signature + nút mở modal TS/Units */}
+      {/* Header: Tempo & Signature */}
       <div className="metronome__display">
         <div className="metronome__tempo">
-          {/* Hiển thị theo đơn vị đã chọn: ♪ = 120 */}
           <button className="tempo-display" onClick={openTempoModal} title="Set tempo">
             {unitIcon(displayUnit)} = {shownBpm}
           </button>
@@ -464,7 +498,7 @@ const Metronome: React.FC = () => {
           onClick={() => adjustTempo(+1)}
           aria-label="Increase tempo"
           dangerouslySetInnerHTML={{
-            __html: `<svg xmlns='http://www.w3.org/2000/svg' width='18' height='18' fill='currentColor' viewBox='0 0 16 16'><path fill-rule='evenodd' d='M7.776 5.553a.5.5 0 0 1 .448 0l6 3a.5.5 0 1 1-.448.894L8 6.56 2.224 9.447a.5.5 0 1 1-.448-.894z'/></svg>`,
+            __html: `<svg xmlns='http://www.w3.org/2000/svg' width='18' height='18' fill='currentColor' viewBox='0 0 16 16'><path fill-rule='evenodd' d='M7.776 5.553a.5.5 0  1 1-.448.894L8 6.56 2.224 9.447a.5.5 0 1 1-.448-.894z'/></svg>`,
           }}
         />
       </div>
@@ -483,7 +517,6 @@ const Metronome: React.FC = () => {
           />
         </button>
 
-        {/* Sound switch (placeholder cho future update sample) */}
         <select
           className="metronome__sound-select no-select"
           value={soundType}
@@ -496,17 +529,17 @@ const Metronome: React.FC = () => {
         </select>
       </div>
 
-      {/* Pendulum (đồng bộ theo click) */}
+      {/* Pendulum: duration theo PHÁCH (mẫu số) */}
       <div className="metronome__pendulum">
         <div
           className={`pendulum-arm ${pendulumSide === -1 ? "left" : "right"}`}
-          style={{ transitionDuration: `${clickSeconds()}s` }}
+          style={{ transitionDuration: `${beatSeconds()}s` }}
         >
           <div className="pendulum-bob" />
         </div>
       </div>
 
-      {/* Accent Bar */}
+      {/* Accent Bar: số block = tử số; active theo phách */}
       <div className="metronome__accent-bar" aria-live="off">
         {accent.map((level, i) => (
           <div
@@ -521,13 +554,13 @@ const Metronome: React.FC = () => {
         ))}
       </div>
 
-      {/* Thể hiện dạng nốt đang gõ (clickUnit) */}
+      {/* Tags */}
       <div className="metronome__note-tag">
         Click unit: <span className="note-chip">{unitIcon(clickUnit)}</span>
         <span className="sep">•</span> Display: <span className="note-chip">{unitIcon(displayUnit)}</span>
       </div>
 
-      {/* TAP floating (góc dưới phải) */}
+      {/* TAP */}
       <button
         className="metronome__tap-floating no-select"
         onClick={handleTap}
@@ -537,7 +570,7 @@ const Metronome: React.FC = () => {
         TAP
       </button>
 
-      {/* Preset List (nguyên trạng) */}
+      {/* Presets */}
       <div className="metronome__presets">
         <h4>Preset Playlist</h4>
         {presets.map((folder, fi) => (
@@ -560,113 +593,28 @@ const Metronome: React.FC = () => {
         ))}
       </div>
 
-      {/* Tempo Modal (nhập theo displayUnit) */}
-      {isTempoModalOpen && (
-        <div className="metronome__modal">
-          <div className="modal-backdrop" onClick={closeTempoModal}></div>
-          <div className="modal-content">
-            <div className="modal-title">Set Tempo</div>
-            <div className="modal-subtitle">{unitIcon(displayUnit)} = BPM</div>
-            <div className="modal-display">{tempoInputStr || "—"}</div>
-            <div className="modal-grid">
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((n) => (
-                <button key={n} onClick={() => handleTempoInput(n)}>{n}</button>
-              ))}
-              <button onClick={handleTempoDelete}>⌫</button>
-              <button onClick={handleTempoClearAll}>AC</button>
-              <button className="set-btn" onClick={handleTempoSet}>SET</button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* ==== Modals ==== */}
+      <TempoModal
+        isOpen={isTempoModalOpen}
+        onClose={closeTempoModal}
+        displayUnit={displayUnit}
+        setDisplayUnit={setDisplayUnit}
+        tempoInputStr={tempoInputStr}
+        setTempoInputStr={setTempoInputStr}
+        tempoInputFresh={tempoInputFresh}
+        setTempoInputFresh={setTempoInputFresh}
+        clampQuarter={clampTempoQ}
+        onApplyQuarterBPM={(q) => setTempoQ(q)}
+      />
 
-      {/* Time Signature & Units Modal */}
-      {isSigModalOpen && (
-        <div className="metronome__modal">
-          <div className="modal-backdrop" onClick={closeSigModal}></div>
-          <div className="modal-content sig">
-            <div className="modal-title">Time Signature & Units</div>
-
-            <div className="sig-row">
-              <div className="sig-col">
-                <div className="label">Upper (beats per bar)</div>
-                <div className="grid grid-top">
-                  {tops.map((t) => (
-                    <button
-                      key={t}
-                      className={t === tsTop ? "is-selected" : ""}
-                      onClick={() => setTimeSig(`${t}/${tsBottom}`)}
-                    >
-                      {t}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="sig-col">
-                <div className="label">Lower (note value)</div>
-                <div className="grid grid-bottom">
-                  {bottoms.map((b) => (
-                    <button
-                      key={b}
-                      className={b === tsBottom ? "is-selected" : ""}
-                      onClick={() => setTimeSig(`${tsTop}/${b}`)}
-                    >
-                      {b}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div className="sig-row">
-              <div className="sig-col">
-                <div className="label">Click unit</div>
-                <div className="grid grid-unit">
-                  {(["1","2","4","8","16","32","4.","8."] as NoteUnit[]).map((u) => (
-                    <button
-                      key={u}
-                      className={u === clickUnit ? "is-selected" : ""}
-                      onClick={() => setClickUnit(u)}
-                      title={`Click: ${unitIcon(u)}`}
-                    >
-                      {unitIcon(u)}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="sig-col">
-                <div className="label">Display unit</div>
-                <div className="grid grid-unit">
-                  {(["1","2","4","8","16","32","4.","8."] as NoteUnit[]).map((u) => (
-                    <button
-                      key={u}
-                      className={u === displayUnit ? "is-selected" : ""}
-                      onClick={() => setDisplayUnit(u)}
-                      title={`Display: ${unitIcon(u)}`}
-                    >
-                      {unitIcon(u)}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div className="sig-actions">
-              <button
-                className="set-btn"
-                onClick={() => {
-                  applySigAndUnits(tsTop!, tsBottom as NoteUnit, clickUnit, displayUnit);
-                  closeSigModal();
-                }}
-              >
-                APPLY
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <TimeSigModal
+        isOpen={isSigModalOpen}
+        onClose={closeSigModal}
+        timeSig={timeSig}
+        setTimeSig={setTimeSig}
+        clickUnit={clickUnit}
+        setClickUnit={setClickUnit}
+      />
     </div>
   );
 };
