@@ -1,11 +1,19 @@
+// Metronome.tsx
+// Update: thêm Ruler song song Pendulum, cho phép chọn chia phách (x2, x3, x4) theo đơn vị phách (dưới của chỉ nhịp).
+// - Không đổi logic âm thanh; chỉ bổ sung hiển thị + flash tick con theo lịch beat.
+// - Giữ cấu trúc hiện tại, thêm state/JSX/SCSS cần thiết tối thiểu.
+
 import React, { useEffect, useRef, useState } from "react";
 import "../../styles/Metronome.scss";
 import TempoModal from "./modals/TempoModal";
 import TimeSigModal from "./modals/TimeSigModal";
 
-/* Khôi phục nút TAP; giữ nguyên cấu trúc/logic, chỉ bổ sung tối thiểu để đảm bảo hiển thị TAP */
+/* Pendulum: giữ nguyên cấu trúc/logic; flash slider/pendulum luôn dùng màu mạnh nhất */
 
 export type NoteUnit = "1" | "2" | "4" | "8" | "16" | "32" | "4." | "8.";
+
+// Ruler modes: tắt / chia đôi / liên ba / chia tư (tương ứng 1/2, 1/3, 1/4 độ dài của 1 phách)
+type RulerMode = "off" | "x2" | "x3" | "x4";
 
 const Metronome: React.FC = () => {
   const [tempoQ, setTempoQ] = useState<number>(120);
@@ -41,11 +49,25 @@ const Metronome: React.FC = () => {
   const tapTimesRef = useRef<number[]>([]);
   const [pendulumSide, setPendulumSide] = useState<-1 | 1>(1);
 
+  /* Pendulum flash */
+  const [pendulumDurSec, setPendulumDurSec] = useState<number>(0.5);
+  const lastFlipAtRef = useRef<number>(0);
+  const lastBeatLenRef = useRef<number>(0.5);
+  const pendulumSideRef = useRef<-1 | 1>(1);
+  const [isFlash, setIsFlash] = useState<boolean>(false);
+  const [flashLevel, setFlashLevel] = useState<0 | 1 | 2 | 3>(0);
+  const flashTimerRef = useRef<number | null>(null);
+
+  /* Ruler state */
+  const [rulerMode, setRulerMode] = useState<RulerMode>("off");
+  const [rulerActiveIdx, setRulerActiveIdx] = useState<number | null>(null);
+  const rulerTimersRef = useRef<number[]>([]);
+
   const scheduleAheadTime = 0.05;
   const lookaheadMs = 20;
   const noteLength = 0.03;
 
-  /* Presets nguyên trạng */
+  /* Presets giữ nguyên */
   const [presets] = useState<any[]>([
     {
       folder: "Show 12/5",
@@ -62,6 +84,7 @@ const Metronome: React.FC = () => {
   useEffect(() => { timeSigRef.current = timeSig; }, [timeSig]);
   useEffect(() => { accentRef.current = accent; }, [accent]);
   useEffect(() => { clickUnitRef.current = clickUnit; }, [clickUnit]);
+  useEffect(() => { pendulumSideRef.current = pendulumSide; }, [pendulumSide]);
 
   /* TimeSig -> accent mặc định */
   useEffect(() => {
@@ -99,7 +122,7 @@ const Metronome: React.FC = () => {
     const barTicks = beatsPerBar * ticksPerBeat;
     const tickSec = (60.0 / (tempoQRef.current || 60)) * BASE_TICK_LEN_Q;
     const beatSec = tickSec * ticksPerBeat;
-    return { beatsPerBar, ticksPerBeat, ticksPerClick, barTicks, tickSec, beatSec };
+    return { beatsPerBar, ticksPerBeat, ticksPerClick, barTicks, tickSec, beatSec, beatUnit };
   };
   const beatSeconds = () => computeGrid().beatSec;
 
@@ -168,14 +191,57 @@ const Metronome: React.FC = () => {
     osc.stop(time + noteLength);
   };
 
-  /* Visual beat + pendulum */
+  /* Flash helper: slider/pendulum luôn flash mạnh nhất */
+  const startFlash = (_levelIgnored: number, beatLen: number) => {
+    setFlashLevel(3);
+    const dur = Math.max(0.06, Math.min(0.18, beatLen * 0.22));
+    setIsFlash(true);
+    if (flashTimerRef.current != null) window.clearTimeout(flashTimerRef.current);
+    flashTimerRef.current = window.setTimeout(() => setIsFlash(false), Math.round(dur * 1000));
+  };
+
+  /* Ruler helpers */
+  const rulerFactor = (mode: RulerMode) => (mode === "x2" ? 2 : mode === "x3" ? 3 : mode === "x4" ? 4 : 0);
+  const clearRulerTimers = () => {
+    rulerTimersRef.current.forEach((id) => window.clearTimeout(id));
+    rulerTimersRef.current = [];
+  };
+  const scheduleRulerFlashes = (atTime: number, beatLen: number) => {
+    clearRulerTimers();
+    const ctx = audioCtxRef.current;
+    if (!ctx) return;
+    const n = rulerFactor(rulerMode);
+    if (n <= 0) return;
+    for (let k = 0; k <= n; k++) {
+      const t = atTime + (beatLen * k) / n;
+      const delayMs = Math.max(0, (t - ctx.currentTime) * 1000);
+      const id = window.setTimeout(() => {
+        setRulerActiveIdx(k);
+        window.setTimeout(() => setRulerActiveIdx(null), 80); // flash ngắn
+      }, delayMs);
+      rulerTimersRef.current.push(id);
+    }
+  };
+
+  /* Visual beat + pendulum + ruler tick schedule */
   const queueVisualBeat = (beatIndex: number, atTime: number) => {
     const ctx = audioCtxRef.current;
     if (!ctx) return;
     const delayMs = Math.max(0, (atTime - ctx.currentTime) * 1000);
+    const beatLen = beatSeconds();
+    const level = (accentRef.current[beatIndex] ?? 1) as 0 | 1 | 2 | 3;
     window.setTimeout(() => {
       setCurrentBeat(beatIndex);
-      setPendulumSide((s) => (s === 1 ? -1 : 1));
+      setPendulumDurSec(beatLen);
+      setPendulumSide((s) => {
+        const next = s === 1 ? -1 : 1;
+        pendulumSideRef.current = next;
+        lastFlipAtRef.current = atTime;
+        lastBeatLenRef.current = beatLen;
+        return next;
+      });
+      startFlash(level, beatLen);
+      scheduleRulerFlashes(atTime, beatLen); // tick con theo chế độ chia
     }, delayMs);
   };
 
@@ -205,7 +271,7 @@ const Metronome: React.FC = () => {
     }
   };
 
-  /* Play/Pause (fix đứng phách 1) */
+  /* Play/Pause + snap */
   const handlePlayToggle = async () => {
     if (!isPlaying) {
       // @ts-expect-error webkit
@@ -218,12 +284,28 @@ const Metronome: React.FC = () => {
       muteFirstClickRef.current = true;
       nextBeatIndexRef.current = 0;
       nextNoteTimeRef.current = startAt;
-      queueVisualBeat(0, startAt);
+
+      setPendulumDurSec(beatSeconds());
 
       setIsPlaying(true);
       if (schedulerIdRef.current == null) schedulerIdRef.current = window.setInterval(schedule, lookaheadMs);
       schedule();
     } else {
+      const ctx = audioCtxRef.current;
+      if (ctx) {
+        const elapsed = Math.max(0, ctx.currentTime - lastFlipAtRef.current);
+        const beatLen = lastBeatLenRef.current || beatSeconds();
+        const prog = beatLen > 0 ? Math.min(1, elapsed / beatLen) : 0;
+        const target = pendulumSideRef.current;
+        const prev = (target === 1 ? -1 : 1) as -1 | 1;
+        const snapTo = prog < 0.5 ? prev : target;
+        const remain = Math.max(0, Math.min(prog, 1 - prog)) * beatLen;
+        setPendulumDurSec(remain || 0.12);
+        setPendulumSide(snapTo);
+      }
+      clearRulerTimers();
+      setRulerActiveIdx(null);
+
       setIsPlaying(false);
       if (schedulerIdRef.current != null) {
         window.clearInterval(schedulerIdRef.current);
@@ -232,7 +314,7 @@ const Metronome: React.FC = () => {
     }
   };
 
-  /* TAP tempo – KHÔI PHỤC NÚT & HÀNH VI */
+  /* TAP tempo */
   const handleTap = () => {
     const now = performance.now();
     const arr = tapTimesRef.current;
@@ -254,7 +336,7 @@ const Metronome: React.FC = () => {
     setTempoQ(nextQ);
   };
 
-  /* Hotkeys (Space: play/pause, T: tap) */
+  /* Hotkeys */
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const tag = (e.target as HTMLElement)?.tagName?.toLowerCase();
@@ -285,6 +367,20 @@ const Metronome: React.FC = () => {
 
   const [tsTop, tsBottom] = timeSig.split("/");
   const shownBpm = displayBpm(tempoQ, displayUnit);
+
+  // Ruler render helpers
+  const { beatUnit } = computeGrid();
+  const factor = rulerFactor(rulerMode);
+  const noteLabelFor = (beat: NoteUnit, f: number) => {
+    // Mapping đơn giản để đọc nhanh: quarter-> eighth/semi, eighth-> 16/32, half-> quarter, v.v...
+    const base = unitLenVsQuarter(beat); // độ dài theo quarter
+    const subLenQ = base / (f || 1);
+    if (Math.abs(subLenQ - 1) < 1e-6) return "♩";
+    if (Math.abs(subLenQ - 0.5) < 1e-6) return "♪";
+    if (Math.abs(subLenQ - 0.25) < 1e-6) return "semi";
+    if (f === 3) return "♪"; // dùng ký hiệu và hiển thị số 3 nhỏ kèm
+    return "♪";
+  };
 
   return (
     <div className="metronome">
@@ -324,12 +420,62 @@ const Metronome: React.FC = () => {
         </button>
       </div>
 
-      {/* Pendulum piston (rail + slider) */}
-      <div className="metronome__pendulum">
-        <div className="pendulum-rail">
-          <div className={`pendulum-slider ${pendulumSide === -1 ? "left" : "right"}`} style={{ transitionDuration: `${beatSeconds()}s` }} />
+      {/* Ruler song song với Pendulum */}
+      <div className="metronome__ruler">
+        <div className="ruler-header">
+          <select
+            className="metronome__ruler-select no-select"
+            value={rulerMode}
+            onChange={(e) => setRulerMode(e.target.value as RulerMode)}
+            aria-label="Ruler subdivision"
+          >
+            <option value="off">Ruler: Off</option>
+            <option value="x2">{`Ruler: 1/${beatUnit === "8" ? "16" : beatUnit === "2" ? "4" : beatUnit === "1" ? "2" : "8"} (×2)`}</option>
+            <option value="x3">Ruler: Triplet (×3)</option>
+            <option value="x4">{`Ruler: 1/${beatUnit === "8" ? "32" : beatUnit === "2" ? "8" : beatUnit === "1" ? "4" : "16"} (×4)`}</option>
+          </select>
+          {factor > 0 && (
+            <div className="ruler-legend no-select">
+              <span className="glyph">
+                {noteLabelFor(beatUnit, factor)}
+                {factor === 3 && <sup>3</sup>}
+              </span>
+              <span className="legend-text">sub</span>
+            </div>
+          )}
+        </div>
+        <div className="ruler-rail">
+          {/* Ticks: gồm 0..factor (đầu/cuối phách) */}
+          {Array.from({ length: Math.max(1, factor) + 1 }).map((_, idx) => {
+            const leftPct = (idx / Math.max(1, factor)) * 100;
+            return (
+              <div
+                key={idx}
+                className={`ruler-tick ${idx === 0 || idx === factor ? "edge" : ""} ${rulerActiveIdx === idx && isPlaying ? "is-active" : ""}`}
+                style={{ left: `${leftPct}%` }}
+              >
+                {idx > 0 && idx < factor && (
+                  <div className="ruler-note no-select">
+                    {noteLabelFor(beatUnit, factor)}
+                    {factor === 3 && <sup>3</sup>}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
+      
+      {/* Pendulum piston */}
+      <div className="metronome__pendulum">
+        <div className={`pendulum-rail ${isFlash ? "flash-l3" : ""}`}>
+          <div
+            className={`pendulum-slider ${pendulumSide === -1 ? "left" : "right"} ${isFlash ? "flash-l3" : ""}`}
+            style={{ transitionDuration: `${pendulumDurSec}s` }}
+          />
+        </div>
+      </div>
+
 
       <button className="metronome__tap-floating" onClick={handleTap} aria-label="Tap tempo (phím T)">TAP</button>
       <div className="metronome__accent-bar" aria-live="off">
@@ -400,8 +546,6 @@ const Metronome: React.FC = () => {
         clickUnit={clickUnit}
         setClickUnit={setClickUnit}
       />
-
-      {/* TAP tempo – NÚT KHÔI PHỤC */}
     </div>
   );
 };
