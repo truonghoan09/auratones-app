@@ -1,18 +1,16 @@
 // Metronome.tsx
-// Update: thêm Ruler song song Pendulum, cho phép chọn chia phách (x2, x3, x4) theo đơn vị phách (dưới của chỉ nhịp).
-// - Không đổi logic âm thanh; chỉ bổ sung hiển thị + flash tick con theo lịch beat.
-// - Giữ cấu trúc hiện tại, thêm state/JSX/SCSS cần thiết tối thiểu.
+// Update:
+// - Sửa legend liên 3 đúng theo mapping 1/2/4/8/16/32.
+// - Sửa glyph cho 32→móc 4 (𝅘𝅥𝅱).
+// - Tắt nháy ruler (loại bỏ lịch set active tick).
+// - Giữ layout/logic âm thanh & pendulum.
 
 import React, { useEffect, useRef, useState } from "react";
 import "../../styles/Metronome.scss";
 import TempoModal from "./modals/TempoModal";
 import TimeSigModal from "./modals/TimeSigModal";
 
-/* Pendulum: giữ nguyên cấu trúc/logic; flash slider/pendulum luôn dùng màu mạnh nhất */
-
 export type NoteUnit = "1" | "2" | "4" | "8" | "16" | "32" | "4." | "8.";
-
-// Ruler modes: tắt / chia đôi / liên ba / chia tư (tương ứng 1/2, 1/3, 1/4 độ dài của 1 phách)
 type RulerMode = "off" | "x2" | "x3" | "x4";
 
 const Metronome: React.FC = () => {
@@ -49,7 +47,7 @@ const Metronome: React.FC = () => {
   const tapTimesRef = useRef<number[]>([]);
   const [pendulumSide, setPendulumSide] = useState<-1 | 1>(1);
 
-  /* Pendulum flash */
+  // Pendulum flash
   const [pendulumDurSec, setPendulumDurSec] = useState<number>(0.5);
   const lastFlipAtRef = useRef<number>(0);
   const lastBeatLenRef = useRef<number>(0.5);
@@ -58,16 +56,15 @@ const Metronome: React.FC = () => {
   const [flashLevel, setFlashLevel] = useState<0 | 1 | 2 | 3>(0);
   const flashTimerRef = useRef<number | null>(null);
 
-  /* Ruler state */
+  // Ruler state
   const [rulerMode, setRulerMode] = useState<RulerMode>("off");
-  const [rulerActiveIdx, setRulerActiveIdx] = useState<number | null>(null);
-  const rulerTimersRef = useRef<number[]>([]);
+  const [rulerActiveIdx, setRulerActiveIdx] = useState<number | null>(null); // giữ state nhưng không kích hoạt
 
   const scheduleAheadTime = 0.05;
   const lookaheadMs = 20;
   const noteLength = 0.03;
 
-  /* Presets giữ nguyên */
+  // Presets (giữ nguyên)
   const [presets] = useState<any[]>([
     {
       folder: "Show 12/5",
@@ -79,14 +76,14 @@ const Metronome: React.FC = () => {
     },
   ]);
 
-  /* Refs sync */
+  // Refs sync
   useEffect(() => { tempoQRef.current = tempoQ; }, [tempoQ]);
   useEffect(() => { timeSigRef.current = timeSig; }, [timeSig]);
   useEffect(() => { accentRef.current = accent; }, [accent]);
   useEffect(() => { clickUnitRef.current = clickUnit; }, [clickUnit]);
   useEffect(() => { pendulumSideRef.current = pendulumSide; }, [pendulumSide]);
 
-  /* TimeSig -> accent mặc định */
+  // TimeSig -> accent mặc định
   useEffect(() => {
     const beats = parseInt(timeSig.split("/")[0], 10) || 4;
     const next = beats === 3 ? [3, 1, 1] : beats === 4 ? [3, 1, 2, 1] : Array(beats).fill(1);
@@ -94,11 +91,17 @@ const Metronome: React.FC = () => {
     nextBeatIndexRef.current = 0;
   }, [timeSig]);
 
-  /* Helpers */
+  // Helpers
   const unitLenVsQuarter = (u: NoteUnit): number => {
     switch (u) {
-      case "1": return 4; case "2": return 2; case "4": return 1; case "8": return 0.5;
-      case "16": return 0.25; case "32": return 0.125; case "4.": return 1.5; case "8.": return 0.75;
+      case "1": return 4;
+      case "2": return 2;
+      case "4": return 1;
+      case "8": return 0.5;
+      case "16": return 0.25;
+      case "32": return 0.125;
+      case "4.": return 1.5;
+      case "8.": return 0.75;
       default: return 1;
     }
   };
@@ -108,7 +111,7 @@ const Metronome: React.FC = () => {
     bpmShown * unitLenVsQuarter(unit);
   const clampTempoQ = (t: number) => Math.max(20, Math.min(300, t));
   const bottomToUnit = (b: string): NoteUnit =>
-    (["1","2","4","8","16","32"].includes(b) ? (b as NoteUnit) : "4");
+    (["1", "2", "4", "8", "16", "32"].includes(b) ? (b as NoteUnit) : "4");
 
   const BASE_TICK_LEN_Q = 0.125;
   const computeGrid = () => {
@@ -126,7 +129,7 @@ const Metronome: React.FC = () => {
   };
   const beatSeconds = () => computeGrid().beatSec;
 
-  /* Knob */
+  // Knob
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
     setIsDragging(true);
@@ -173,14 +176,14 @@ const Metronome: React.FC = () => {
     };
   }, [isDragging]);
 
-  /* Audio click */
+  // Audio click
   const playClick = (time: number, level: number) => {
     const ctx = audioCtxRef.current;
     if (!ctx || level === 0) return;
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     let freq = level === 3 ? 1200 : level === 2 ? 900 : 700;
-    let vol  = level === 3 ? 0.6  : level === 2 ? 0.38 : 0.22;
+    let vol = level === 3 ? 0.6 : level === 2 ? 0.38 : 0.22;
     if (soundType === "square") { osc.type = "square"; freq *= 0.9; }
     else if (soundType === "triangle") { osc.type = "triangle"; vol *= 0.9; }
     osc.frequency.value = freq;
@@ -191,7 +194,7 @@ const Metronome: React.FC = () => {
     osc.stop(time + noteLength);
   };
 
-  /* Flash helper: slider/pendulum luôn flash mạnh nhất */
+  // Flash helper (giữ cho pendulum, không tác động ruler)
   const startFlash = (_levelIgnored: number, beatLen: number) => {
     setFlashLevel(3);
     const dur = Math.max(0.06, Math.min(0.18, beatLen * 0.22));
@@ -200,30 +203,82 @@ const Metronome: React.FC = () => {
     flashTimerRef.current = window.setTimeout(() => setIsFlash(false), Math.round(dur * 1000));
   };
 
-  /* Ruler helpers */
+  // Ruler helpers (tắt nháy: không schedule tick-active)
   const rulerFactor = (mode: RulerMode) => (mode === "x2" ? 2 : mode === "x3" ? 3 : mode === "x4" ? 4 : 0);
-  const clearRulerTimers = () => {
-    rulerTimersRef.current.forEach((id) => window.clearTimeout(id));
-    rulerTimersRef.current = [];
-  };
-  const scheduleRulerFlashes = (atTime: number, beatLen: number) => {
-    clearRulerTimers();
-    const ctx = audioCtxRef.current;
-    if (!ctx) return;
-    const n = rulerFactor(rulerMode);
-    if (n <= 0) return;
-    for (let k = 0; k <= n; k++) {
-      const t = atTime + (beatLen * k) / n;
-      const delayMs = Math.max(0, (t - ctx.currentTime) * 1000);
-      const id = window.setTimeout(() => {
-        setRulerActiveIdx(k);
-        window.setTimeout(() => setRulerActiveIdx(null), 80); // flash ngắn
-      }, delayMs);
-      rulerTimersRef.current.push(id);
+
+  // VN names (đơn vị hiển thị)
+  const vnNameForUnit = (u: NoteUnit | "64"): string => {
+    switch (u) {
+      case "1": return "tròn";
+      case "2": return "trắng";
+      case "4": return "đen";
+      case "8": return "đơn";
+      case "16": return "móc đôi";
+      case "32": return "móc ba";
+      default: return "móc 4";
     }
   };
 
-  /* Visual beat + pendulum + ruler tick schedule */
+  // Glyph theo độ dài phần tư (bổ sung 1/64)
+  const glyphForQuarterLen = (lenQ: number): string => {
+    if (Math.abs(lenQ - 4) < 1e-6) return "𝅝";
+    if (Math.abs(lenQ - 2) < 1e-6) return "𝅗𝅥";
+    if (Math.abs(lenQ - 1) < 1e-6) return "♩";
+    if (Math.abs(lenQ - 0.5) < 1e-6) return "♪";
+    if (Math.abs(lenQ - 0.25) < 1e-6) return "𝅘𝅥𝅯";
+    if (Math.abs(lenQ - 0.125) < 1e-6) return "𝅘𝅥𝅰";
+    if (Math.abs(lenQ - 0.0625) < 1e-6) return "𝅘𝅥𝅱"; // sixty-fourth
+    return "♪";
+  };
+
+  // Đơn vị nhỏ hơn kế tiếp (1→2→4→8→16→32→64)
+  const nextSmallerBinaryUnit = (u: NoteUnit): NoteUnit | "64" => {
+    switch (u) {
+      case "1": return "2";
+      case "2": return "4";
+      case "4": return "8";
+      case "8": return "16";
+      case "16": return "32";
+      case "32": return "64";
+      default: return "8";
+    }
+  };
+
+  // Glyph cho triplet theo beatUnit (32→64 dùng 𝅘𝅥𝅱)
+  const tripletGlyphForBeatUnit = (beat: NoteUnit): string => {
+    const sub = nextSmallerBinaryUnit(beat);
+    switch (sub) {
+      case "2": return "𝅗𝅥";
+      case "4": return "♩";
+      case "8": return "♪";
+      case "16": return "𝅘𝅥𝅯";
+      case "32": return "𝅘𝅥𝅰";
+      default: return "𝅘𝅥𝅱"; // 64th
+    }
+  };
+
+  // Legend liên 3: theo yêu cầu cụ thể 1..32
+  const tripletText = (beatUnit: NoteUnit) => {
+    switch (beatUnit) {
+      case "1": return "Liên 3 nốt trắng";
+      case "2": return "Liên 3 nốt đen";
+      case "4": return "Liên 3 nốt đơn";
+      case "8": return "Liên 3 nốt đôi";
+      case "16": return "Liên 3 nốt móc ba";
+      case "32": return "Liên 3 nốt móc 4";
+      default: return "Liên 3";
+    }
+  };
+
+  // Nhãn nốt cho ruler
+  const noteLabelForSubdivision = (beat: NoteUnit, f: number) => {
+    if (f === 3) return tripletGlyphForBeatUnit(beat);
+    const base = unitLenVsQuarter(beat);
+    const subLenQ = base / (f || 1);
+    return glyphForQuarterLen(subLenQ);
+  };
+
+  // Visual beat + pendulum (ruler không nháy)
   const queueVisualBeat = (beatIndex: number, atTime: number) => {
     const ctx = audioCtxRef.current;
     if (!ctx) return;
@@ -241,11 +296,12 @@ const Metronome: React.FC = () => {
         return next;
       });
       startFlash(level, beatLen);
-      scheduleRulerFlashes(atTime, beatLen); // tick con theo chế độ chia
+      // Không gọi scheduleRulerFlashes -> tắt nháy ruler
+      setRulerActiveIdx(null);
     }, delayMs);
   };
 
-  /* Scheduler */
+  // Scheduler
   const schedule = () => {
     const ctx = audioCtxRef.current;
     if (!ctx) return;
@@ -253,7 +309,7 @@ const Metronome: React.FC = () => {
     while (nextNoteTimeRef.current < ctx.currentTime + scheduleAheadTime) {
       const tickInBar = nextBeatIndexRef.current % Math.max(1, g.barTicks);
       const isVisualBeat = (tickInBar % g.ticksPerBeat) === 0;
-      const isClickTime  = (tickInBar % g.ticksPerClick) === 0;
+      const isClickTime = (tickInBar % g.ticksPerClick) === 0;
       const beatIndex = Math.floor(tickInBar / g.ticksPerBeat) % Math.max(1, g.barTicks / g.ticksPerBeat);
       const levelAtBeat = accentRef.current[beatIndex] ?? 1;
 
@@ -271,7 +327,7 @@ const Metronome: React.FC = () => {
     }
   };
 
-  /* Play/Pause + snap */
+  // Play/Pause + snap
   const handlePlayToggle = async () => {
     if (!isPlaying) {
       // @ts-expect-error webkit
@@ -303,9 +359,7 @@ const Metronome: React.FC = () => {
         setPendulumDurSec(remain || 0.12);
         setPendulumSide(snapTo);
       }
-      clearRulerTimers();
       setRulerActiveIdx(null);
-
       setIsPlaying(false);
       if (schedulerIdRef.current != null) {
         window.clearInterval(schedulerIdRef.current);
@@ -314,7 +368,7 @@ const Metronome: React.FC = () => {
     }
   };
 
-  /* TAP tempo */
+  // TAP tempo
   const handleTap = () => {
     const now = performance.now();
     const arr = tapTimesRef.current;
@@ -322,21 +376,19 @@ const Metronome: React.FC = () => {
     arr.push(now);
     if (arr.length > 8) arr.shift();
     if (arr.length < 2) return;
-
     const dts: number[] = [];
     for (let i = 1; i < arr.length; i++) {
       const dt = arr[i] - arr[i - 1];
       if (dt >= 150 && dt <= 2000) dts.push(dt);
     }
     if (!dts.length) return;
-
     const avgMs = dts.reduce((a, b) => a + b, 0) / dts.length;
     const bpmShown = Math.round(60000 / avgMs);
     const nextQ = Math.max(20, Math.min(300, Math.round(toQuarterBpm(bpmShown, displayUnit))));
     setTempoQ(nextQ);
   };
 
-  /* Hotkeys */
+  // Hotkeys
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const tag = (e.target as HTMLElement)?.tagName?.toLowerCase();
@@ -349,17 +401,17 @@ const Metronome: React.FC = () => {
     return () => window.removeEventListener("keydown", onKey);
   }, [isPlaying]);
 
-  /* Accent toggle */
+  // Accent toggle
   const toggleAccent = (i: number) => {
     const nxt = [...accent];
     nxt[i] = nxt[i] === 3 ? 2 : nxt[i] === 2 ? 1 : nxt[i] === 1 ? 0 : 3;
     setAccent(nxt);
   };
 
-  /* Tempo +/- */
+  // Tempo +/-
   const adjustTempo = (d: number) => setTempoQ((t) => clampTempoQ(t + d));
 
-  /* Modals */
+  // Modals
   const openTempoModal = () => { setTempoInputStr(String(displayBpm(tempoQ, displayUnit))); setTempoInputFresh(true); setIsTempoModalOpen(true); };
   const closeTempoModal = () => setIsTempoModalOpen(false);
   const openSigModal = () => setIsSigModalOpen(true);
@@ -368,19 +420,8 @@ const Metronome: React.FC = () => {
   const [tsTop, tsBottom] = timeSig.split("/");
   const shownBpm = displayBpm(tempoQ, displayUnit);
 
-  // Ruler render helpers
   const { beatUnit } = computeGrid();
   const factor = rulerFactor(rulerMode);
-  const noteLabelFor = (beat: NoteUnit, f: number) => {
-    // Mapping đơn giản để đọc nhanh: quarter-> eighth/semi, eighth-> 16/32, half-> quarter, v.v...
-    const base = unitLenVsQuarter(beat); // độ dài theo quarter
-    const subLenQ = base / (f || 1);
-    if (Math.abs(subLenQ - 1) < 1e-6) return "♩";
-    if (Math.abs(subLenQ - 0.5) < 1e-6) return "♪";
-    if (Math.abs(subLenQ - 0.25) < 1e-6) return "semi";
-    if (f === 3) return "♪"; // dùng ký hiệu và hiển thị số 3 nhỏ kèm
-    return "♪";
-  };
 
   return (
     <div className="metronome">
@@ -388,12 +429,12 @@ const Metronome: React.FC = () => {
         <div>
           <button className="tempo-display" onClick={openTempoModal}>
             {displayUnit === "4" ? "♩" :
-            displayUnit === "8" ? "♪" :
-            displayUnit === "2" ? "𝅗𝅥" :
-            displayUnit === "16" ? "semi" :
-            displayUnit === "4." ? "♩." :
-            displayUnit === "8." ? "♪." :
-            `𝅝`} = {shownBpm}
+             displayUnit === "8" ? "♪" :
+             displayUnit === "2" ? "𝅗𝅥" :
+             displayUnit === "16" ? "𝅘𝅥𝅯" :
+             displayUnit === "4." ? "♩." :
+             displayUnit === "8." ? "♪." :
+             "𝅝"} = {shownBpm}
           </button>
           <span className="tempo-unit">BPM</span>
         </div>
@@ -420,64 +461,68 @@ const Metronome: React.FC = () => {
         </button>
       </div>
 
-      {/* Ruler song song với Pendulum */}
-      <div className="metronome__ruler">
-        <div className="ruler-header">
-          <select
-            className="metronome__ruler-select no-select"
-            value={rulerMode}
-            onChange={(e) => setRulerMode(e.target.value as RulerMode)}
-            aria-label="Ruler subdivision"
-          >
-            <option value="off">Ruler: Off</option>
-            <option value="x2">{`Ruler: 1/${beatUnit === "8" ? "16" : beatUnit === "2" ? "4" : beatUnit === "1" ? "2" : "8"} (×2)`}</option>
-            <option value="x3">Ruler: Triplet (×3)</option>
-            <option value="x4">{`Ruler: 1/${beatUnit === "8" ? "32" : beatUnit === "2" ? "8" : beatUnit === "1" ? "4" : "16"} (×4)`}</option>
-          </select>
-          {factor > 0 && (
-            <div className="ruler-legend no-select">
-              <span className="glyph">
-                {noteLabelFor(beatUnit, factor)}
-                {factor === 3 && <sup>3</sup>}
-              </span>
-              <span className="legend-text">sub</span>
-            </div>
-          )}
-        </div>
-        <div className="ruler-rail">
-          {/* Ticks: gồm 0..factor (đầu/cuối phách) */}
-          {Array.from({ length: Math.max(1, factor) + 1 }).map((_, idx) => {
-            const leftPct = (idx / Math.max(1, factor)) * 100;
-            return (
-              <div
-                key={idx}
-                className={`ruler-tick ${idx === 0 || idx === factor ? "edge" : ""} ${rulerActiveIdx === idx && isPlaying ? "is-active" : ""}`}
-                style={{ left: `${leftPct}%` }}
+      {/* Ruler + Pendulum */}
+      <div className="metronome__rp">
+        <div className="metronome__ruler">
+          <div className="ruler-header">
+            <div className="ruler-select-wrap">
+              <select
+                className="metronome__ruler-select no-select"
+                value={rulerMode}
+                onChange={(e) => setRulerMode(e.target.value as RulerMode)}
+                aria-label="Ruler subdivision"
               >
-                {idx > 0 && idx < factor && (
-                  <div className="ruler-note no-select">
-                    {noteLabelFor(beatUnit, factor)}
-                    {factor === 3 && <sup>3</sup>}
-                  </div>
-                )}
+                <option value="off">Ruler: Tắt</option>
+                <option value="x2">Chia đôi</option>
+                <option value="x3">Chia ba</option>
+                <option value="x4">Chia tư</option>
+              </select>
+            </div>
+            {factor > 0 && (
+              <div className="ruler-legend no-select">
+                <span className="glyph">
+                  {noteLabelForSubdivision(beatUnit, factor)}
+                  {factor === 3 && <sup>3</sup>}
+                </span>
+                <span className="legend-text">
+                  {factor === 3 ? tripletText(beatUnit) : `Nốt ${vnNameForUnit(beatUnit)} chia ${factor}`}
+                </span>
               </div>
-            );
-          })}
+            )}
+          </div>
+          <div className="ruler-rail">
+            {Array.from({ length: Math.max(1, factor) + 1 }).map((_, idx) => {
+              const leftPct = (idx / Math.max(1, factor)) * 100;
+              return (
+                <div
+                  key={idx}
+                  className={`ruler-tick ${idx === 0 || idx === factor ? "edge" : ""} ${rulerActiveIdx === idx && isPlaying ? "is-active" : ""}`}
+                  style={{ left: `${leftPct}%` }}
+                >
+                  {idx > 0 && idx < factor && (
+                    <div className="ruler-note no-select">
+                      {noteLabelForSubdivision(beatUnit, factor)}
+                      {factor === 3 && <sup>3</sup>}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
-      </div>
-      
-      {/* Pendulum piston */}
-      <div className="metronome__pendulum">
-        <div className={`pendulum-rail ${isFlash ? "flash-l3" : ""}`}>
-          <div
-            className={`pendulum-slider ${pendulumSide === -1 ? "left" : "right"} ${isFlash ? "flash-l3" : ""}`}
-            style={{ transitionDuration: `${pendulumDurSec}s` }}
-          />
-        </div>
-      </div>
 
+        <div className="metronome__pendulum">
+          <div className={`pendulum-rail ${isFlash ? "flash-l3" : ""}`}>
+            <div
+              className={`pendulum-slider ${pendulumSide === -1 ? "left" : "right"} ${isFlash ? "flash-l3" : ""}`}
+              style={{ transitionDuration: `${pendulumDurSec}s` }}
+            />
+          </div>
+        </div>
+      </div>
 
       <button className="metronome__tap-floating" onClick={handleTap} aria-label="Tap tempo (phím T)">TAP</button>
+
       <div className="metronome__accent-bar" aria-live="off">
         {accent.map((level, i) => (
           <div
@@ -491,13 +536,14 @@ const Metronome: React.FC = () => {
           </div>
         ))}
       </div>
+
       <select className="metronome__sound-select no-select" value={soundType} onChange={(e) => setSoundType(e.target.value as any)}>
         <option value="beep">Beep</option>
         <option value="square">Square</option>
         <option value="triangle">Triangle</option>
       </select>
 
-      {/* Presets giữ nguyên */}
+      {/* Presets */}
       <div className="metronome__presets">
         <h4>Preset Playlist</h4>
         {presets.map((folder, fi) => (
@@ -524,7 +570,7 @@ const Metronome: React.FC = () => {
         ))}
       </div>
 
-      {/* Modal Tempo */}
+      {/* Modals */}
       <TempoModal
         isOpen={isTempoModalOpen}
         onClose={closeTempoModal}
@@ -537,7 +583,6 @@ const Metronome: React.FC = () => {
         clampQuarter={(q) => Math.max(20, Math.min(300, q))}
         onApplyQuarterBPM={(q) => setTempoQ(q)}
       />
-      {/* Modal TimeSig */}
       <TimeSigModal
         isOpen={isSigModalOpen}
         onClose={closeSigModal}
