@@ -1,37 +1,51 @@
-// src/components/tools/modals/TempoModal.tsx
+// src/components/tools/TempoModal.tsx
 import React from "react";
 import "../../../styles/TempoModal.scss";
+import { NoteIcon } from "../../common/NoteIcon";
 
-/* Note: đồng bộ với Metronome nhưng độc lập module */
-export type NoteUnit = "1" | "2" | "4" | "8" | "16" | "32" | "4." | "8.";
+/* Only half / quarter / eighth + dotted modifier (dot is a toggle) */
+export type NoteUnit = "1" | "2" | "4" | "8" | "16" | "32" | "2." | "4." | "8.";
 
-/* Map độ dài so với quarter (canonical) */
+/* Ratios vs quarter (kept as-is for downstream logic) */
 const unitLenVsQuarter = (u: NoteUnit): number => {
   switch (u) {
-    case "1": return 4;
-    case "2": return 2;
-    case "4": return 1;
-    case "8": return 0.5;
+    case "1":  return 4;
+    case "2":  return 2;
+    case "4":  return 1;
+    case "8":  return 0.5;
     case "16": return 0.25;
     case "32": return 0.125;
+    case "2.": return 3;
     case "4.": return 1.5;
     case "8.": return 0.75;
-    default: return 1;
+    default:   return 1;
   }
 };
 
-const unitIcon = (u: NoteUnit) => {
+/* Labels used in titles/tooltips */
+const unitLabel = (u: NoteUnit): string => {
   switch (u) {
-    case "1": return "𝅝";
-    case "2": return "𝅗𝅥";
-    case "4": return "♩";
-    case "8": return "♪";
-    case "16": return "♬";
-    case "32": return "♬♬";
-    case "4.": return "♩.";
-    case "8.": return "♪.";
-    default: return "♩";
+    case "2":  return "half";
+    case "4":  return "quarter";
+    case "8":  return "eighth";
+    case "2.": return "half (dotted)";
+    case "4.": return "quarter (dotted)";
+    case "8.": return "eighth (dotted)";
+    default:   return "quarter";
   }
+};
+
+/* Compose icon for subtitle using existing NoteIcon wrapper */
+const unitIcon = (u: NoteUnit) => {
+  const base = (u.startsWith("2") ? "half" : u.startsWith("8") ? "eighth" : "quarter") as
+    | "half" | "quarter" | "eighth";
+  const dotted = u.endsWith(".");
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+      <NoteIcon name={base} width={28} height={28} />
+      {dotted && <NoteIcon name="dot" width={10} height={10} />}
+    </span>
+  );
 };
 
 const toQuarterBpm = (bpmShown: number, unit: NoteUnit) =>
@@ -42,7 +56,6 @@ interface TempoModalProps {
   onClose: () => void;
   displayUnit: NoteUnit;
   setDisplayUnit: (u: NoteUnit) => void;
-  /* cho phép setState style functional updater */
   tempoInputStr: string;
   setTempoInputStr: React.Dispatch<React.SetStateAction<string>>;
   tempoInputFresh: boolean;
@@ -50,6 +63,13 @@ interface TempoModalProps {
   clampQuarter: (t: number) => number;
   onApplyQuarterBPM: (quarterBpm: number) => void;
 }
+
+/* Dot modifier helpers */
+const isDotted = (u: NoteUnit) => u.endsWith(".");
+const baseOf = (u: NoteUnit): "2" | "4" | "8" =>
+  (u.startsWith("2") ? "2" : u.startsWith("8") ? "8" : "4");
+const applyDot = (base: "2" | "4" | "8", dotted: boolean): NoteUnit =>
+  (dotted ? (base + ".") : base) as NoteUnit;
 
 const TempoModal: React.FC<TempoModalProps> = ({
   isOpen,
@@ -65,7 +85,7 @@ const TempoModal: React.FC<TempoModalProps> = ({
 }) => {
   if (!isOpen) return null;
 
-  // keypad handlers (giữ logic tương đương)
+  /* keypad handlers (unchanged) */
   const handleTempoInput = (num: number) => {
     setTempoInputStr((prev) => {
       const base = tempoInputFresh ? "" : prev;
@@ -90,6 +110,29 @@ const TempoModal: React.FC<TempoModalProps> = ({
     onClose();
   };
 
+  /* Unit selection: 3 base buttons + 1 dot toggle (dot cannot stand alone) */
+  const baseUnits: Array<"2" | "4" | "8"> = ["2", "4", "8"];
+  const currentBase = baseOf(displayUnit);
+  const dotted = isDotted(displayUnit);
+
+  const handleClickBase = (b: "2" | "4" | "8") => {
+    setDisplayUnit(applyDot(b, dotted));
+  };
+  const handleToggleDot = () => {
+    setDisplayUnit(applyDot(currentBase, !dotted));
+  };
+
+  /* Square compact buttons; center icon; reuse NoteIcon so sprite mounting stays consistent */
+  const btnSq: React.CSSProperties = {
+    width: 34,
+    height: 34,
+    padding: 0,
+    borderRadius: 8,
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+  };
+
   return (
     <div className="metronome__modal">
       <div className="modal-backdrop" onClick={onClose}></div>
@@ -100,16 +143,29 @@ const TempoModal: React.FC<TempoModalProps> = ({
         <div className="unit-section">
           <div className="label">Display unit</div>
           <div className="grid grid-unit">
-            {(["1","2","4","8","16","32","4.","8."] as NoteUnit[]).map((u) => (
+            {baseUnits.map((u) => (
               <button
                 key={u}
-                className={u === displayUnit ? "is-selected" : ""}
-                onClick={() => setDisplayUnit(u)}
-                title={`Display: ${unitIcon(u)}`}
+                className={u === currentBase ? "is-selected" : ""}
+                onClick={() => handleClickBase(u)}
+                title={`Display: ${unitLabel(u as NoteUnit)}`}
+                style={btnSq}
               >
-                {unitIcon(u)}
+                {/* Use existing NoteIcon names that your app already supports */}
+                {u === "2" && <NoteIcon name="half" width={22} height={22} />}
+                {u === "4" && <NoteIcon name="quarter" width={22} height={22} />}
+                {u === "8" && <NoteIcon name="eighth" width={22} height={22} />}
               </button>
             ))}
+            <button
+              key="dot"
+              className={dotted ? "is-selected" : ""}
+              onClick={handleToggleDot}
+              title="Display: dotted"
+              style={btnSq}
+            >
+              <NoteIcon name="dot" width={10} height={10} />
+            </button>
           </div>
         </div>
 

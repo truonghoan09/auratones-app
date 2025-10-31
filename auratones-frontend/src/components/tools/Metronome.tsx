@@ -9,6 +9,8 @@ import React, { useEffect, useRef, useState } from "react";
 import "../../styles/Metronome.scss";
 import TempoModal from "./modals/TempoModal";
 import TimeSigModal from "./modals/TimeSigModal";
+import TestNotes from "../test";
+import NoteIconSpriteDemo from "../../assets/noteIconSprite";
 
 export type NoteUnit = "1" | "2" | "4" | "8" | "16" | "32" | "4." | "8.";
 type RulerMode = "off" | "x2" | "x3" | "x4";
@@ -426,6 +428,7 @@ const Metronome: React.FC = () => {
   return (
     <div className="metronome">
       <div className="metronome__display">
+
         <div>
           <button className="tempo-display" onClick={openTempoModal}>
             {displayUnit === "4" ? "♩" :
