@@ -14,7 +14,7 @@ import usePersistRoute from './hooks/usePersistRoute';
 import { DialogProvider } from './contexts/DialogContext';
 import { DisplayModeProvider } from './contexts/DisplayModeContext';
 import LoadingOverlay from './components/LoadingOverlay';
-import NoteIconSprite from './assets/noteIconSprite';
+import NoteIconSprite from './assets/NoteIconTile';
 import NotePrimitivesSprite from './components/common/NotePrimitivesSprite';
 
 const AppContent = () => {

@@ -10,7 +10,7 @@ import "../../styles/Metronome.scss";
 import TempoModal from "./modals/TempoModal";
 import TimeSigModal from "./modals/TimeSigModal";
 import TestNotes from "../test";
-import NoteIconSpriteDemo from "../../assets/noteIconSprite";
+// import NoteIconSpriteDemo from "../../assets/noteIconSprite";
 
 export type NoteUnit = "1" | "2" | "4" | "8" | "16" | "32" | "4." | "8.";
 type RulerMode = "off" | "x2" | "x3" | "x4";
@@ -574,7 +574,7 @@ const Metronome: React.FC = () => {
       </div>
 
       {/* Modals */}
-      <TempoModal
+      {/* <TempoModal
         isOpen={isTempoModalOpen}
         onClose={closeTempoModal}
         displayUnit={displayUnit}
@@ -585,7 +585,7 @@ const Metronome: React.FC = () => {
         setTempoInputFresh={setTempoInputFresh}
         clampQuarter={(q) => Math.max(20, Math.min(300, q))}
         onApplyQuarterBPM={(q) => setTempoQ(q)}
-      />
+      /> */}
       <TimeSigModal
         isOpen={isSigModalOpen}
         onClose={closeSigModal}

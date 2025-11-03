@@ -2,14 +2,53 @@
 // Mode B: component auto-computes anchors; head size & dot spacing scale automatically.
 
 import React, { useState } from "react";
-import NoteIconSprite from "../../assets/noteIconSprite";
 import DebugStaff from "../DebugStaff";
 import Crosshair from "../Crosshair";
 import Glyph from "../Glyph";
 import GlyphAtAnchorOf from "../GlyphAtAnchorOf";
-import { getAnchorSp } from "../../lib/sprite";
-import { getSpriteMetrics, getDotGapSp } from "../../lib/spriteMetrics";
+// import { getAnchorSp } from "../../lib/sprite"; // ❌ gây lỗi: module không export getAnchorSp
+import { getSpriteMetrics } from "../../lib/spriteMetrics";
 import { NoteIcon } from "../common/NoteIcon"; // thêm để hiển thị icon tempo unit
+import NoteIconTile from "../../assets/NoteIconTile";
+
+// ✅ Định dạng mới: đọc anchor/gap từ tokens.json
+//    (đường dẫn theo cây thư mục bạn gửi: src/assets/sprite/tokens.json)
+import spriteTokensRaw from "../../assets/sprite/tokens.json";
+
+// Kiểu đơn giản cho tokens (nếu schema có thêm field khác cũng không ảnh hưởng)
+type SpriteTokens = Record<
+  string,
+  {
+    anchors?: Record<
+      string,
+      {
+        x: number; // toạ độ anchor theo đơn vị "sp" tương đối trong bounding box glyph
+        y: number;
+        gapSp?: number; // khoảng cách mặc định (nếu có) để đặt glyph phụ (vd: dấu chấm)
+      }
+    >;
+  }
+>;
+const spriteTokens = spriteTokensRaw as SpriteTokens;
+
+// --- Shim theo định dạng mới: lấy anchor từ tokens.json ---
+type AnchorName = "center" | "dot";
+type Anchor = { x: number; y: number };
+
+const getAnchorSp = (glyphId: string, anchor: AnchorName): Anchor => {
+  const a = spriteTokens[glyphId]?.anchors?.[anchor];
+  if (a && Number.isFinite(a.x) && Number.isFinite(a.y)) return { x: a.x, y: a.y };
+  // Fallback an toàn nếu thiếu tokens
+  if (anchor === "dot") return { x: 1.0, y: 0.5 };
+  return { x: 0.5, y: 0.5 };
+};
+
+// Lấy khoảng cách “mặc định” (ở đơn vị sp) giữa anchor và dấu chấm từ tokens.json.
+// Nếu tokens không có, dùng giá trị kinh nghiệm 0.35sp (tuỳ theo font có thể chênh nhẹ).
+const getSpriteDotGapSp = (ownerGlyphId: string, anchor: AnchorName): number => {
+  const gap = spriteTokens[ownerGlyphId]?.anchors?.[anchor]?.gapSp;
+  return Number.isFinite(gap as number) ? (gap as number) : 0.35;
+};
 
 // --- Tempo unit type (giống bên TempoModal) ---
 type NoteUnit = "1" | "2" | "4" | "8" | "16" | "32" | "2." | "4." | "8.";
@@ -53,9 +92,10 @@ const PianoRoll: React.FC = () => {
   const spSize = 24;
   const staffTop = 90;
   const lineGap = spSize;
-  const padPerSideSp = 0.05; 
+  const padPerSideSp = 0.05;
 
   // --- 1. Compute head scale automatically from real path height ---
+  //    Vẫn dùng getSpriteMetrics (đọc từ sprite.svg), không thay đổi logic scale.
   const { pathHSp } = getSpriteMetrics("noteheadBlack");
   const targetHeadPathHeightSp = 1 - 2 * padPerSideSp;
   const headScale = targetHeadPathHeightSp / pathHSp;
@@ -64,13 +104,14 @@ const PianoRoll: React.FC = () => {
   const centerY = staffTop + 2.5 * lineGap;
   const centerX = 380;
 
-  // Anchor-based placement
+  // Anchor-based placement (đọc anchor từ tokens.json)
   const c = getAnchorSp("noteheadBlack", "center");
   const headX = centerX - c.x * spSize * headScale;
   const headY = centerY - c.y * spSize * headScale;
 
-  // --- 3. Compute correct dot offset ---
-  const spriteGapSp = getDotGapSp("noteheadBlack", "dot");
+  // --- 3. Compute correct dot offset --- (định dạng mới)
+  //    spriteGapSp lấy từ tokens.json (nếu có); desiredDotGapSp vẫn theo logic cũ.
+  const spriteGapSp = getSpriteDotGapSp("noteheadBlack", "dot");
   const desiredDotGapSp = 0.50;
   const dxSp = (desiredDotGapSp / headScale) - spriteGapSp;
 
@@ -102,10 +143,10 @@ const PianoRoll: React.FC = () => {
 
   return (
     <div>
-      <NoteIconSprite />
+      <NoteIconTile symbolId="note8thDown" frameSize={35} scale={0.5} />
 
       --- UI test tempo unit & bpm ---
-      <div style={{ marginBottom: 16, color: "#ddd", fontFamily: "monospace" }}>
+      {/* <div style={{ marginBottom: 16, color: "#ddd", fontFamily: "monospace" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <div>Display unit:</div>
           {baseUnits.map((u) => (
@@ -148,7 +189,7 @@ const PianoRoll: React.FC = () => {
             {unitIcon(displayUnit)} = {bpm} BPM → Quarter = {Math.round(quarterBpm)} BPM
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };
@@ -156,25 +197,25 @@ const PianoRoll: React.FC = () => {
 export default PianoRoll;
 
 
-      // {/* --- Canvas render --- */}
-      // <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`}>
-      //   <rect x="0" y="0" width={W} height={H} fill="#2b2f3a" />
+// {/* --- Canvas render --- */}
+// <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`}>
+//   <rect x="0" y="0" width={W} height={H} fill="#2b2f3a" />
 
-      //   <DebugStaff x={80} y={staffTop} width={W - 160} lineGap={lineGap} />
-      //   <Crosshair x={atX} y={atY} />
+//   <DebugStaff x={80} y={staffTop} width={W - 160} lineGap={lineGap} />
+//   <Crosshair x={atX} y={atY} />
 
-      //   {/* Head scaled automatically */}
-      //   <Glyph id="noteheadBlack" x={headX} y={headY} spSize={spSize} scale={headScale} />
+//   {/* Head scaled automatically */}
+//   <Glyph id="noteheadBlack" x={headX} y={headY} spSize={spSize} scale={headScale} />
 
-      //   {/* Dot anchored, fixed gap in sp */}
-      //   <GlyphAtAnchorOf
-      //     glyphId="metAugDot"
-      //     anchorOnId="noteheadBlack"
-      //     anchor="dot"
-      //     ownerX={headX}
-      //     ownerY={headY}
-      //     ownerScale={headScale}
-      //     spSize={spSize}
-      //     dxSp={dxSp}
-      //   />
-      // </svg>
+//   {/* Dot anchored, fixed gap in sp */}
+//   <GlyphAtAnchorOf
+//     glyphId="metAugDot"
+//     anchorOnId="noteheadBlack"
+//     anchor="dot"
+//     ownerX={headX}
+//     ownerY={headY}
+//     ownerScale={headScale}
+//     spSize={spSize}
+//     dxSp={dxSp}
+//   />
+// </svg>
