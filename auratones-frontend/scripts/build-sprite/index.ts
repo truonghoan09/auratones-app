@@ -4,7 +4,7 @@
 // - Iterates all PUA glyphs (U+E000–U+F8FF)
 // - Emits: src/assets/sprite/sprite.svg + src/assets/sprite/tokens.json
 // - Each <symbol> includes data-name, optional data-category (from ranges)
-// - Coordinates are flipped to screen-friendly (y-down).
+// - Coordinates use direct font orientation (không lật Y thêm lần nữa).
 
 /// <reference types="node" />
 import * as fs from "fs";
@@ -119,12 +119,21 @@ function findCategoryFor(cp: number, ranges: Ranges | null): string | undefined 
   }
 }
 
+/**
+ * Duyệt tất cả glyph trong font (giữ nguyên logic cũ, tránh lỗi container lạ).
+ */
 function eachGlyph(font: any, cb: (g: Glyph) => void) {
   const gs: any = font.glyphs;
   if (!gs) return;
 
-  if (Array.isArray(gs.glyphs)) { for (const g of gs.glyphs) cb(g); return; }
-  if (typeof gs.forEach === "function") { gs.forEach((g: Glyph) => cb(g)); return; }
+  if (Array.isArray(gs.glyphs)) {
+    for (const g of gs.glyphs) cb(g);
+    return;
+  }
+  if (typeof gs.forEach === "function") {
+    gs.forEach((g: Glyph) => cb(g));
+    return;
+  }
   if (typeof gs.length === "number" && typeof gs.get === "function") {
     for (let i = 0; i < gs.length; i++) cb(gs.get(i));
     return;
@@ -158,7 +167,7 @@ function eachGlyph(font: any, cb: (g: Glyph) => void) {
   const revNames   = buildReverseGlyphMap(glyphnames);
 
   const symbols: string[] = [];
-  const tokens: Tokens = {};
+  const tokens: Tokens = {} as Tokens;
 
   eachGlyph(font, (g) => {
     const cp = (g as any).unicode as number | undefined;
@@ -192,19 +201,30 @@ function eachGlyph(font: any, cb: (g: Glyph) => void) {
     const vbH = hSp + PAD_SP * 2;
 
     const scaleSp = 1 / UPEM;
+
+    /**
+     * Transform:
+     * - scale(scaleSp, scaleSp): giữ nguyên hướng gốc của glyph (không lật Y).
+     * - translate(PAD_SP, PAD_SP): canh glyph vào trong viewBox với padding.
+     * - translate(-x1, -y1): đưa bbox về gốc font.
+     *
+     * Kết quả:
+     * - "note8thUp" hiển thị với head nằm dưới, stem + flag đi lên (quay phải).
+     * - "note8thDown" hiển thị với head nằm trên, stem + flag đi xuống (quay trái).
+     */
     const gTransform =
-      `translate(${PAD_SP + wSp}, ${PAD_SP + hSp}) ` +
-      `scale(${-scaleSp}, ${-scaleSp}) ` +
+      `translate(${PAD_SP}, ${PAD_SP}) ` +
+      `scale(${scaleSp}, ${scaleSp}) ` +
       `translate(${-x1}, ${-y1})`;
 
     symbols.push(
       `<symbol id="${symbolId}" viewBox="0 0 ${vbW} ${vbH}" overflow="visible" data-name="${displayName}"` +
       (category ? ` data-category="${category}"` : ``) +
       `>
-  <g transform="${gTransform}">
-    <path d="${d}" />
-  </g>
-</symbol>`
+        <g transform="${gTransform}">
+          <path d="${d}" />
+        </g>
+      </symbol>`
     );
 
     tokens[symbolId] = {
@@ -217,7 +237,7 @@ function eachGlyph(font: any, cb: (g: Glyph) => void) {
   });
 
   const sprite = `<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg"
+    <svg xmlns="http://www.w3.org/2000/svg"
      xmlns:xlink="http://www.w3.org/1999/xlink"
      style="display:none">
 ${symbols.join("\n")}

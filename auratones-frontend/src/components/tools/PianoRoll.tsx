@@ -143,7 +143,7 @@ const PianoRoll: React.FC = () => {
 
   return (
     <div>
-      <NoteIconTile symbolId="note8thDown" frameSize={35} scale={0.5} />
+      <NoteIconTile symbolId="metNote8thUp" frameSize={35} scale={0.9} />
 
       --- UI test tempo unit & bpm ---
       {/* <div style={{ marginBottom: 16, color: "#ddd", fontFamily: "monospace" }}>

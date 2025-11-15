@@ -19,6 +19,7 @@ export const NoteIcon: React.FC<IconProps> = ({
 }) => {
   const symbolId = name.startsWith("noteicon-") ? name : `noteicon-${name}`;
   const refPath = `#${symbolId}`;
+  const vb = viewBox || "0 0 512 512";
 
   return (
     <svg
@@ -26,7 +27,7 @@ export const NoteIcon: React.FC<IconProps> = ({
       xmlnsXlink="http://www.w3.org/1999/xlink"
       width={width}
       height={height}
-      viewBox={viewBox || "0 0 512 512"}  // fallback hợp lý
+      viewBox={vb}
       preserveAspectRatio="xMidYMid meet"
       aria-hidden="true"
       focusable="false"

@@ -30,7 +30,7 @@ const DEFAULT_ICON_BASE = 64;
 
 /**
  * NoteIconTile
- * - Render MỘT nốt nhạc trong khung cố định, canh giữa theo cả 2 chiều.
+ * - Render một nốt nhạc trong khung cố định, canh giữa theo cả 2 chiều.
  * - Lấy glyph từ sprite qua <use href="#{symbolId}">.
  * - Quy mô icon theo `scale` (mặc định = 1).
  * - Có thể dùng làm button/icon tương tác.
@@ -47,13 +47,13 @@ export default function NoteIconTile({
   style,
   onClick,
 }: NoteIconTileProps) {
-  // Nhúng sprite <symbol> ẩn. Bạn có thể render component này 1 lần ở root để tránh lặp lại.
+  // Nhúng sprite <symbol> ẩn, nên render ít nhất một lần ở cấp cao nhất.
   const spriteMarkup = useMemo(() => ({ __html: spriteRaw }), []);
 
-  // Tính kích thước icon (width/height) dựa trên base cố định và scale
+  // Tính kích thước icon (width/height) dựa trên base cố định và scale.
   const iconSize = Math.max(0, DEFAULT_ICON_BASE * scale);
 
-  // Canh giữa icon trong khung vuông
+  // Canh giữa icon trong khung vuông.
   const x = (frameSize - iconSize) / 2;
   const y = (frameSize - iconSize) / 2;
 
@@ -64,7 +64,6 @@ export default function NoteIconTile({
           aria-hidden
           focusable="false"
           style={{ position: "absolute", width: 0, height: 0, overflow: "hidden" }}
-          // sprite.svg chứa các <symbol id="..."> mà ta sẽ <use>
           dangerouslySetInnerHTML={spriteMarkup}
         />
       )}
@@ -94,7 +93,7 @@ export default function NoteIconTile({
           fill={background}
         />
 
-        {/* Nốt nhạc canh giữa, scale bằng width/height */}
+        {/* Nốt nhạc canh giữa, không lật thêm, hướng đã đúng từ sprite */}
         <use
           href={`#${symbolId}`}
           xlinkHref={`#${symbolId}`}
@@ -110,8 +109,7 @@ export default function NoteIconTile({
 }
 
 /**
- * (Tuỳ chọn) Component chỉ để nhúng sprite defs một lần ở cấp cao (App/Layout)
- * Nếu bạn dùng nhiều NoteIconTile và không muốn lặp lại defs, render <NoteSpriteDefs/> ở root.
+ * Component chỉ để nhúng sprite defs một lần ở cấp cao (App/Layout).
  */
 export function NoteSpriteDefs() {
   const spriteMarkup = useMemo(() => ({ __html: spriteRaw }), []);
