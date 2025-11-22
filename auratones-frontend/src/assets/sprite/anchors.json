@@ -1,0 +1,12 @@
+{
+  "noteheadBlack": {
+    "center":   { "xSp": 0.0,  "ySp": 0.0 },
+    "stemUp":   { "xSp": 0.55, "ySp": 0.0 },
+    "stemDown": { "xSp": -0.55,"ySp": 0.0 },
+    "dot":      { "xSp": 1.0,  "ySp": 0.0 }
+  },
+
+  "metAugDot": {
+    "center": { "xSp": 0.0, "ySp": 0.0 }
+  }
+}

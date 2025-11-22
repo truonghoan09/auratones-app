@@ -1,52 +1,106 @@
 // src/lib/sprite.ts
-export type SpriteBBoxSp = { x: number; y: number; w: number; h: number };
-export type Anchors = Record<string, { x: number; y: number }>;
+// Helper đọc metadata từ sprite/tokens.json: bbox_sp + anchors (nếu có).
 
-export type Token = {
-  codepoint: string;
-  name: string;
-  bbox_sp: SpriteBBoxSp;
-  raw_bbox_units: { x1: number; y1: number; x2: number; y2: number };
-  anchors?: Anchors; // optional
+import tokensJson from "../engraving/sprite/tokens.json";
+
+export type BoxSp = {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
 };
 
-export type Tokens = Record<string, Token>;
+type RawBBoxUnits = {
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+};
 
-// tokens.json được tạo không có anchors -> cast safe
-import tokensRaw from "../assets/sprite/tokens.json";
-export const TOKENS = tokensRaw as unknown as Tokens;
+type AnchorEntry = {
+  xSp: number;
+  ySp: number;
+};
 
-export function getBoxSp(id: string): SpriteBBoxSp {
+type TokenEntry = {
+  bbox_sp: BoxSp;
+  raw_bbox_units: RawBBoxUnits;
+  anchors?: Record<string, AnchorEntry>;
+};
+
+type TokensFile = Record<string, TokenEntry>;
+
+/** Toàn bộ tokens từ build-sprite (dùng chung cho bbox, anchors, metrics). */
+export const TOKENS = tokensJson as TokensFile;
+
+/**
+ * Trả về bounding box theo đơn vị staff-space (bbox_sp) cho glyph id.
+ */
+export function getBoxSp(id: string): BoxSp {
   const t = TOKENS[id];
-  if (!t) throw new Error(`Unknown glyph id: ${id}`);
-  return t.bbox_sp;
+  if (t && t.bbox_sp) return t.bbox_sp;
+  return { x: 0, y: 0, w: 1, h: 1 };
 }
 
-/** Lấy tâm bbox (fallback center) */
-export function getCenterSp(id: string) {
-  const b = getBoxSp(id);
-  return { x: b.x + b.w / 2, y: b.y + b.h / 2 };
-}
-
-/** Có anchors không */
-export function hasAnchors(id: string): boolean {
+/**
+ * Trả về anchor theo đơn vị staff-space.
+ * - Nếu tokens.json có anchors[id][anchorName] thì dùng xSp/ySp.
+ * - Nếu không có:
+ *    + anchor "center": dùng tâm bbox_sp.
+ *    + anchor khác: fallback (0,0).
+ */
+export function getAnchorSp(
+  id: string,
+  anchorName: string
+): { x: number; y: number } {
   const t = TOKENS[id];
-  return !!(t && t.anchors && Object.keys(t.anchors).length > 0);
+  const a = t?.anchors?.[anchorName];
+  if (a) {
+    return { x: a.xSp, y: a.ySp };
+  }
+
+  if (anchorName === "center") {
+    const box = getBoxSp(id);
+    return { x: box.w / 2, y: box.h / 2 };
+  }
+
+  return { x: 0, y: 0 };
 }
 
-/** Lấy anchor an toàn: có thì trả, không thì fallback về center/0/custom */
+/**
+ * Phiên bản an toàn:
+ * - Thử anchorName trước.
+ * - Nếu không có, thử fallbackName.
+ * - Nếu fallbackName = "center" và không có anchors, dùng tâm bbox_sp.
+ * - Nếu vẫn không có: trả (0,0).
+ */
 export function getAnchorSpSafe(
   id: string,
   anchorName: string,
-  fallback: "center" | "zero" | { x: number; y: number } = "center"
-) {
+  fallbackName: string = "center"
+): { x: number; y: number } {
   const t = TOKENS[id];
-  if (!t) throw new Error(`Unknown glyph id: ${id}`);
 
-  const a = t.anchors?.[anchorName];
-  if (a) return a;
+  const a = t?.anchors?.[anchorName];
+  if (a) {
+    return { x: a.xSp, y: a.ySp };
+  }
 
-  if (fallback === "center") return getCenterSp(id);
-  if (fallback === "zero") return { x: 0, y: 0 };
-  return fallback; // custom
+  if (fallbackName) {
+    const fb = t?.anchors?.[fallbackName];
+    if (fb) {
+      return { x: fb.xSp, y: fb.ySp };
+    }
+    if (fallbackName === "center") {
+      const box = getBoxSp(id);
+      return { x: box.w / 2, y: box.h / 2 };
+    }
+  }
+
+  if (anchorName === "center") {
+    const box = getBoxSp(id);
+    return { x: box.w / 2, y: box.h / 2 };
+  }
+
+  return { x: 0, y: 0 };
 }

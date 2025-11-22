@@ -3,40 +3,23 @@ import React from "react";
 import { getAnchorSpSafe, getBoxSp } from "../lib/sprite";
 import Glyph from "./Glyph";
 
-/**
- * Vẽ glyph B sao cho TÂM của nó trùng một điểm (anchor).
- *
- * Hỗ trợ 2 cách dùng:
- *  A) TUYỆT ĐỐI:
- *     - Truyền atX, atY (px)  => component canh TÂM glyph vào (atX, atY)
- *
- *  B) TỰ TÍNH ANCHOR:
- *     - Truyền anchorOnId, anchor, ownerX, ownerY, spSize, (ownerScale)
- *     - Component sẽ lấy anchor (đơn vị sp) trên glyph A rồi quy ra px.
- *     - Nếu glyph không có anchors (đã bỏ lúc build), tự động fallback về TÂM bbox.
- *
- *  Thuộc tính chung:
- *    - glyphId: id glyph sẽ vẽ (B), spSize, scale, fill
- *    - dxSp/dySp: nudge nhỏ theo sp khi cần tinh chỉnh (tuỳ chọn)
- */
 type Props = {
   glyphId: string;
   spSize: number;
   fill?: string;
   scale?: number;
 
-  // --- Cách A (TUYỆT ĐỐI) ---
+  // Cách A: anchor tuyệt đối
   atX?: number;
   atY?: number;
 
-  // --- Cách B (TỰ TÍNH) ---
+  // Cách B: tự tính từ anchor glyph A
   anchorOnId?: string;
   anchor?: string;
   ownerX?: number;
   ownerY?: number;
   ownerScale?: number;
 
-  // tinh chỉnh nhỏ theo sp (áp dụng cho cách B)
   dxSp?: number;
   dySp?: number;
 };
@@ -61,21 +44,38 @@ const GlyphAtAnchorOf: React.FC<Props> = (props) => {
     dySp = 0,
   } = props;
 
-  // 1) Lấy bbox glyph B (sp) -> px để canh TÂM
+  // 1) Bbox glyph B (sp)
   const { w, h } = getBoxSp(glyphId);
-  const pxW = w * spSize * scale;
-  const pxH = h * spSize * scale;
 
-  // 2) Tính điểm đích (anchor) trong px theo chế độ
+  // Scale vẽ thực tế: có thể lớn hơn scale gốc nếu là dot.
+  let drawScale = scale;
+
+  // Nếu là dấu chấm augmentation, đảm bảo kích thước tối thiểu cho dễ nhìn.
+  if (glyphId === "metAugmentationDot") {
+    const baseW = w * spSize * scale;
+    const baseH = h * spSize * scale;
+    const minPx = 8;
+    const factor = Math.max(
+      baseW > 0 ? minPx / baseW : 1,
+      baseH > 0 ? minPx / baseH : 1,
+      1
+    );
+    drawScale = scale * factor;
+  }
+
+  const pxW = w * spSize * drawScale;
+  const pxH = h * spSize * drawScale;
+
+  // 2) Tính điểm đích (anchor) theo chế độ
   let targetX: number;
   let targetY: number;
 
   if (typeof atX === "number" && typeof atY === "number") {
-    // --- Cách A: bạn đã tính (atX, atY) sẵn ---
+    // Cách A: anchor tuyệt đối
     targetX = atX;
     targetY = atY;
   } else {
-    // --- Cách B: tự tính từ anchor của glyph A ---
+    // Cách B: từ anchor glyph A
     if (
       !anchorOnId ||
       !anchor ||
@@ -87,8 +87,8 @@ const GlyphAtAnchorOf: React.FC<Props> = (props) => {
       );
     }
 
-    // Dùng getAnchorSpSafe: nếu không có anchors, fallback = "center" (tâm bbox của glyph A)
-    const a = getAnchorSpSafe(anchorOnId, anchor, "center"); // {x,y} in sp của symbol A
+    // Nếu không có anchor cụ thể, fallback về "center" của glyph A
+    const a = getAnchorSpSafe(anchorOnId, anchor, "center"); // {x,y} in sp
     targetX = ownerX + (a.x + dxSp) * spSize * ownerScale;
     targetY = ownerY + (a.y + dySp) * spSize * ownerScale;
   }
@@ -104,7 +104,7 @@ const GlyphAtAnchorOf: React.FC<Props> = (props) => {
       y={placeY}
       spSize={spSize}
       fill={fill}
-      scale={scale}
+      scale={drawScale}
     />
   );
 };

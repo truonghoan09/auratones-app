@@ -1,0 +1,2447 @@
+{
+  "brace": {
+    "codepoint": "U+E000",
+    "name": "brace",
+    "category": null
+  },
+  "reversedBrace": {
+    "codepoint": "U+E001",
+    "name": "reversedBrace",
+    "category": null
+  },
+  "bracket": {
+    "codepoint": "U+E002",
+    "name": "bracket",
+    "category": null
+  },
+  "bracketTop": {
+    "codepoint": "U+E003",
+    "name": "bracketTop",
+    "category": null
+  },
+  "bracketBottom": {
+    "codepoint": "U+E004",
+    "name": "bracketBottom",
+    "category": null
+  },
+  "reversedBracketTop": {
+    "codepoint": "U+E005",
+    "name": "reversedBracketTop",
+    "category": null
+  },
+  "reversedBracketBottom": {
+    "codepoint": "U+E006",
+    "name": "reversedBracketBottom",
+    "category": null
+  },
+  "systemDivider": {
+    "codepoint": "U+E007",
+    "name": "systemDivider",
+    "category": null
+  },
+  "systemDividerLong": {
+    "codepoint": "U+E008",
+    "name": "systemDividerLong",
+    "category": null
+  },
+  "systemDividerExtraLong": {
+    "codepoint": "U+E009",
+    "name": "systemDividerExtraLong",
+    "category": null
+  },
+  "repeatDots": {
+    "codepoint": "U+E043",
+    "name": "repeatDots",
+    "category": null
+  },
+  "repeatDot": {
+    "codepoint": "U+E044",
+    "name": "repeatDot",
+    "category": null
+  },
+  "segno": {
+    "codepoint": "U+E047",
+    "name": "segno",
+    "category": null
+  },
+  "coda": {
+    "codepoint": "U+E048",
+    "name": "coda",
+    "category": null
+  },
+  "codaSquare": {
+    "codepoint": "U+E049",
+    "name": "codaSquare",
+    "category": null
+  },
+  "segnoSerpent1": {
+    "codepoint": "U+E04A",
+    "name": "segnoSerpent1",
+    "category": null
+  },
+  "segnoSerpent2": {
+    "codepoint": "U+E04B",
+    "name": "segnoSerpent2",
+    "category": null
+  },
+  "gClef": {
+    "codepoint": "U+E050",
+    "name": "gClef",
+    "category": null
+  },
+  "gClef15mb": {
+    "codepoint": "U+E051",
+    "name": "gClef15mb",
+    "category": null
+  },
+  "gClef8vb": {
+    "codepoint": "U+E052",
+    "name": "gClef8vb",
+    "category": null
+  },
+  "gClef8va": {
+    "codepoint": "U+E053",
+    "name": "gClef8va",
+    "category": null
+  },
+  "gClef15ma": {
+    "codepoint": "U+E054",
+    "name": "gClef15ma",
+    "category": null
+  },
+  "gClef8vbOld": {
+    "codepoint": "U+E055",
+    "name": "gClef8vbOld",
+    "category": null
+  },
+  "gClef8vbParens": {
+    "codepoint": "U+E057",
+    "name": "gClef8vbParens",
+    "category": null
+  },
+  "cClef": {
+    "codepoint": "U+E05C",
+    "name": "cClef",
+    "category": null
+  },
+  "cClef8vb": {
+    "codepoint": "U+E05D",
+    "name": "cClef8vb",
+    "category": null
+  },
+  "fClef": {
+    "codepoint": "U+E062",
+    "name": "fClef",
+    "category": null
+  },
+  "fClef15mb": {
+    "codepoint": "U+E063",
+    "name": "fClef15mb",
+    "category": null
+  },
+  "fClef8vb": {
+    "codepoint": "U+E064",
+    "name": "fClef8vb",
+    "category": null
+  },
+  "fClef8va": {
+    "codepoint": "U+E065",
+    "name": "fClef8va",
+    "category": null
+  },
+  "fClef15ma": {
+    "codepoint": "U+E066",
+    "name": "fClef15ma",
+    "category": null
+  },
+  "unpitchedPercussionClef1": {
+    "codepoint": "U+E069",
+    "name": "unpitchedPercussionClef1",
+    "category": null
+  },
+  "unpitchedPercussionClef2": {
+    "codepoint": "U+E06A",
+    "name": "unpitchedPercussionClef2",
+    "category": null
+  },
+  "6stringTabClef": {
+    "codepoint": "U+E06D",
+    "name": "6stringTabClef",
+    "category": null
+  },
+  "4stringTabClef": {
+    "codepoint": "U+E06E",
+    "name": "4stringTabClef",
+    "category": null
+  },
+  "gClefChange": {
+    "codepoint": "U+E07A",
+    "name": "gClefChange",
+    "category": null
+  },
+  "cClefChange": {
+    "codepoint": "U+E07B",
+    "name": "cClefChange",
+    "category": null
+  },
+  "fClefChange": {
+    "codepoint": "U+E07C",
+    "name": "fClefChange",
+    "category": null
+  },
+  "clef8": {
+    "codepoint": "U+E07D",
+    "name": "clef8",
+    "category": null
+  },
+  "clef15": {
+    "codepoint": "U+E07E",
+    "name": "clef15",
+    "category": null
+  },
+  "timeSig0": {
+    "codepoint": "U+E080",
+    "name": "timeSig0",
+    "category": null
+  },
+  "timeSig1": {
+    "codepoint": "U+E081",
+    "name": "timeSig1",
+    "category": null
+  },
+  "timeSig2": {
+    "codepoint": "U+E082",
+    "name": "timeSig2",
+    "category": null
+  },
+  "timeSig3": {
+    "codepoint": "U+E083",
+    "name": "timeSig3",
+    "category": null
+  },
+  "timeSig4": {
+    "codepoint": "U+E084",
+    "name": "timeSig4",
+    "category": null
+  },
+  "timeSig5": {
+    "codepoint": "U+E085",
+    "name": "timeSig5",
+    "category": null
+  },
+  "timeSig6": {
+    "codepoint": "U+E086",
+    "name": "timeSig6",
+    "category": null
+  },
+  "timeSig7": {
+    "codepoint": "U+E087",
+    "name": "timeSig7",
+    "category": null
+  },
+  "timeSig8": {
+    "codepoint": "U+E088",
+    "name": "timeSig8",
+    "category": null
+  },
+  "timeSig9": {
+    "codepoint": "U+E089",
+    "name": "timeSig9",
+    "category": null
+  },
+  "timeSigCommon": {
+    "codepoint": "U+E08A",
+    "name": "timeSigCommon",
+    "category": null
+  },
+  "timeSigCutCommon": {
+    "codepoint": "U+E08B",
+    "name": "timeSigCutCommon",
+    "category": null
+  },
+  "timeSigPlus": {
+    "codepoint": "U+E08C",
+    "name": "timeSigPlus",
+    "category": null
+  },
+  "noteheadDoubleWhole": {
+    "codepoint": "U+E0A0",
+    "name": "noteheadDoubleWhole",
+    "category": null
+  },
+  "noteheadDoubleWholeSquare": {
+    "codepoint": "U+E0A1",
+    "name": "noteheadDoubleWholeSquare",
+    "category": null
+  },
+  "noteheadWhole": {
+    "codepoint": "U+E0A2",
+    "name": "noteheadWhole",
+    "category": null
+  },
+  "noteheadHalf": {
+    "codepoint": "U+E0A3",
+    "name": "noteheadHalf",
+    "category": null
+  },
+  "noteheadBlack": {
+    "codepoint": "U+E0A4",
+    "name": "noteheadBlack",
+    "category": null
+  },
+  "noteheadNull": {
+    "codepoint": "U+E0A5",
+    "name": "noteheadNull",
+    "category": null
+  },
+  "noteheadXBlack": {
+    "codepoint": "U+E0A9",
+    "name": "noteheadXBlack",
+    "category": null
+  },
+  "noteheadPlusBlack": {
+    "codepoint": "U+E0AF",
+    "name": "noteheadPlusBlack",
+    "category": null
+  },
+  "noteheadCircleX": {
+    "codepoint": "U+E0B3",
+    "name": "noteheadCircleX",
+    "category": null
+  },
+  "noteheadSquareWhite": {
+    "codepoint": "U+E0B8",
+    "name": "noteheadSquareWhite",
+    "category": null
+  },
+  "noteheadSquareBlack": {
+    "codepoint": "U+E0B9",
+    "name": "noteheadSquareBlack",
+    "category": null
+  },
+  "noteheadTriangleUpWhite": {
+    "codepoint": "U+E0BD",
+    "name": "noteheadTriangleUpWhite",
+    "category": null
+  },
+  "noteheadTriangleUpBlack": {
+    "codepoint": "U+E0BE",
+    "name": "noteheadTriangleUpBlack",
+    "category": null
+  },
+  "noteheadTriangleLeftWhite": {
+    "codepoint": "U+E0BF",
+    "name": "noteheadTriangleLeftWhite",
+    "category": null
+  },
+  "noteheadTriangleLeftBlack": {
+    "codepoint": "U+E0C0",
+    "name": "noteheadTriangleLeftBlack",
+    "category": null
+  },
+  "noteheadTriangleRightWhite": {
+    "codepoint": "U+E0C1",
+    "name": "noteheadTriangleRightWhite",
+    "category": null
+  },
+  "noteheadTriangleRightBlack": {
+    "codepoint": "U+E0C2",
+    "name": "noteheadTriangleRightBlack",
+    "category": null
+  },
+  "noteheadMoonWhite": {
+    "codepoint": "U+E0CA",
+    "name": "noteheadMoonWhite",
+    "category": null
+  },
+  "noteheadMoonBlack": {
+    "codepoint": "U+E0CB",
+    "name": "noteheadMoonBlack",
+    "category": null
+  },
+  "noteheadTriangleRoundDownWhite": {
+    "codepoint": "U+E0CC",
+    "name": "noteheadTriangleRoundDownWhite",
+    "category": null
+  },
+  "noteheadTriangleRoundDownBlack": {
+    "codepoint": "U+E0CD",
+    "name": "noteheadTriangleRoundDownBlack",
+    "category": null
+  },
+  "noteheadSlashedBlack1": {
+    "codepoint": "U+E0CF",
+    "name": "noteheadSlashedBlack1",
+    "category": null
+  },
+  "noteheadSlashedBlack2": {
+    "codepoint": "U+E0D0",
+    "name": "noteheadSlashedBlack2",
+    "category": null
+  },
+  "noteheadSlashedHalf1": {
+    "codepoint": "U+E0D1",
+    "name": "noteheadSlashedHalf1",
+    "category": null
+  },
+  "noteheadSlashedHalf2": {
+    "codepoint": "U+E0D2",
+    "name": "noteheadSlashedHalf2",
+    "category": null
+  },
+  "noteheadSlashedWhole1": {
+    "codepoint": "U+E0D3",
+    "name": "noteheadSlashedWhole1",
+    "category": null
+  },
+  "noteheadSlashedWhole2": {
+    "codepoint": "U+E0D4",
+    "name": "noteheadSlashedWhole2",
+    "category": null
+  },
+  "noteheadSlashedDoubleWhole1": {
+    "codepoint": "U+E0D5",
+    "name": "noteheadSlashedDoubleWhole1",
+    "category": null
+  },
+  "noteheadSlashedDoubleWhole2": {
+    "codepoint": "U+E0D6",
+    "name": "noteheadSlashedDoubleWhole2",
+    "category": null
+  },
+  "noteheadDiamondDoubleWhole": {
+    "codepoint": "U+E0D7",
+    "name": "noteheadDiamondDoubleWhole",
+    "category": null
+  },
+  "noteheadDiamondWhole": {
+    "codepoint": "U+E0D8",
+    "name": "noteheadDiamondWhole",
+    "category": null
+  },
+  "noteheadDiamondHalf": {
+    "codepoint": "U+E0D9",
+    "name": "noteheadDiamondHalf",
+    "category": null
+  },
+  "noteheadDiamondBlack": {
+    "codepoint": "U+E0DB",
+    "name": "noteheadDiamondBlack",
+    "category": null
+  },
+  "noteheadCircledXLarge": {
+    "codepoint": "U+E0EC",
+    "name": "noteheadCircledXLarge",
+    "category": null
+  },
+  "noteheadParenthesisLeft": {
+    "codepoint": "U+E0F5",
+    "name": "noteheadParenthesisLeft",
+    "category": null
+  },
+  "noteheadParenthesisRight": {
+    "codepoint": "U+E0F6",
+    "name": "noteheadParenthesisRight",
+    "category": null
+  },
+  "noteheadWholeFilled": {
+    "codepoint": "U+E0FA",
+    "name": "noteheadWholeFilled",
+    "category": null
+  },
+  "noteheadHalfFilled": {
+    "codepoint": "U+E0FB",
+    "name": "noteheadHalfFilled",
+    "category": null
+  },
+  "noteheadRoundBlackDoubleSlashed": {
+    "codepoint": "U+E11C",
+    "name": "noteheadRoundBlackDoubleSlashed",
+    "category": null
+  },
+  "noteheadRoundWhiteDoubleSlashed": {
+    "codepoint": "U+E11D",
+    "name": "noteheadRoundWhiteDoubleSlashed",
+    "category": null
+  },
+  "noteheadClusterSquareWhite": {
+    "codepoint": "U+E120",
+    "name": "noteheadClusterSquareWhite",
+    "category": null
+  },
+  "noteheadClusterSquareBlack": {
+    "codepoint": "U+E121",
+    "name": "noteheadClusterSquareBlack",
+    "category": null
+  },
+  "noteDoubleWhole": {
+    "codepoint": "U+E1D0",
+    "name": "noteDoubleWhole",
+    "category": null
+  },
+  "noteDoubleWholeSquare": {
+    "codepoint": "U+E1D1",
+    "name": "noteDoubleWholeSquare",
+    "category": null
+  },
+  "noteWhole": {
+    "codepoint": "U+E1D2",
+    "name": "noteWhole",
+    "category": null
+  },
+  "noteHalfUp": {
+    "codepoint": "U+E1D3",
+    "name": "noteHalfUp",
+    "category": null
+  },
+  "noteHalfDown": {
+    "codepoint": "U+E1D4",
+    "name": "noteHalfDown",
+    "category": null
+  },
+  "noteQuarterUp": {
+    "codepoint": "U+E1D5",
+    "name": "noteQuarterUp",
+    "category": null
+  },
+  "noteQuarterDown": {
+    "codepoint": "U+E1D6",
+    "name": "noteQuarterDown",
+    "category": null
+  },
+  "note8thUp": {
+    "codepoint": "U+E1D7",
+    "name": "note8thUp",
+    "category": null
+  },
+  "note8thDown": {
+    "codepoint": "U+E1D8",
+    "name": "note8thDown",
+    "category": null
+  },
+  "note16thUp": {
+    "codepoint": "U+E1D9",
+    "name": "note16thUp",
+    "category": null
+  },
+  "note16thDown": {
+    "codepoint": "U+E1DA",
+    "name": "note16thDown",
+    "category": null
+  },
+  "note32ndUp": {
+    "codepoint": "U+E1DB",
+    "name": "note32ndUp",
+    "category": null
+  },
+  "note32ndDown": {
+    "codepoint": "U+E1DC",
+    "name": "note32ndDown",
+    "category": null
+  },
+  "note64thUp": {
+    "codepoint": "U+E1DD",
+    "name": "note64thUp",
+    "category": null
+  },
+  "note64thDown": {
+    "codepoint": "U+E1DE",
+    "name": "note64thDown",
+    "category": null
+  },
+  "note128thUp": {
+    "codepoint": "U+E1DF",
+    "name": "note128thUp",
+    "category": null
+  },
+  "note128thDown": {
+    "codepoint": "U+E1E0",
+    "name": "note128thDown",
+    "category": null
+  },
+  "note256thUp": {
+    "codepoint": "U+E1E1",
+    "name": "note256thUp",
+    "category": null
+  },
+  "note256thDown": {
+    "codepoint": "U+E1E2",
+    "name": "note256thDown",
+    "category": null
+  },
+  "note512thUp": {
+    "codepoint": "U+E1E3",
+    "name": "note512thUp",
+    "category": null
+  },
+  "note512thDown": {
+    "codepoint": "U+E1E4",
+    "name": "note512thDown",
+    "category": null
+  },
+  "note1024thUp": {
+    "codepoint": "U+E1E5",
+    "name": "note1024thUp",
+    "category": null
+  },
+  "note1024thDown": {
+    "codepoint": "U+E1E6",
+    "name": "note1024thDown",
+    "category": null
+  },
+  "augmentationDot": {
+    "codepoint": "U+E1E7",
+    "name": "augmentationDot",
+    "category": null
+  },
+  "tremolo1": {
+    "codepoint": "U+E220",
+    "name": "tremolo1",
+    "category": null
+  },
+  "tremolo2": {
+    "codepoint": "U+E221",
+    "name": "tremolo2",
+    "category": null
+  },
+  "tremolo3": {
+    "codepoint": "U+E222",
+    "name": "tremolo3",
+    "category": null
+  },
+  "tremolo4": {
+    "codepoint": "U+E223",
+    "name": "tremolo4",
+    "category": null
+  },
+  "tremolo5": {
+    "codepoint": "U+E224",
+    "name": "tremolo5",
+    "category": null
+  },
+  "tremoloFingered1": {
+    "codepoint": "U+E225",
+    "name": "tremoloFingered1",
+    "category": null
+  },
+  "tremoloFingered2": {
+    "codepoint": "U+E226",
+    "name": "tremoloFingered2",
+    "category": null
+  },
+  "tremoloFingered3": {
+    "codepoint": "U+E227",
+    "name": "tremoloFingered3",
+    "category": null
+  },
+  "tremoloFingered4": {
+    "codepoint": "U+E228",
+    "name": "tremoloFingered4",
+    "category": null
+  },
+  "tremoloFingered5": {
+    "codepoint": "U+E229",
+    "name": "tremoloFingered5",
+    "category": null
+  },
+  "buzzRoll": {
+    "codepoint": "U+E22A",
+    "name": "buzzRoll",
+    "category": null
+  },
+  "tremoloDivisiDots2": {
+    "codepoint": "U+E22E",
+    "name": "tremoloDivisiDots2",
+    "category": null
+  },
+  "tremoloDivisiDots3": {
+    "codepoint": "U+E22F",
+    "name": "tremoloDivisiDots3",
+    "category": null
+  },
+  "tremoloDivisiDots4": {
+    "codepoint": "U+E230",
+    "name": "tremoloDivisiDots4",
+    "category": null
+  },
+  "tremoloDivisiDots6": {
+    "codepoint": "U+E231",
+    "name": "tremoloDivisiDots6",
+    "category": null
+  },
+  "oneHandedRollStevens": {
+    "codepoint": "U+E233",
+    "name": "oneHandedRollStevens",
+    "category": null
+  },
+  "doubleLateralRollStevens": {
+    "codepoint": "U+E234",
+    "name": "doubleLateralRollStevens",
+    "category": null
+  },
+  "flag8thUp": {
+    "codepoint": "U+E240",
+    "name": "flag8thUp",
+    "category": null
+  },
+  "flag8thDown": {
+    "codepoint": "U+E241",
+    "name": "flag8thDown",
+    "category": null
+  },
+  "flag16thUp": {
+    "codepoint": "U+E242",
+    "name": "flag16thUp",
+    "category": null
+  },
+  "flag16thDown": {
+    "codepoint": "U+E243",
+    "name": "flag16thDown",
+    "category": null
+  },
+  "flag32ndUp": {
+    "codepoint": "U+E244",
+    "name": "flag32ndUp",
+    "category": null
+  },
+  "flag32ndDown": {
+    "codepoint": "U+E245",
+    "name": "flag32ndDown",
+    "category": null
+  },
+  "flag64thUp": {
+    "codepoint": "U+E246",
+    "name": "flag64thUp",
+    "category": null
+  },
+  "flag64thDown": {
+    "codepoint": "U+E247",
+    "name": "flag64thDown",
+    "category": null
+  },
+  "flag128thUp": {
+    "codepoint": "U+E248",
+    "name": "flag128thUp",
+    "category": null
+  },
+  "flag128thDown": {
+    "codepoint": "U+E249",
+    "name": "flag128thDown",
+    "category": null
+  },
+  "flag256thUp": {
+    "codepoint": "U+E24A",
+    "name": "flag256thUp",
+    "category": null
+  },
+  "flag256thDown": {
+    "codepoint": "U+E24B",
+    "name": "flag256thDown",
+    "category": null
+  },
+  "flag512thUp": {
+    "codepoint": "U+E24C",
+    "name": "flag512thUp",
+    "category": null
+  },
+  "flag512thDown": {
+    "codepoint": "U+E24D",
+    "name": "flag512thDown",
+    "category": null
+  },
+  "flag1024thUp": {
+    "codepoint": "U+E24E",
+    "name": "flag1024thUp",
+    "category": null
+  },
+  "flag1024thDown": {
+    "codepoint": "U+E24F",
+    "name": "flag1024thDown",
+    "category": null
+  },
+  "flagInternalUp": {
+    "codepoint": "U+E250",
+    "name": "flagInternalUp",
+    "category": null
+  },
+  "flagInternalDown": {
+    "codepoint": "U+E251",
+    "name": "flagInternalDown",
+    "category": null
+  },
+  "accidentalFlat": {
+    "codepoint": "U+E260",
+    "name": "accidentalFlat",
+    "category": null
+  },
+  "accidentalNatural": {
+    "codepoint": "U+E261",
+    "name": "accidentalNatural",
+    "category": null
+  },
+  "accidentalSharp": {
+    "codepoint": "U+E262",
+    "name": "accidentalSharp",
+    "category": null
+  },
+  "accidentalDoubleSharp": {
+    "codepoint": "U+E263",
+    "name": "accidentalDoubleSharp",
+    "category": null
+  },
+  "accidentalDoubleFlat": {
+    "codepoint": "U+E264",
+    "name": "accidentalDoubleFlat",
+    "category": null
+  },
+  "accidentalTripleSharp": {
+    "codepoint": "U+E265",
+    "name": "accidentalTripleSharp",
+    "category": null
+  },
+  "accidentalTripleFlat": {
+    "codepoint": "U+E266",
+    "name": "accidentalTripleFlat",
+    "category": null
+  },
+  "accidentalNaturalFlat": {
+    "codepoint": "U+E267",
+    "name": "accidentalNaturalFlat",
+    "category": null
+  },
+  "accidentalNaturalSharp": {
+    "codepoint": "U+E268",
+    "name": "accidentalNaturalSharp",
+    "category": null
+  },
+  "accidentalSharpSharp": {
+    "codepoint": "U+E269",
+    "name": "accidentalSharpSharp",
+    "category": null
+  },
+  "accidentalParensLeft": {
+    "codepoint": "U+E26A",
+    "name": "accidentalParensLeft",
+    "category": null
+  },
+  "accidentalParensRight": {
+    "codepoint": "U+E26B",
+    "name": "accidentalParensRight",
+    "category": null
+  },
+  "accidentalBracketLeft": {
+    "codepoint": "U+E26C",
+    "name": "accidentalBracketLeft",
+    "category": null
+  },
+  "accidentalBracketRight": {
+    "codepoint": "U+E26D",
+    "name": "accidentalBracketRight",
+    "category": null
+  },
+  "accidentalQuarterToneFlatArrowUp": {
+    "codepoint": "U+E270",
+    "name": "accidentalQuarterToneFlatArrowUp",
+    "category": null
+  },
+  "accidentalThreeQuarterTonesFlatArrowDown": {
+    "codepoint": "U+E271",
+    "name": "accidentalThreeQuarterTonesFlatArrowDown",
+    "category": null
+  },
+  "accidentalQuarterToneSharpNaturalArrowUp": {
+    "codepoint": "U+E272",
+    "name": "accidentalQuarterToneSharpNaturalArrowUp",
+    "category": null
+  },
+  "accidentalQuarterToneFlatNaturalArrowDown": {
+    "codepoint": "U+E273",
+    "name": "accidentalQuarterToneFlatNaturalArrowDown",
+    "category": null
+  },
+  "accidentalThreeQuarterTonesSharpArrowUp": {
+    "codepoint": "U+E274",
+    "name": "accidentalThreeQuarterTonesSharpArrowUp",
+    "category": null
+  },
+  "accidentalQuarterToneSharpArrowDown": {
+    "codepoint": "U+E275",
+    "name": "accidentalQuarterToneSharpArrowDown",
+    "category": null
+  },
+  "accidentalFiveQuarterTonesSharpArrowUp": {
+    "codepoint": "U+E276",
+    "name": "accidentalFiveQuarterTonesSharpArrowUp",
+    "category": null
+  },
+  "accidentalThreeQuarterTonesSharpArrowDown": {
+    "codepoint": "U+E277",
+    "name": "accidentalThreeQuarterTonesSharpArrowDown",
+    "category": null
+  },
+  "accidentalThreeQuarterTonesFlatArrowUp": {
+    "codepoint": "U+E278",
+    "name": "accidentalThreeQuarterTonesFlatArrowUp",
+    "category": null
+  },
+  "accidentalFiveQuarterTonesFlatArrowDown": {
+    "codepoint": "U+E279",
+    "name": "accidentalFiveQuarterTonesFlatArrowDown",
+    "category": null
+  },
+  "accidentalArrowUp": {
+    "codepoint": "U+E27A",
+    "name": "accidentalArrowUp",
+    "category": null
+  },
+  "accidentalArrowDown": {
+    "codepoint": "U+E27B",
+    "name": "accidentalArrowDown",
+    "category": null
+  },
+  "accidentalQuarterToneFlatStein": {
+    "codepoint": "U+E280",
+    "name": "accidentalQuarterToneFlatStein",
+    "category": null
+  },
+  "accidentalThreeQuarterTonesFlatZimmermann": {
+    "codepoint": "U+E281",
+    "name": "accidentalThreeQuarterTonesFlatZimmermann",
+    "category": null
+  },
+  "accidentalQuarterToneSharpStein": {
+    "codepoint": "U+E282",
+    "name": "accidentalQuarterToneSharpStein",
+    "category": null
+  },
+  "accidentalThreeQuarterTonesSharpStein": {
+    "codepoint": "U+E283",
+    "name": "accidentalThreeQuarterTonesSharpStein",
+    "category": null
+  },
+  "accidentalNarrowReversedFlat": {
+    "codepoint": "U+E284",
+    "name": "accidentalNarrowReversedFlat",
+    "category": null
+  },
+  "accidentalNarrowReversedFlatAndFlat": {
+    "codepoint": "U+E285",
+    "name": "accidentalNarrowReversedFlatAndFlat",
+    "category": null
+  },
+  "accidentalBuyukMucennebFlat": {
+    "codepoint": "U+E440",
+    "name": "accidentalBuyukMucennebFlat",
+    "category": null
+  },
+  "accidentalBakiyeFlat": {
+    "codepoint": "U+E442",
+    "name": "accidentalBakiyeFlat",
+    "category": null
+  },
+  "accidentalKucukMucennebSharp": {
+    "codepoint": "U+E446",
+    "name": "accidentalKucukMucennebSharp",
+    "category": null
+  },
+  "accidentalBuyukMucennebSharp": {
+    "codepoint": "U+E447",
+    "name": "accidentalBuyukMucennebSharp",
+    "category": null
+  },
+  "articAccentAbove": {
+    "codepoint": "U+E4A0",
+    "name": "articAccentAbove",
+    "category": null
+  },
+  "articAccentBelow": {
+    "codepoint": "U+E4A1",
+    "name": "articAccentBelow",
+    "category": null
+  },
+  "articStaccatoAbove": {
+    "codepoint": "U+E4A2",
+    "name": "articStaccatoAbove",
+    "category": null
+  },
+  "articStaccatoBelow": {
+    "codepoint": "U+E4A3",
+    "name": "articStaccatoBelow",
+    "category": null
+  },
+  "articTenutoAbove": {
+    "codepoint": "U+E4A4",
+    "name": "articTenutoAbove",
+    "category": null
+  },
+  "articTenutoBelow": {
+    "codepoint": "U+E4A5",
+    "name": "articTenutoBelow",
+    "category": null
+  },
+  "articStaccatissimoAbove": {
+    "codepoint": "U+E4A6",
+    "name": "articStaccatissimoAbove",
+    "category": null
+  },
+  "articStaccatissimoBelow": {
+    "codepoint": "U+E4A7",
+    "name": "articStaccatissimoBelow",
+    "category": null
+  },
+  "articStaccatissimoWedgeAbove": {
+    "codepoint": "U+E4A8",
+    "name": "articStaccatissimoWedgeAbove",
+    "category": null
+  },
+  "articStaccatissimoWedgeBelow": {
+    "codepoint": "U+E4A9",
+    "name": "articStaccatissimoWedgeBelow",
+    "category": null
+  },
+  "articMarcatoAbove": {
+    "codepoint": "U+E4AC",
+    "name": "articMarcatoAbove",
+    "category": null
+  },
+  "articMarcatoBelow": {
+    "codepoint": "U+E4AD",
+    "name": "articMarcatoBelow",
+    "category": null
+  },
+  "articMarcatoStaccatoAbove": {
+    "codepoint": "U+E4AE",
+    "name": "articMarcatoStaccatoAbove",
+    "category": null
+  },
+  "articMarcatoStaccatoBelow": {
+    "codepoint": "U+E4AF",
+    "name": "articMarcatoStaccatoBelow",
+    "category": null
+  },
+  "articAccentStaccatoAbove": {
+    "codepoint": "U+E4B0",
+    "name": "articAccentStaccatoAbove",
+    "category": null
+  },
+  "articAccentStaccatoBelow": {
+    "codepoint": "U+E4B1",
+    "name": "articAccentStaccatoBelow",
+    "category": null
+  },
+  "articTenutoStaccatoAbove": {
+    "codepoint": "U+E4B2",
+    "name": "articTenutoStaccatoAbove",
+    "category": null
+  },
+  "articTenutoStaccatoBelow": {
+    "codepoint": "U+E4B3",
+    "name": "articTenutoStaccatoBelow",
+    "category": null
+  },
+  "articTenutoAccentAbove": {
+    "codepoint": "U+E4B4",
+    "name": "articTenutoAccentAbove",
+    "category": null
+  },
+  "articTenutoAccentBelow": {
+    "codepoint": "U+E4B5",
+    "name": "articTenutoAccentBelow",
+    "category": null
+  },
+  "articStressAbove": {
+    "codepoint": "U+E4B6",
+    "name": "articStressAbove",
+    "category": null
+  },
+  "articStressBelow": {
+    "codepoint": "U+E4B7",
+    "name": "articStressBelow",
+    "category": null
+  },
+  "articUnstressAbove": {
+    "codepoint": "U+E4B8",
+    "name": "articUnstressAbove",
+    "category": null
+  },
+  "articUnstressBelow": {
+    "codepoint": "U+E4B9",
+    "name": "articUnstressBelow",
+    "category": null
+  },
+  "articLaissezVibrerAbove": {
+    "codepoint": "U+E4BA",
+    "name": "articLaissezVibrerAbove",
+    "category": null
+  },
+  "articLaissezVibrerBelow": {
+    "codepoint": "U+E4BB",
+    "name": "articLaissezVibrerBelow",
+    "category": null
+  },
+  "articMarcatoTenutoAbove": {
+    "codepoint": "U+E4BC",
+    "name": "articMarcatoTenutoAbove",
+    "category": null
+  },
+  "articMarcatoTenutoBelow": {
+    "codepoint": "U+E4BD",
+    "name": "articMarcatoTenutoBelow",
+    "category": null
+  },
+  "fermataAbove": {
+    "codepoint": "U+E4C0",
+    "name": "fermataAbove",
+    "category": null
+  },
+  "fermataBelow": {
+    "codepoint": "U+E4C1",
+    "name": "fermataBelow",
+    "category": null
+  },
+  "fermataShortAbove": {
+    "codepoint": "U+E4C4",
+    "name": "fermataShortAbove",
+    "category": null
+  },
+  "fermataShortBelow": {
+    "codepoint": "U+E4C5",
+    "name": "fermataShortBelow",
+    "category": null
+  },
+  "fermataLongAbove": {
+    "codepoint": "U+E4C6",
+    "name": "fermataLongAbove",
+    "category": null
+  },
+  "fermataLongBelow": {
+    "codepoint": "U+E4C7",
+    "name": "fermataLongBelow",
+    "category": null
+  },
+  "fermataVeryLongAbove": {
+    "codepoint": "U+E4C8",
+    "name": "fermataVeryLongAbove",
+    "category": null
+  },
+  "fermataVeryLongBelow": {
+    "codepoint": "U+E4C9",
+    "name": "fermataVeryLongBelow",
+    "category": null
+  },
+  "breathMarkComma": {
+    "codepoint": "U+E4CE",
+    "name": "breathMarkComma",
+    "category": null
+  },
+  "caesura": {
+    "codepoint": "U+E4D1",
+    "name": "caesura",
+    "category": null
+  },
+  "caesuraShort": {
+    "codepoint": "U+E4D3",
+    "name": "caesuraShort",
+    "category": null
+  },
+  "caesuraCurved": {
+    "codepoint": "U+E4D4",
+    "name": "caesuraCurved",
+    "category": null
+  },
+  "caesuraSingleStroke": {
+    "codepoint": "U+E4D7",
+    "name": "caesuraSingleStroke",
+    "category": null
+  },
+  "restMaxima": {
+    "codepoint": "U+E4E0",
+    "name": "restMaxima",
+    "category": null
+  },
+  "restLonga": {
+    "codepoint": "U+E4E1",
+    "name": "restLonga",
+    "category": null
+  },
+  "restDoubleWhole": {
+    "codepoint": "U+E4E2",
+    "name": "restDoubleWhole",
+    "category": null
+  },
+  "restWhole": {
+    "codepoint": "U+E4E3",
+    "name": "restWhole",
+    "category": null
+  },
+  "restHalf": {
+    "codepoint": "U+E4E4",
+    "name": "restHalf",
+    "category": null
+  },
+  "restQuarter": {
+    "codepoint": "U+E4E5",
+    "name": "restQuarter",
+    "category": null
+  },
+  "rest8th": {
+    "codepoint": "U+E4E6",
+    "name": "rest8th",
+    "category": null
+  },
+  "rest16th": {
+    "codepoint": "U+E4E7",
+    "name": "rest16th",
+    "category": null
+  },
+  "rest32nd": {
+    "codepoint": "U+E4E8",
+    "name": "rest32nd",
+    "category": null
+  },
+  "rest64th": {
+    "codepoint": "U+E4E9",
+    "name": "rest64th",
+    "category": null
+  },
+  "rest128th": {
+    "codepoint": "U+E4EA",
+    "name": "rest128th",
+    "category": null
+  },
+  "rest256th": {
+    "codepoint": "U+E4EB",
+    "name": "rest256th",
+    "category": null
+  },
+  "rest512th": {
+    "codepoint": "U+E4EC",
+    "name": "rest512th",
+    "category": null
+  },
+  "rest1024th": {
+    "codepoint": "U+E4ED",
+    "name": "rest1024th",
+    "category": null
+  },
+  "restQuarterOld": {
+    "codepoint": "U+E4F2",
+    "name": "restQuarterOld",
+    "category": null
+  },
+  "restDoubleWholeLegerLine": {
+    "codepoint": "U+E4F3",
+    "name": "restDoubleWholeLegerLine",
+    "category": null
+  },
+  "restWholeLegerLine": {
+    "codepoint": "U+E4F4",
+    "name": "restWholeLegerLine",
+    "category": null
+  },
+  "restHalfLegerLine": {
+    "codepoint": "U+E4F5",
+    "name": "restHalfLegerLine",
+    "category": null
+  },
+  "restQuarterZ": {
+    "codepoint": "U+E4F6",
+    "name": "restQuarterZ",
+    "category": null
+  },
+  "repeat1Bar": {
+    "codepoint": "U+E500",
+    "name": "repeat1Bar",
+    "category": null
+  },
+  "repeat2Bars": {
+    "codepoint": "U+E501",
+    "name": "repeat2Bars",
+    "category": null
+  },
+  "repeat4Bars": {
+    "codepoint": "U+E502",
+    "name": "repeat4Bars",
+    "category": null
+  },
+  "repeatBarUpperDot": {
+    "codepoint": "U+E503",
+    "name": "repeatBarUpperDot",
+    "category": null
+  },
+  "repeatBarSlash": {
+    "codepoint": "U+E504",
+    "name": "repeatBarSlash",
+    "category": null
+  },
+  "repeatBarLowerDot": {
+    "codepoint": "U+E505",
+    "name": "repeatBarLowerDot",
+    "category": null
+  },
+  "ottava": {
+    "codepoint": "U+E510",
+    "name": "ottava",
+    "category": null
+  },
+  "ottavaAlta": {
+    "codepoint": "U+E511",
+    "name": "ottavaAlta",
+    "category": null
+  },
+  "ottavaBassa": {
+    "codepoint": "U+E512",
+    "name": "ottavaBassa",
+    "category": null
+  },
+  "ottavaBassaBa": {
+    "codepoint": "U+E513",
+    "name": "ottavaBassaBa",
+    "category": null
+  },
+  "quindicesima": {
+    "codepoint": "U+E514",
+    "name": "quindicesima",
+    "category": null
+  },
+  "quindicesimaAlta": {
+    "codepoint": "U+E515",
+    "name": "quindicesimaAlta",
+    "category": null
+  },
+  "quindicesimaBassa": {
+    "codepoint": "U+E516",
+    "name": "quindicesimaBassa",
+    "category": null
+  },
+  "ventiduesima": {
+    "codepoint": "U+E517",
+    "name": "ventiduesima",
+    "category": null
+  },
+  "ventiduesimaAlta": {
+    "codepoint": "U+E518",
+    "name": "ventiduesimaAlta",
+    "category": null
+  },
+  "ventiduesimaBassa": {
+    "codepoint": "U+E519",
+    "name": "ventiduesimaBassa",
+    "category": null
+  },
+  "octaveParensLeft": {
+    "codepoint": "U+E51A",
+    "name": "octaveParensLeft",
+    "category": null
+  },
+  "octaveParensRight": {
+    "codepoint": "U+E51B",
+    "name": "octaveParensRight",
+    "category": null
+  },
+  "ottavaBassaVb": {
+    "codepoint": "U+E51C",
+    "name": "ottavaBassaVb",
+    "category": null
+  },
+  "quindicesimaBassaMb": {
+    "codepoint": "U+E51D",
+    "name": "quindicesimaBassaMb",
+    "category": null
+  },
+  "ventiduesimaBassaMb": {
+    "codepoint": "U+E51E",
+    "name": "ventiduesimaBassaMb",
+    "category": null
+  },
+  "octaveBassa": {
+    "codepoint": "U+E51F",
+    "name": "octaveBassa",
+    "category": null
+  },
+  "dynamicPiano": {
+    "codepoint": "U+E520",
+    "name": "dynamicPiano",
+    "category": null
+  },
+  "dynamicMezzo": {
+    "codepoint": "U+E521",
+    "name": "dynamicMezzo",
+    "category": null
+  },
+  "dynamicForte": {
+    "codepoint": "U+E522",
+    "name": "dynamicForte",
+    "category": null
+  },
+  "dynamicRinforzando": {
+    "codepoint": "U+E523",
+    "name": "dynamicRinforzando",
+    "category": null
+  },
+  "dynamicSforzando": {
+    "codepoint": "U+E524",
+    "name": "dynamicSforzando",
+    "category": null
+  },
+  "dynamicZ": {
+    "codepoint": "U+E525",
+    "name": "dynamicZ",
+    "category": null
+  },
+  "dynamicNiente": {
+    "codepoint": "U+E526",
+    "name": "dynamicNiente",
+    "category": null
+  },
+  "dynamicPPPPPP": {
+    "codepoint": "U+E527",
+    "name": "dynamicPPPPPP",
+    "category": null
+  },
+  "dynamicPPPPP": {
+    "codepoint": "U+E528",
+    "name": "dynamicPPPPP",
+    "category": null
+  },
+  "dynamicPPPP": {
+    "codepoint": "U+E529",
+    "name": "dynamicPPPP",
+    "category": null
+  },
+  "dynamicPPP": {
+    "codepoint": "U+E52A",
+    "name": "dynamicPPP",
+    "category": null
+  },
+  "dynamicPP": {
+    "codepoint": "U+E52B",
+    "name": "dynamicPP",
+    "category": null
+  },
+  "dynamicMP": {
+    "codepoint": "U+E52C",
+    "name": "dynamicMP",
+    "category": null
+  },
+  "dynamicMF": {
+    "codepoint": "U+E52D",
+    "name": "dynamicMF",
+    "category": null
+  },
+  "dynamicPF": {
+    "codepoint": "U+E52E",
+    "name": "dynamicPF",
+    "category": null
+  },
+  "dynamicFF": {
+    "codepoint": "U+E52F",
+    "name": "dynamicFF",
+    "category": null
+  },
+  "dynamicFFF": {
+    "codepoint": "U+E530",
+    "name": "dynamicFFF",
+    "category": null
+  },
+  "dynamicFFFF": {
+    "codepoint": "U+E531",
+    "name": "dynamicFFFF",
+    "category": null
+  },
+  "dynamicFFFFF": {
+    "codepoint": "U+E532",
+    "name": "dynamicFFFFF",
+    "category": null
+  },
+  "dynamicFFFFFF": {
+    "codepoint": "U+E533",
+    "name": "dynamicFFFFFF",
+    "category": null
+  },
+  "dynamicFortePiano": {
+    "codepoint": "U+E534",
+    "name": "dynamicFortePiano",
+    "category": null
+  },
+  "dynamicForzando": {
+    "codepoint": "U+E535",
+    "name": "dynamicForzando",
+    "category": null
+  },
+  "dynamicSforzando1": {
+    "codepoint": "U+E536",
+    "name": "dynamicSforzando1",
+    "category": null
+  },
+  "dynamicSforzandoPiano": {
+    "codepoint": "U+E537",
+    "name": "dynamicSforzandoPiano",
+    "category": null
+  },
+  "dynamicSforzandoPianissimo": {
+    "codepoint": "U+E538",
+    "name": "dynamicSforzandoPianissimo",
+    "category": null
+  },
+  "dynamicSforzato": {
+    "codepoint": "U+E539",
+    "name": "dynamicSforzato",
+    "category": null
+  },
+  "dynamicSforzatoPiano": {
+    "codepoint": "U+E53A",
+    "name": "dynamicSforzatoPiano",
+    "category": null
+  },
+  "dynamicSforzatoFF": {
+    "codepoint": "U+E53B",
+    "name": "dynamicSforzatoFF",
+    "category": null
+  },
+  "dynamicRinforzando1": {
+    "codepoint": "U+E53C",
+    "name": "dynamicRinforzando1",
+    "category": null
+  },
+  "dynamicRinforzando2": {
+    "codepoint": "U+E53D",
+    "name": "dynamicRinforzando2",
+    "category": null
+  },
+  "dynamicCrescendoHairpin": {
+    "codepoint": "U+E53E",
+    "name": "dynamicCrescendoHairpin",
+    "category": null
+  },
+  "dynamicDiminuendoHairpin": {
+    "codepoint": "U+E53F",
+    "name": "dynamicDiminuendoHairpin",
+    "category": null
+  },
+  "dynamicMessaDiVoce": {
+    "codepoint": "U+E540",
+    "name": "dynamicMessaDiVoce",
+    "category": null
+  },
+  "dynamicNienteForHairpin": {
+    "codepoint": "U+E541",
+    "name": "dynamicNienteForHairpin",
+    "category": null
+  },
+  "graceNoteAcciaccaturaStemUp": {
+    "codepoint": "U+E560",
+    "name": "graceNoteAcciaccaturaStemUp",
+    "category": null
+  },
+  "graceNoteAcciaccaturaStemDown": {
+    "codepoint": "U+E561",
+    "name": "graceNoteAcciaccaturaStemDown",
+    "category": null
+  },
+  "graceNoteAppoggiaturaStemUp": {
+    "codepoint": "U+E562",
+    "name": "graceNoteAppoggiaturaStemUp",
+    "category": null
+  },
+  "graceNoteAppoggiaturaStemDown": {
+    "codepoint": "U+E563",
+    "name": "graceNoteAppoggiaturaStemDown",
+    "category": null
+  },
+  "graceNoteSlashStemUp": {
+    "codepoint": "U+E564",
+    "name": "graceNoteSlashStemUp",
+    "category": null
+  },
+  "graceNoteSlashStemDown": {
+    "codepoint": "U+E565",
+    "name": "graceNoteSlashStemDown",
+    "category": null
+  },
+  "ornamentTrill": {
+    "codepoint": "U+E566",
+    "name": "ornamentTrill",
+    "category": null
+  },
+  "ornamentTurn": {
+    "codepoint": "U+E567",
+    "name": "ornamentTurn",
+    "category": null
+  },
+  "ornamentTurnInverted": {
+    "codepoint": "U+E568",
+    "name": "ornamentTurnInverted",
+    "category": null
+  },
+  "ornamentTurnSlash": {
+    "codepoint": "U+E569",
+    "name": "ornamentTurnSlash",
+    "category": null
+  },
+  "ornamentTurnUp": {
+    "codepoint": "U+E56A",
+    "name": "ornamentTurnUp",
+    "category": null
+  },
+  "ornamentTurnUpS": {
+    "codepoint": "U+E56B",
+    "name": "ornamentTurnUpS",
+    "category": null
+  },
+  "ornamentShortTrill": {
+    "codepoint": "U+E56C",
+    "name": "ornamentShortTrill",
+    "category": null
+  },
+  "ornamentMordent": {
+    "codepoint": "U+E56D",
+    "name": "ornamentMordent",
+    "category": null
+  },
+  "ornamentTremblement": {
+    "codepoint": "U+E56E",
+    "name": "ornamentTremblement",
+    "category": null
+  },
+  "ornamentHaydn": {
+    "codepoint": "U+E56F",
+    "name": "ornamentHaydn",
+    "category": null
+  },
+  "ornamentPortDeVoixV": {
+    "codepoint": "U+E570",
+    "name": "ornamentPortDeVoixV",
+    "category": null
+  },
+  "ornamentRightFacingHalfCircle": {
+    "codepoint": "U+E571",
+    "name": "ornamentRightFacingHalfCircle",
+    "category": null
+  },
+  "ornamentLeftFacingHalfCircle": {
+    "codepoint": "U+E572",
+    "name": "ornamentLeftFacingHalfCircle",
+    "category": null
+  },
+  "ornamentRightFacingHook": {
+    "codepoint": "U+E573",
+    "name": "ornamentRightFacingHook",
+    "category": null
+  },
+  "ornamentLeftFacingHook": {
+    "codepoint": "U+E574",
+    "name": "ornamentLeftFacingHook",
+    "category": null
+  },
+  "ornamentHookBeforeNote": {
+    "codepoint": "U+E575",
+    "name": "ornamentHookBeforeNote",
+    "category": null
+  },
+  "ornamentHookAfterNote": {
+    "codepoint": "U+E576",
+    "name": "ornamentHookAfterNote",
+    "category": null
+  },
+  "ornamentDownCurve": {
+    "codepoint": "U+E578",
+    "name": "ornamentDownCurve",
+    "category": null
+  },
+  "ornamentShortObliqueLineBeforeNote": {
+    "codepoint": "U+E579",
+    "name": "ornamentShortObliqueLineBeforeNote",
+    "category": null
+  },
+  "ornamentShortObliqueLineAfterNote": {
+    "codepoint": "U+E57A",
+    "name": "ornamentShortObliqueLineAfterNote",
+    "category": null
+  },
+  "ornamentObliqueLineBeforeNote": {
+    "codepoint": "U+E57B",
+    "name": "ornamentObliqueLineBeforeNote",
+    "category": null
+  },
+  "ornamentObliqueLineAfterNote": {
+    "codepoint": "U+E57C",
+    "name": "ornamentObliqueLineAfterNote",
+    "category": null
+  },
+  "ornamentDoubleObliqueLinesBeforeNote": {
+    "codepoint": "U+E57D",
+    "name": "ornamentDoubleObliqueLinesBeforeNote",
+    "category": null
+  },
+  "ornamentDoubleObliqueLinesAfterNote": {
+    "codepoint": "U+E57E",
+    "name": "ornamentDoubleObliqueLinesAfterNote",
+    "category": null
+  },
+  "ornamentObliqueLineHorizBeforeNote": {
+    "codepoint": "U+E57F",
+    "name": "ornamentObliqueLineHorizBeforeNote",
+    "category": null
+  },
+  "ornamentObliqueLineHorizAfterNote": {
+    "codepoint": "U+E580",
+    "name": "ornamentObliqueLineHorizAfterNote",
+    "category": null
+  },
+  "ornamentShake3": {
+    "codepoint": "U+E582",
+    "name": "ornamentShake3",
+    "category": null
+  },
+  "ornamentVerticalLine": {
+    "codepoint": "U+E583",
+    "name": "ornamentVerticalLine",
+    "category": null
+  },
+  "ornamentShakeMuffat1": {
+    "codepoint": "U+E584",
+    "name": "ornamentShakeMuffat1",
+    "category": null
+  },
+  "ornamentSchleifer": {
+    "codepoint": "U+E587",
+    "name": "ornamentSchleifer",
+    "category": null
+  },
+  "ornamentPinceCouperin": {
+    "codepoint": "U+E588",
+    "name": "ornamentPinceCouperin",
+    "category": null
+  },
+  "ornamentLowLeftConcaveStroke": {
+    "codepoint": "U+E598",
+    "name": "ornamentLowLeftConcaveStroke",
+    "category": null
+  },
+  "ornamentZigZagLineNoRightEnd": {
+    "codepoint": "U+E59D",
+    "name": "ornamentZigZagLineNoRightEnd",
+    "category": null
+  },
+  "ornamentZigZagLineWithRightEnd": {
+    "codepoint": "U+E59E",
+    "name": "ornamentZigZagLineWithRightEnd",
+    "category": null
+  },
+  "ornamentPrecompAppoggTrill": {
+    "codepoint": "U+E5B2",
+    "name": "ornamentPrecompAppoggTrill",
+    "category": null
+  },
+  "ornamentPrecompSlideTrillDAnglebert": {
+    "codepoint": "U+E5B5",
+    "name": "ornamentPrecompSlideTrillDAnglebert",
+    "category": null
+  },
+  "ornamentPrecompSlideTrillBach": {
+    "codepoint": "U+E5B8",
+    "name": "ornamentPrecompSlideTrillBach",
+    "category": null
+  },
+  "ornamentPrecompTrillSuffixDandrieu": {
+    "codepoint": "U+E5BB",
+    "name": "ornamentPrecompTrillSuffixDandrieu",
+    "category": null
+  },
+  "ornamentPrecompPortDeVoixMordent": {
+    "codepoint": "U+E5BC",
+    "name": "ornamentPrecompPortDeVoixMordent",
+    "category": null
+  },
+  "ornamentPrecompTrillWithMordent": {
+    "codepoint": "U+E5BD",
+    "name": "ornamentPrecompTrillWithMordent",
+    "category": null
+  },
+  "ornamentPrecompCadence": {
+    "codepoint": "U+E5BE",
+    "name": "ornamentPrecompCadence",
+    "category": null
+  },
+  "ornamentPrecompDoubleCadenceLowerPrefix": {
+    "codepoint": "U+E5C0",
+    "name": "ornamentPrecompDoubleCadenceLowerPrefix",
+    "category": null
+  },
+  "ornamentPrecompDoubleCadenceUpperPrefix": {
+    "codepoint": "U+E5C3",
+    "name": "ornamentPrecompDoubleCadenceUpperPrefix",
+    "category": null
+  },
+  "ornamentPrecompMordentUpperPrefix": {
+    "codepoint": "U+E5C6",
+    "name": "ornamentPrecompMordentUpperPrefix",
+    "category": null
+  },
+  "ornamentPrecompInvertedMordentUpperPrefix": {
+    "codepoint": "U+E5C7",
+    "name": "ornamentPrecompInvertedMordentUpperPrefix",
+    "category": null
+  },
+  "ornamentPrecompTrillLowerSuffix": {
+    "codepoint": "U+E5C8",
+    "name": "ornamentPrecompTrillLowerSuffix",
+    "category": null
+  },
+  "brassMuteClosed": {
+    "codepoint": "U+E5E5",
+    "name": "brassMuteClosed",
+    "category": null
+  },
+  "brassMuteHalfClosed": {
+    "codepoint": "U+E5E6",
+    "name": "brassMuteHalfClosed",
+    "category": null
+  },
+  "brassMuteOpen": {
+    "codepoint": "U+E5E7",
+    "name": "brassMuteOpen",
+    "category": null
+  },
+  "brassHarmonMuteClosed": {
+    "codepoint": "U+E5E8",
+    "name": "brassHarmonMuteClosed",
+    "category": null
+  },
+  "brassHarmonMuteStemHalfLeft": {
+    "codepoint": "U+E5E9",
+    "name": "brassHarmonMuteStemHalfLeft",
+    "category": null
+  },
+  "brassHarmonMuteStemHalfRight": {
+    "codepoint": "U+E5EA",
+    "name": "brassHarmonMuteStemHalfRight",
+    "category": null
+  },
+  "brassHarmonMuteStemOpen": {
+    "codepoint": "U+E5EB",
+    "name": "brassHarmonMuteStemOpen",
+    "category": null
+  },
+  "brassValveTrill": {
+    "codepoint": "U+E5EF",
+    "name": "brassValveTrill",
+    "category": null
+  },
+  "stringsDownBow": {
+    "codepoint": "U+E610",
+    "name": "stringsDownBow",
+    "category": null
+  },
+  "stringsDownBowTurned": {
+    "codepoint": "U+E611",
+    "name": "stringsDownBowTurned",
+    "category": null
+  },
+  "stringsUpBow": {
+    "codepoint": "U+E612",
+    "name": "stringsUpBow",
+    "category": null
+  },
+  "stringsUpBowTurned": {
+    "codepoint": "U+E613",
+    "name": "stringsUpBowTurned",
+    "category": null
+  },
+  "stringsHarmonic": {
+    "codepoint": "U+E614",
+    "name": "stringsHarmonic",
+    "category": null
+  },
+  "stringsHalfHarmonic": {
+    "codepoint": "U+E615",
+    "name": "stringsHalfHarmonic",
+    "category": null
+  },
+  "pluckedSnapPizzicatoBelow": {
+    "codepoint": "U+E630",
+    "name": "pluckedSnapPizzicatoBelow",
+    "category": null
+  },
+  "pluckedSnapPizzicatoAbove": {
+    "codepoint": "U+E631",
+    "name": "pluckedSnapPizzicatoAbove",
+    "category": null
+  },
+  "pluckedBuzzPizzicato": {
+    "codepoint": "U+E632",
+    "name": "pluckedBuzzPizzicato",
+    "category": null
+  },
+  "keyboardPedalPed": {
+    "codepoint": "U+E650",
+    "name": "keyboardPedalPed",
+    "category": null
+  },
+  "keyboardPedalP": {
+    "codepoint": "U+E651",
+    "name": "keyboardPedalP",
+    "category": null
+  },
+  "keyboardPedalE": {
+    "codepoint": "U+E652",
+    "name": "keyboardPedalE",
+    "category": null
+  },
+  "keyboardPedalD": {
+    "codepoint": "U+E653",
+    "name": "keyboardPedalD",
+    "category": null
+  },
+  "keyboardPedalDot": {
+    "codepoint": "U+E654",
+    "name": "keyboardPedalDot",
+    "category": null
+  },
+  "keyboardPedalUp": {
+    "codepoint": "U+E655",
+    "name": "keyboardPedalUp",
+    "category": null
+  },
+  "keyboardPedalParensLeft": {
+    "codepoint": "U+E676",
+    "name": "keyboardPedalParensLeft",
+    "category": null
+  },
+  "keyboardPedalParensRight": {
+    "codepoint": "U+E677",
+    "name": "keyboardPedalParensRight",
+    "category": null
+  },
+  "harpPedalRaised": {
+    "codepoint": "U+E680",
+    "name": "harpPedalRaised",
+    "category": null
+  },
+  "harpPedalCentered": {
+    "codepoint": "U+E681",
+    "name": "harpPedalCentered",
+    "category": null
+  },
+  "harpPedalLowered": {
+    "codepoint": "U+E682",
+    "name": "harpPedalLowered",
+    "category": null
+  },
+  "harpPedalDivider": {
+    "codepoint": "U+E683",
+    "name": "harpPedalDivider",
+    "category": null
+  },
+  "csymDiminished": {
+    "codepoint": "U+E870",
+    "name": "csymDiminished",
+    "category": null
+  },
+  "csymHalfDiminished": {
+    "codepoint": "U+E871",
+    "name": "csymHalfDiminished",
+    "category": null
+  },
+  "csymAugmented": {
+    "codepoint": "U+E872",
+    "name": "csymAugmented",
+    "category": null
+  },
+  "csymMajorSeventh": {
+    "codepoint": "U+E873",
+    "name": "csymMajorSeventh",
+    "category": null
+  },
+  "tuplet0": {
+    "codepoint": "U+E880",
+    "name": "tuplet0",
+    "category": null
+  },
+  "tuplet1": {
+    "codepoint": "U+E881",
+    "name": "tuplet1",
+    "category": null
+  },
+  "tuplet2": {
+    "codepoint": "U+E882",
+    "name": "tuplet2",
+    "category": null
+  },
+  "tuplet3": {
+    "codepoint": "U+E883",
+    "name": "tuplet3",
+    "category": null
+  },
+  "tuplet4": {
+    "codepoint": "U+E884",
+    "name": "tuplet4",
+    "category": null
+  },
+  "tuplet5": {
+    "codepoint": "U+E885",
+    "name": "tuplet5",
+    "category": null
+  },
+  "tuplet6": {
+    "codepoint": "U+E886",
+    "name": "tuplet6",
+    "category": null
+  },
+  "tuplet7": {
+    "codepoint": "U+E887",
+    "name": "tuplet7",
+    "category": null
+  },
+  "tuplet8": {
+    "codepoint": "U+E888",
+    "name": "tuplet8",
+    "category": null
+  },
+  "tuplet9": {
+    "codepoint": "U+E889",
+    "name": "tuplet9",
+    "category": null
+  },
+  "tupletColon": {
+    "codepoint": "U+E88A",
+    "name": "tupletColon",
+    "category": null
+  },
+  "mensuralNoteheadMinimaWhite": {
+    "codepoint": "U+E93C",
+    "name": "mensuralNoteheadMinimaWhite",
+    "category": null
+  },
+  "mensuralNoteheadSemiminimaWhite": {
+    "codepoint": "U+E93D",
+    "name": "mensuralNoteheadSemiminimaWhite",
+    "category": null
+  },
+  "ornamentQuilisma": {
+    "codepoint": "U+EA20",
+    "name": "ornamentQuilisma",
+    "category": null
+  },
+  "ornamentOriscus": {
+    "codepoint": "U+EA21",
+    "name": "ornamentOriscus",
+    "category": null
+  },
+  "wiggleTrill": {
+    "codepoint": "U+EAA4",
+    "name": "wiggleTrill",
+    "category": null
+  },
+  "wiggleArpeggiatoUp": {
+    "codepoint": "U+EAA9",
+    "name": "wiggleArpeggiatoUp",
+    "category": null
+  },
+  "wiggleArpeggiatoDown": {
+    "codepoint": "U+EAAA",
+    "name": "wiggleArpeggiatoDown",
+    "category": null
+  },
+  "wiggleArpeggiatoUpArrow": {
+    "codepoint": "U+EAAD",
+    "name": "wiggleArpeggiatoUpArrow",
+    "category": null
+  },
+  "wiggleArpeggiatoDownArrow": {
+    "codepoint": "U+EAAE",
+    "name": "wiggleArpeggiatoDownArrow",
+    "category": null
+  },
+  "metNoteDoubleWhole": {
+    "codepoint": "U+ECA0",
+    "name": "metNoteDoubleWhole",
+    "category": null
+  },
+  "metNoteWhole": {
+    "codepoint": "U+ECA2",
+    "name": "metNoteWhole",
+    "category": null
+  },
+  "metNoteHalfUp": {
+    "codepoint": "U+ECA3",
+    "name": "metNoteHalfUp",
+    "category": null
+  },
+  "metNoteQuarterUp": {
+    "codepoint": "U+ECA5",
+    "name": "metNoteQuarterUp",
+    "category": null
+  },
+  "metNote8thUp": {
+    "codepoint": "U+ECA7",
+    "name": "metNote8thUp",
+    "category": null
+  },
+  "metNote16thUp": {
+    "codepoint": "U+ECA9",
+    "name": "metNote16thUp",
+    "category": null
+  },
+  "metNote32ndUp": {
+    "codepoint": "U+ECAB",
+    "name": "metNote32ndUp",
+    "category": null
+  },
+  "metAugmentationDot": {
+    "codepoint": "U+ECB7",
+    "name": "metAugmentationDot",
+    "category": null
+  },
+  "fingering0": {
+    "codepoint": "U+ED10",
+    "name": "fingering0",
+    "category": null
+  },
+  "fingering1": {
+    "codepoint": "U+ED11",
+    "name": "fingering1",
+    "category": null
+  },
+  "fingering2": {
+    "codepoint": "U+ED12",
+    "name": "fingering2",
+    "category": null
+  },
+  "fingering3": {
+    "codepoint": "U+ED13",
+    "name": "fingering3",
+    "category": null
+  },
+  "fingering4": {
+    "codepoint": "U+ED14",
+    "name": "fingering4",
+    "category": null
+  },
+  "fingering5": {
+    "codepoint": "U+ED15",
+    "name": "fingering5",
+    "category": null
+  },
+  "fingering6": {
+    "codepoint": "U+ED24",
+    "name": "fingering6",
+    "category": null
+  },
+  "fingering7": {
+    "codepoint": "U+ED25",
+    "name": "fingering7",
+    "category": null
+  },
+  "fingering8": {
+    "codepoint": "U+ED26",
+    "name": "fingering8",
+    "category": null
+  },
+  "fingering9": {
+    "codepoint": "U+ED27",
+    "name": "fingering9",
+    "category": null
+  },
+  "fingering0Italic": {
+    "codepoint": "U+ED80",
+    "name": "fingering0Italic",
+    "category": null
+  },
+  "fingering1Italic": {
+    "codepoint": "U+ED81",
+    "name": "fingering1Italic",
+    "category": null
+  },
+  "fingering2Italic": {
+    "codepoint": "U+ED82",
+    "name": "fingering2Italic",
+    "category": null
+  },
+  "fingering3Italic": {
+    "codepoint": "U+ED83",
+    "name": "fingering3Italic",
+    "category": null
+  },
+  "fingering4Italic": {
+    "codepoint": "U+ED84",
+    "name": "fingering4Italic",
+    "category": null
+  },
+  "fingering5Italic": {
+    "codepoint": "U+ED85",
+    "name": "fingering5Italic",
+    "category": null
+  },
+  "fingering6Italic": {
+    "codepoint": "U+ED86",
+    "name": "fingering6Italic",
+    "category": null
+  },
+  "fingering7Italic": {
+    "codepoint": "U+ED87",
+    "name": "fingering7Italic",
+    "category": null
+  },
+  "fingering8Italic": {
+    "codepoint": "U+ED88",
+    "name": "fingering8Italic",
+    "category": null
+  },
+  "fingering9Italic": {
+    "codepoint": "U+ED89",
+    "name": "fingering9Italic",
+    "category": null
+  },
+  "uF400": {
+    "codepoint": "U+F400",
+    "name": "uF400",
+    "category": null
+  },
+  "uF401": {
+    "codepoint": "U+F401",
+    "name": "uF401",
+    "category": null
+  },
+  "uF402": {
+    "codepoint": "U+F402",
+    "name": "uF402",
+    "category": null
+  },
+  "uF403": {
+    "codepoint": "U+F403",
+    "name": "uF403",
+    "category": null
+  },
+  "uF40E": {
+    "codepoint": "U+F40E",
+    "name": "uF40E",
+    "category": null
+  },
+  "uF40F": {
+    "codepoint": "U+F40F",
+    "name": "uF40F",
+    "category": null
+  },
+  "uF411": {
+    "codepoint": "U+F411",
+    "name": "uF411",
+    "category": null
+  },
+  "uF412": {
+    "codepoint": "U+F412",
+    "name": "uF412",
+    "category": null
+  },
+  "uF414": {
+    "codepoint": "U+F414",
+    "name": "uF414",
+    "category": null
+  },
+  "uF415": {
+    "codepoint": "U+F415",
+    "name": "uF415",
+    "category": null
+  },
+  "uF417": {
+    "codepoint": "U+F417",
+    "name": "uF417",
+    "category": null
+  },
+  "uF418": {
+    "codepoint": "U+F418",
+    "name": "uF418",
+    "category": null
+  },
+  "uF41A": {
+    "codepoint": "U+F41A",
+    "name": "uF41A",
+    "category": null
+  },
+  "uF41B": {
+    "codepoint": "U+F41B",
+    "name": "uF41B",
+    "category": null
+  },
+  "uF41D": {
+    "codepoint": "U+F41D",
+    "name": "uF41D",
+    "category": null
+  },
+  "uF41E": {
+    "codepoint": "U+F41E",
+    "name": "uF41E",
+    "category": null
+  },
+  "uF420": {
+    "codepoint": "U+F420",
+    "name": "uF420",
+    "category": null
+  },
+  "uF421": {
+    "codepoint": "U+F421",
+    "name": "uF421",
+    "category": null
+  },
+  "uF423": {
+    "codepoint": "U+F423",
+    "name": "uF423",
+    "category": null
+  },
+  "uF424": {
+    "codepoint": "U+F424",
+    "name": "uF424",
+    "category": null
+  },
+  "uF426": {
+    "codepoint": "U+F426",
+    "name": "uF426",
+    "category": null
+  },
+  "uF434": {
+    "codepoint": "U+F434",
+    "name": "uF434",
+    "category": null
+  },
+  "uF440": {
+    "codepoint": "U+F440",
+    "name": "uF440",
+    "category": null
+  },
+  "uF441": {
+    "codepoint": "U+F441",
+    "name": "uF441",
+    "category": null
+  },
+  "uF442": {
+    "codepoint": "U+F442",
+    "name": "uF442",
+    "category": null
+  },
+  "uF443": {
+    "codepoint": "U+F443",
+    "name": "uF443",
+    "category": null
+  },
+  "uF444": {
+    "codepoint": "U+F444",
+    "name": "uF444",
+    "category": null
+  },
+  "uF445": {
+    "codepoint": "U+F445",
+    "name": "uF445",
+    "category": null
+  },
+  "uF446": {
+    "codepoint": "U+F446",
+    "name": "uF446",
+    "category": null
+  },
+  "uF447": {
+    "codepoint": "U+F447",
+    "name": "uF447",
+    "category": null
+  },
+  "uF448": {
+    "codepoint": "U+F448",
+    "name": "uF448",
+    "category": null
+  },
+  "uF449": {
+    "codepoint": "U+F449",
+    "name": "uF449",
+    "category": null
+  },
+  "uF4BA": {
+    "codepoint": "U+F4BA",
+    "name": "uF4BA",
+    "category": null
+  },
+  "uF506": {
+    "codepoint": "U+F506",
+    "name": "uF506",
+    "category": null
+  },
+  "uF507": {
+    "codepoint": "U+F507",
+    "name": "uF507",
+    "category": null
+  },
+  "uF508": {
+    "codepoint": "U+F508",
+    "name": "uF508",
+    "category": null
+  },
+  "uF509": {
+    "codepoint": "U+F509",
+    "name": "uF509",
+    "category": null
+  },
+  "uF50A": {
+    "codepoint": "U+F50A",
+    "name": "uF50A",
+    "category": null
+  },
+  "uF50B": {
+    "codepoint": "U+F50B",
+    "name": "uF50B",
+    "category": null
+  },
+  "uF50C": {
+    "codepoint": "U+F50C",
+    "name": "uF50C",
+    "category": null
+  },
+  "uF50D": {
+    "codepoint": "U+F50D",
+    "name": "uF50D",
+    "category": null
+  },
+  "uF50E": {
+    "codepoint": "U+F50E",
+    "name": "uF50E",
+    "category": null
+  },
+  "uF50F": {
+    "codepoint": "U+F50F",
+    "name": "uF50F",
+    "category": null
+  },
+  "uF5DD": {
+    "codepoint": "U+F5DD",
+    "name": "uF5DD",
+    "category": null
+  },
+  "uF5DE": {
+    "codepoint": "U+F5DE",
+    "name": "uF5DE",
+    "category": null
+  },
+  "uF5DF": {
+    "codepoint": "U+F5DF",
+    "name": "uF5DF",
+    "category": null
+  },
+  "uF5E0": {
+    "codepoint": "U+F5E0",
+    "name": "uF5E0",
+    "category": null
+  },
+  "uF5E1": {
+    "codepoint": "U+F5E1",
+    "name": "uF5E1",
+    "category": null
+  },
+  "uF630": {
+    "codepoint": "U+F630",
+    "name": "uF630",
+    "category": null
+  },
+  "uF631": {
+    "codepoint": "U+F631",
+    "name": "uF631",
+    "category": null
+  }
+}

@@ -7,7 +7,8 @@
     "build": "vite build",
     "type-check": "tsc -b",
     "dev": "vite",
-    "build:sprite": "ts-node -P scripts/tsconfig.scripts.json scripts/build-sprite/index.ts"
+    "build:sprite": "ts-node -P scripts/tsconfig.scripts.json scripts/build-sprite/index.ts",
+    "build:anchors": "ts-node -P scripts/tsconfig.scripts.json scripts/build-anchors/index.ts"
   },
   "dependencies": {
     "firebase": "^12.2.1",

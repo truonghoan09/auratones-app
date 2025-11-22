@@ -1,5 +1,5 @@
 // src/components/Glyph.tsx
-// Render a sprite <symbol> by id with proper scaling.
+// Render một sprite <symbol> theo id với scale đúng theo bbox_sp.
 
 import React from "react";
 import { getBoxSp } from "../lib/sprite";
@@ -21,15 +21,16 @@ const Glyph: React.FC<GlyphProps> = ({
   scale = 1,
   fill = "#fff",
 }) => {
-  // bbox in "sp" from tokens.json
+  // bbox_sp của glyph trong đơn vị staff-space
   const box = getBoxSp(id);
+
   const width = box.w * spSize * scale;
   const height = box.h * spSize * scale;
 
   return (
     <use
       href={`#${id}`}
-      xlinkHref={`#${id}`}             // legacy fallback
+      xlinkHref={`#${id}`}  // fallback cũ cho một số browser
       x={x}
       y={y}
       width={width}
